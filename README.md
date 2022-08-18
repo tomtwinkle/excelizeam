@@ -3,7 +3,7 @@ Wrapper to facilitate use of `excelize.StreamWriter` in [qax-os/excelize](https:
 
 ## Motivation
 
-`excelize.StreamWriter` in [qax-os/excelize](https://github.com/qax-os/excelize) has been found to be able to [write large amounts of data at high speed while reducing memory usage](https://xuri.me/excelize/ja/performance.html), and should be used aggressively, but its use is [severely limited](https://pkg.go.dev/github.com/xuri/excelize/v2#File.NewStreamWriter), and [Excel itself will be damaged](https://github.com/qax-os/excelize/issues/1202) if the order of writes is incorrect.
+`excelize.StreamWriter` in [qax-os/excelize](https://github.com/qax-os/excelize) has been found to be able to [write large amounts of data at high speed while reducing memory usage](https://xuri.me/excelize/en/performance.html), and should be used aggressively, but its use is [severely limited](https://pkg.go.dev/github.com/xuri/excelize/v2#File.NewStreamWriter), and [Excel itself will be damaged](https://github.com/qax-os/excelize/issues/1202) if the order of writes is incorrect.
 
 Therefore, a Wrapper was created to automatically meet the restrictions.
 
