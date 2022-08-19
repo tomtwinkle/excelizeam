@@ -41,6 +41,8 @@ type Excelizeam interface {
 type excelizeam struct {
 	sw *excelize.StreamWriter
 
+	maxRow        int
+	maxCol        int
 	defaultBorder *DefaultBorders
 	styleStore    map[uint64]StoredStyle
 	rowStore      map[int]*StoredRow
@@ -158,6 +160,12 @@ func (e *excelizeam) MergeCell(startColIndex, startRowIndex, endColIndex, endRow
 }
 
 func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+	if e.maxCol < colIndex {
+		e.maxCol = colIndex
+	}
+	if e.maxRow < rowIndex {
+		e.maxRow = rowIndex
+	}
 	if _, ok := e.rowStore[rowIndex]; !ok {
 		e.rowStore[rowIndex] = &StoredRow{
 			Row: Row{
@@ -206,6 +214,13 @@ func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, sty
 }
 
 func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error {
+	if e.maxCol < colIndex {
+		e.maxCol = colIndex
+	}
+	if e.maxRow < rowIndex {
+		e.maxRow = rowIndex
+	}
+
 	if _, ok := e.rowStore[rowIndex]; !ok {
 		e.rowStore[rowIndex] = &StoredRow{
 			Row: Row{
@@ -245,6 +260,13 @@ func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, 
 }
 
 func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error {
+	if e.maxCol < endColIndex {
+		e.maxCol = endColIndex
+	}
+	if e.maxRow < endRowIndex {
+		e.maxRow = endRowIndex
+	}
+
 	for rowIdx := startRowIndex; rowIdx <= endRowIndex; rowIdx++ {
 		for colIdx := startColIndex; colIdx <= endColIndex; colIdx++ {
 			if _, ok := e.rowStore[rowIdx]; !ok {
@@ -288,6 +310,13 @@ func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex
 }
 
 func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
+	if e.maxCol < endColIndex {
+		e.maxCol = endColIndex
+	}
+	if e.maxRow < endRowIndex {
+		e.maxRow = endRowIndex
+	}
+
 	for rowIdx := startRowIndex; rowIdx <= endRowIndex; rowIdx++ {
 		for colIdx := startColIndex; colIdx <= endColIndex; colIdx++ {
 			borderStyles := make([]excelize.Border, 0, 4)
@@ -626,26 +655,14 @@ func (e *excelizeam) Write(w io.Writer) error {
 }
 
 func (e *excelizeam) writeStream() error {
-	var maxRow, maxCol int
-	for rowIndex, row := range e.rowStore {
-		for colIndex := range row.Cols {
-			if maxCol < colIndex {
-				maxCol = colIndex
-			}
-		}
-		if maxRow < rowIndex {
-			maxRow = rowIndex
-		}
-	}
-
-	defaultStyleCells := make([]interface{}, maxCol)
+	defaultStyleCells := make([]interface{}, e.maxCol)
 	if e.defaultBorder != nil {
-		for i := 0; i < maxCol; i++ {
+		for i := 0; i < e.maxCol; i++ {
 			defaultStyleCells[i] = excelize.Cell{StyleID: e.defaultBorder.StyleID, Value: ""}
 		}
 	}
 
-	for rowIdx := 1; rowIdx <= maxRow; rowIdx++ {
+	for rowIdx := 1; rowIdx <= e.maxRow; rowIdx++ {
 		r, rowOK := e.rowStore[rowIdx]
 		if !rowOK {
 			// Value/Styleのない行はデフォルトStyleのみ設定
@@ -665,7 +682,7 @@ func (e *excelizeam) writeStream() error {
 		}
 
 		canWrite := false
-		cellValues := make([]interface{}, maxCol)
+		cellValues := make([]interface{}, e.maxCol)
 		if e.defaultBorder != nil {
 			canWrite = true
 			copy(cellValues, defaultStyleCells)
