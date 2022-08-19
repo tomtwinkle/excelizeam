@@ -5,6 +5,8 @@ import (
 	"io"
 	"sync"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/tomtwinkle/excelizeam/excelizestyle"
 	"github.com/xuri/excelize/v2"
@@ -16,25 +18,36 @@ var (
 )
 
 type Excelizeam interface {
+	// Preparations in advance
+
+	// SetDefaultBorderStyle Set default cell border
+	// For example, use when you want to paint the cell background white
 	SetDefaultBorderStyle(style excelizestyle.BorderStyle, color excelizestyle.BorderColor) error
+
+	// Excelize StreamWriter Wrapper
 
 	SetPageMargins(options ...excelize.PageMarginsOptions) error
 	SetColWidth(colIndex int, width float64) error
 	SetColWidthRange(colIndexMin, colIndexMax int, width float64) error
-
 	MergeCell(startColIndex, startRowIndex, endColIndex, endRowIndex int) error
 
+	// SetCellValue Set value and style to cell
 	SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error
-
+	// SetStyleCell Set style to cell
 	SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error
+	// SetStyleCellRange Set style to cell with range
 	SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error
+	// SetBorderRange Set border around cell range
 	SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error
 
+	// Write StreamWriter
 	Write(w io.Writer) error
 }
 
 type excelizeam struct {
 	sw *excelize.StreamWriter
+
+	eg errgroup.Group
 
 	maxRow        int
 	maxCol        int
