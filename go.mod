@@ -6,6 +6,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/stretchr/testify v1.7.0
 	github.com/xuri/excelize/v2 v2.6.0
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 )
 
 require (

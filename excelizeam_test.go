@@ -3,7 +3,10 @@ package excelizeam_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"testing"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/tomtwinkle/excelizeam"
 	"github.com/tomtwinkle/excelizeam/excelizestyle"
@@ -51,6 +54,24 @@ func TestExcelizeam_Write(t *testing.T) {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				for rowIdx := 1; rowIdx <= 10; rowIdx++ {
 					for colIdx := 1; colIdx <= 10; colIdx++ {
+						if err := w.SetCellValue(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), nil, false); err != nil {
+							return err
+						}
+					}
+				}
+				return nil
+			},
+		},
+		"SetCellValue:with_not_style_multiple_rows_cols_no_sort_odd": {
+			testFunc: func(w excelizeam.Excelizeam) error {
+				for rowIdx := 1; rowIdx <= 10; rowIdx++ {
+					if rowIdx%2 == 0 {
+						continue
+					}
+					for colIdx := 1; colIdx <= 10; colIdx++ {
+						if colIdx%2 == 0 {
+							continue
+						}
 						if err := w.SetCellValue(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), nil, false); err != nil {
 							return err
 						}
@@ -253,6 +274,175 @@ func TestExcelizeam_Write(t *testing.T) {
 			Assert(t, expected, actual)
 		})
 	}
+}
+
+func BenchmarkExcelizeam(b *testing.B) {
+	b.Run("Excelize", func(b *testing.B) {
+		var buf bytes.Buffer
+		defer buf.Reset()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if err := benchExcelize(&buf); err != nil {
+				b.Error(err)
+			}
+		}
+	})
+	b.Run("Excelize Async", func(b *testing.B) {
+		var buf bytes.Buffer
+		defer buf.Reset()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if err := benchExcelizeAsync(&buf); err != nil {
+				b.Error(err)
+			}
+		}
+	})
+	b.Run("Excelize StreamWriter", func(b *testing.B) {
+		var buf bytes.Buffer
+		defer buf.Reset()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if err := benchStream(&buf); err != nil {
+				b.Error(err)
+			}
+		}
+	})
+	b.Run("Excelizeam", func(b *testing.B) {
+		var buf bytes.Buffer
+		defer buf.Reset()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if err := benchExcelizeam(&buf); err != nil {
+				b.Error(err)
+			}
+		}
+	})
+}
+
+func benchExcelize(w io.Writer) error {
+	f := excelize.NewFile()
+	f.SetSheetName("Sheet1", "test")
+
+	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		for colIdx := 1; colIdx <= 10; colIdx++ {
+			cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
+			if err != nil {
+				return err
+			}
+			if err := f.SetCellValue("test", cell, fmt.Sprintf("test%d-%d", rowIdx, colIdx)); err != nil {
+				return err
+			}
+			styleID, err := f.NewStyle(&excelize.Style{
+				Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+				Font:      &excelize.Font{Size: 12, Bold: true},
+				Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+			})
+			if err != nil {
+				return err
+			}
+			if err := f.SetCellStyle("test", cell, cell, styleID); err != nil {
+				return err
+			}
+		}
+	}
+	return f.Write(w)
+}
+
+func benchExcelizeAsync(w io.Writer) error {
+	f := excelize.NewFile()
+	f.SetSheetName("Sheet1", "test")
+
+	var eg errgroup.Group
+
+	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		for colIdx := 1; colIdx <= 10; colIdx++ {
+			eg.Go(func() error {
+				cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
+				if err != nil {
+					return err
+				}
+				if err := f.SetCellValue("test", cell, fmt.Sprintf("test%d-%d", rowIdx, colIdx)); err != nil {
+					return err
+				}
+				styleID, err := f.NewStyle(&excelize.Style{
+					Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+					Font:      &excelize.Font{Size: 12, Bold: true},
+					Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+				})
+				if err != nil {
+					return err
+				}
+				if err := f.SetCellStyle("test", cell, cell, styleID); err != nil {
+					return err
+				}
+				return nil
+			})
+		}
+	}
+
+	if err := eg.Wait(); err != nil {
+		return err
+	}
+	return f.Write(w)
+}
+
+func benchStream(w io.Writer) error {
+	f := excelize.NewFile()
+	f.SetSheetName("Sheet1", "test")
+	sw, err := f.NewStreamWriter("test")
+	if err != nil {
+		return err
+	}
+
+	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		for colIdx := 1; colIdx <= 10; colIdx++ {
+			cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
+			if err != nil {
+				return err
+			}
+			styleID, err := f.NewStyle(&excelize.Style{
+				Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+				Font:      &excelize.Font{Size: 12, Bold: true},
+				Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+			})
+			if err != nil {
+				return err
+			}
+			if err := sw.SetRow(cell, []interface{}{
+				excelize.Cell{
+					StyleID: styleID,
+					Value:   fmt.Sprintf("test%d-%d", rowIdx, colIdx),
+				},
+			}); err != nil {
+				return err
+			}
+		}
+	}
+	return f.Write(w)
+}
+
+func benchExcelizeam(w io.Writer) error {
+	e, err := excelizeam.New("test")
+	if err != nil {
+		return err
+	}
+
+	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		for colIdx := 1; colIdx <= 10; colIdx++ {
+			if err := e.SetCellValue(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), &excelize.Style{
+				Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+				Font:      &excelize.Font{Size: 12, Bold: true},
+				Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+			}, false); err != nil {
+				return err
+			}
+		}
+	}
+	return e.Write(w)
 }
 
 func Assert(t *testing.T, expected, actual *excelize.File) {

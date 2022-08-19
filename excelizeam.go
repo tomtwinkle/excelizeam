@@ -9,6 +9,12 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+const (
+	DefaultRowBufferSize = 100000
+	DefaultColBufferSize = 1000
+	DefaultStyleSize     = 1000
+)
+
 var (
 	ErrOverrideCellValue = errors.New("override cell value")
 	ErrOverrideCellStyle = errors.New("override cell style")
@@ -98,7 +104,7 @@ func New(sheetName string) (Excelizeam, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &excelizeam{sw: sw, rowStore: make(map[int]*StoredRow), styleStore: make(map[uint64]StoredStyle)}, nil
+	return &excelizeam{sw: sw, rowStore: make(map[int]*StoredRow, DefaultRowBufferSize), styleStore: make(map[uint64]StoredStyle, DefaultStyleSize)}, nil
 }
 
 func (e *excelizeam) SetDefaultBorderStyle(style excelizestyle.BorderStyle, color excelizestyle.BorderColor) error {
@@ -157,7 +163,7 @@ func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, sty
 			Row: Row{
 				Index: rowIndex,
 			},
-			Cols: make(map[int]*Cell),
+			Cols: make(map[int]*Cell, DefaultColBufferSize),
 		}
 	}
 	if c, ok := e.rowStore[rowIndex].Cols[colIndex]; ok {
@@ -205,7 +211,7 @@ func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, 
 			Row: Row{
 				Index: rowIndex,
 			},
-			Cols: make(map[int]*Cell),
+			Cols: make(map[int]*Cell, DefaultColBufferSize),
 		}
 	}
 	if c, ok := e.rowStore[rowIndex].Cols[colIndex]; ok {
@@ -246,7 +252,7 @@ func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex
 					Row: Row{
 						Index: rowIdx,
 					},
-					Cols: make(map[int]*Cell),
+					Cols: make(map[int]*Cell, DefaultColBufferSize),
 				}
 			}
 			if c, ok := e.rowStore[rowIdx].Cols[colIdx]; ok {
@@ -448,7 +454,7 @@ func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, e
 					Row: Row{
 						Index: rowIdx,
 					},
-					Cols: make(map[int]*Cell),
+					Cols: make(map[int]*Cell, DefaultColBufferSize),
 				}
 			}
 			if c, ok := e.rowStore[rowIdx].Cols[colIdx]; ok {
@@ -632,28 +638,53 @@ func (e *excelizeam) writeStream() error {
 		}
 	}
 
+	defaultStyleCells := make([]interface{}, maxCol)
+	if e.defaultBorder != nil {
+		for i := 0; i < maxCol; i++ {
+			defaultStyleCells[i] = excelize.Cell{StyleID: e.defaultBorder.StyleID, Value: ""}
+		}
+	}
+
 	for rowIdx := 1; rowIdx <= maxRow; rowIdx++ {
-		for colIdx := 1; colIdx <= maxCol; colIdx++ {
-			cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
-			if err != nil {
-				return err
-			}
-			var vs *excelize.Cell
+		r, rowOK := e.rowStore[rowIdx]
+		if !rowOK {
+			// Value/Styleのない行はデフォルトStyleのみ設定
 			if e.defaultBorder != nil {
-				vs = &excelize.Cell{StyleID: e.defaultBorder.StyleID, Value: ""}
-			}
-			if r, ok := e.rowStore[rowIdx]; ok {
-				if c, ok := r.Cols[colIdx]; ok {
-					vs = &excelize.Cell{StyleID: c.StyleID, Value: c.Value}
+				cell, err := excelize.CoordinatesToCellName(1, rowIdx)
+				if err != nil {
+					return err
 				}
-			}
-			if vs != nil {
 				if err := e.sw.SetRow(
 					cell,
-					[]interface{}{*vs},
+					defaultStyleCells,
 				); err != nil {
 					return err
 				}
+			}
+			continue
+		}
+
+		canWrite := false
+		cellValues := make([]interface{}, maxCol)
+		if e.defaultBorder != nil {
+			canWrite = true
+			copy(cellValues, defaultStyleCells)
+		}
+		for colIdx, c := range r.Cols {
+			canWrite = true
+			cellValues[colIdx-1] = excelize.Cell{StyleID: c.StyleID, Value: c.Value}
+		}
+
+		if canWrite {
+			cell, err := excelize.CoordinatesToCellName(1, rowIdx)
+			if err != nil {
+				return err
+			}
+			if err := e.sw.SetRow(
+				cell,
+				cellValues,
+			); err != nil {
+				return err
 			}
 		}
 	}
