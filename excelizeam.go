@@ -3,6 +3,7 @@ package excelizeam
 import (
 	"errors"
 	"io"
+	"sync"
 
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/tomtwinkle/excelizeam/excelizestyle"
@@ -12,7 +13,6 @@ import (
 const (
 	DefaultRowBufferSize = 100000
 	DefaultColBufferSize = 1000
-	DefaultStyleSize     = 1000
 )
 
 var (
@@ -44,7 +44,7 @@ type excelizeam struct {
 	maxRow        int
 	maxCol        int
 	defaultBorder *DefaultBorders
-	styleStore    map[uint64]StoredStyle
+	styleStore    sync.Map
 	rowStore      map[int]*StoredRow
 }
 
@@ -106,7 +106,7 @@ func New(sheetName string) (Excelizeam, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &excelizeam{sw: sw, rowStore: make(map[int]*StoredRow, DefaultRowBufferSize), styleStore: make(map[uint64]StoredStyle, DefaultStyleSize)}, nil
+	return &excelizeam{sw: sw, rowStore: make(map[int]*StoredRow, DefaultRowBufferSize)}, nil
 }
 
 func (e *excelizeam) SetDefaultBorderStyle(style excelizestyle.BorderStyle, color excelizestyle.BorderColor) error {
@@ -531,29 +531,30 @@ func (e *excelizeam) getStyleID(style *excelize.Style) (int, error) {
 		return 0, err
 	}
 	var styleID int
-	if s, ok := e.styleStore[hash]; ok {
-		styleID = s.StyleID
+	if s, ok := e.styleStore.Load(hash); ok {
+		styleID = s.(StoredStyle).StyleID
 	} else {
 		styleID, err = e.sw.File.NewStyle(&styl)
 		if err != nil {
 			return 0, err
 		}
-		e.styleStore[hash] = StoredStyle{
+		e.styleStore.Store(hash, StoredStyle{
 			StyleID: styleID,
 			Style:   style,
-		}
+		})
 	}
 	return styleID, nil
 }
 
 func (e *excelizeam) overrideStyle(originStyleID int, overrideStyle excelize.Style) (int, error) {
 	var originStyle *excelize.Style
-	for _, s := range e.styleStore {
-		if s.StyleID == originStyleID {
-			originStyle = s.Style
-			break
+	e.styleStore.Range(func(_, value any) bool {
+		if value.(StoredStyle).StyleID == originStyleID {
+			originStyle = value.(StoredStyle).Style
+			return false
 		}
-	}
+		return true
+	})
 	if originStyle == nil {
 		return e.getStyleID(&overrideStyle)
 	}
