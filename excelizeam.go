@@ -33,12 +33,23 @@ type Excelizeam interface {
 
 	// SetCellValue Set value and style to cell
 	SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error
+	// SetCellValueAsync Set value and style to cell asynchronously
+	SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style)
+
 	// SetStyleCell Set style to cell
 	SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error
+	// SetStyleCellAsync Set style to cell asynchronously
+	SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style)
+
 	// SetStyleCellRange Set style to cell with range
 	SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error
+	// SetStyleCellRangeAsync Set style to cell with range asynchronously
+	SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style)
+
 	// SetBorderRange Set border around cell range
 	SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error
+	// SetBorderRangeAsync Set border around cell range asynchronously
+	SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange)
 
 	// Write StreamWriter
 	Write(w io.Writer) error
@@ -157,7 +168,20 @@ func (e *excelizeam) MergeCell(startColIndex, startRowIndex, endColIndex, endRow
 	return e.sw.MergeCell(startCell, endCell)
 }
 
+func (e *excelizeam) SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style) {
+	e.eg.Go(func() error {
+		return e.setCellValue(colIndex, rowIndex, value, style, false)
+	})
+}
+
 func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setCellValue(colIndex, rowIndex, value, style, override)
+}
+
+func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
 	if e.maxCol < colIndex {
 		e.maxCol = colIndex
 	}
@@ -214,7 +238,20 @@ func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, sty
 	return nil
 }
 
+func (e *excelizeam) SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style) {
+	e.eg.Go(func() error {
+		return e.setStyleCell(colIndex, rowIndex, style, false)
+	})
+}
+
 func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setStyleCell(colIndex, rowIndex, style, override)
+}
+
+func (e *excelizeam) setStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error {
 	if e.maxCol < colIndex {
 		e.maxCol = colIndex
 	}
@@ -263,7 +300,20 @@ func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, 
 	return nil
 }
 
+func (e *excelizeam) SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style) {
+	e.eg.Go(func() error {
+		return e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, false)
+	})
+}
+
 func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, override)
+}
+
+func (e *excelizeam) setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error {
 	if e.maxCol < endColIndex {
 		e.maxCol = endColIndex
 	}
@@ -316,7 +366,20 @@ func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex
 	return nil
 }
 
+func (e *excelizeam) SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange) {
+	e.eg.Go(func() error {
+		return e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, false)
+	})
+}
+
 func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, override)
+}
+
+func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
 	if e.maxCol < endColIndex {
 		e.maxCol = endColIndex
 	}
@@ -666,6 +729,9 @@ func (e *excelizeam) Write(w io.Writer) error {
 }
 
 func (e *excelizeam) writeStream() error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
 	defaultStyleCells := make([]interface{}, e.maxCol)
 	if e.defaultBorder != nil {
 		for i := 0; i < e.maxCol; i++ {
