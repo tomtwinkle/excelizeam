@@ -321,6 +321,17 @@ func BenchmarkExcelizeam(b *testing.B) {
 			}
 		}
 	})
+	b.Run("Excelizeam Async", func(b *testing.B) {
+		var buf bytes.Buffer
+		defer buf.Reset()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if err := benchExcelizeamAsync(&buf); err != nil {
+				b.Error(err)
+			}
+		}
+	})
 }
 
 func benchExcelize(w io.Writer) error {
@@ -359,7 +370,9 @@ func benchExcelizeAsync(w io.Writer) error {
 	var eg errgroup.Group
 
 	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		rowIdx := rowIdx
 		for colIdx := 1; colIdx <= 10; colIdx++ {
+			colIdx := colIdx
 			eg.Go(func() error {
 				cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
 				if err != nil {
@@ -441,6 +454,37 @@ func benchExcelizeam(w io.Writer) error {
 				return err
 			}
 		}
+	}
+	return e.Write(w)
+}
+
+func benchExcelizeamAsync(w io.Writer) error {
+	e, err := excelizeam.New("test")
+	if err != nil {
+		return err
+	}
+
+	var eg errgroup.Group
+
+	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
+		rowIdx := rowIdx
+		for colIdx := 1; colIdx <= 10; colIdx++ {
+			colIdx := colIdx
+			eg.Go(func() error {
+				if err := e.SetCellValue(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), &excelize.Style{
+					Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+					Font:      &excelize.Font{Size: 12, Bold: true},
+					Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+				}, false); err != nil {
+					return err
+				}
+				return nil
+			})
+		}
+	}
+
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 	return e.Write(w)
 }
