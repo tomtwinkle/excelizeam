@@ -20,12 +20,12 @@ func TestExcelizeam_Write(t *testing.T) {
 		testFunc func(w excelizeam.Excelizeam) error
 		wantErr  error
 	}{
-		"SetCellValue:with_not_style": {
+		"SetCellValue-with_not_style": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				return w.SetCellValue(1, 1, "test", nil, false)
 			},
 		},
-		"SetCellValue:with_not_style_override": {
+		"SetCellValue-with_not_style_override": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(1, 1, "test1", nil, false); err != nil {
 					return err
@@ -37,7 +37,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_not_style_override_error": {
+		"SetCellValue-with_not_style_override_error": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(1, 1, "test1", nil, false); err != nil {
 					return err
@@ -50,7 +50,7 @@ func TestExcelizeam_Write(t *testing.T) {
 			},
 			wantErr: excelizeam.ErrOverrideCellValue,
 		},
-		"SetCellValue:with_not_style_multiple_rows_cols_no_sort": {
+		"SetCellValue-with_not_style_multiple_rows_cols_no_sort": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				for rowIdx := 1; rowIdx <= 10; rowIdx++ {
 					for colIdx := 1; colIdx <= 10; colIdx++ {
@@ -62,7 +62,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_not_style_multiple_rows_cols_no_sort_odd": {
+		"SetCellValue-with_not_style_multiple_rows_cols_no_sort_odd": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				for rowIdx := 1; rowIdx <= 10; rowIdx++ {
 					if rowIdx%2 == 0 {
@@ -80,7 +80,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_not_style_multiple_rows_cols_sort": {
+		"SetCellValue-with_not_style_multiple_rows_cols_sort": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				for colIdx := 1; colIdx <= 10; colIdx++ {
 					for rowIdx := 1; rowIdx <= 10; rowIdx++ {
@@ -92,7 +92,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment": {
+		"SetCellValue-with_style_border_fill_font_alignment": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				return w.SetCellValue(2, 2, "test", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -106,7 +106,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				}, false)
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_border_top": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_border_top": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -130,7 +130,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_border_bottom": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_border_bottom": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -154,7 +154,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_border_left": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_border_left": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -178,7 +178,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_border_right": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_border_right": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -202,7 +202,7 @@ func TestExcelizeam_Write(t *testing.T) {
 				return nil
 			},
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_value_error": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_value_error": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
@@ -220,7 +220,7 @@ func TestExcelizeam_Write(t *testing.T) {
 			},
 			wantErr: excelizeam.ErrOverrideCellValue,
 		},
-		"SetCellValue:with_style_border_fill_font_alignment_override_style_error": {
+		"SetCellValue-with_style_border_fill_font_alignment_override_style_error": {
 			testFunc: func(w excelizeam.Excelizeam) error {
 				if err := w.SetCellValue(2, 2, "test1", &excelize.Style{
 					Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
