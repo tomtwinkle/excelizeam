@@ -80,16 +80,6 @@ type StoredRow struct {
 	Cols map[int]*Cell
 }
 
-type SortedRow struct {
-	Row
-	Cols []SortedCol
-}
-
-type SortedCol struct {
-	Index int
-	Cell
-}
-
 type Row struct {
 	Index int
 }
