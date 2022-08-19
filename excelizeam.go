@@ -77,7 +77,7 @@ type StoredStyle struct {
 
 type StoredRow struct {
 	Row
-	Cols map[int]*Cell
+	Cols sync.Map
 }
 
 type Row struct {
@@ -161,10 +161,10 @@ func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, sty
 			Row: Row{
 				Index: rowIndex,
 			},
-			Cols: make(map[int]*Cell, DefaultColBufferSize),
 		}
 	}
-	if c, ok := e.rowStore[rowIndex].Cols[colIndex]; ok {
+	if cachec, ok := e.rowStore[rowIndex].Cols.Load(colIndex); ok {
+		c := cachec.(*Cell)
 		if c.Value != nil && value != nil && !override {
 			return ErrOverrideCellValue
 		}
@@ -196,10 +196,10 @@ func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, sty
 	if err != nil {
 		return err
 	}
-	e.rowStore[rowIndex].Cols[colIndex] = &Cell{
+	e.rowStore[rowIndex].Cols.Store(colIndex, &Cell{
 		StyleID: styleID,
 		Value:   value,
-	}
+	})
 	return nil
 }
 
@@ -216,10 +216,10 @@ func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, 
 			Row: Row{
 				Index: rowIndex,
 			},
-			Cols: make(map[int]*Cell, DefaultColBufferSize),
 		}
 	}
-	if c, ok := e.rowStore[rowIndex].Cols[colIndex]; ok {
+	if cachec, ok := e.rowStore[rowIndex].Cols.Load(colIndex); ok {
+		c := cachec.(*Cell)
 		if c.StyleID > 0 {
 			if !override {
 				return ErrOverrideCellStyle
@@ -242,10 +242,10 @@ func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, 
 	if err != nil {
 		return err
 	}
-	e.rowStore[rowIndex].Cols[colIndex] = &Cell{
+	e.rowStore[rowIndex].Cols.Store(colIndex, &Cell{
 		StyleID: styleID,
 		Value:   nil,
-	}
+	})
 	return nil
 }
 
@@ -264,10 +264,10 @@ func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex
 					Row: Row{
 						Index: rowIdx,
 					},
-					Cols: make(map[int]*Cell, DefaultColBufferSize),
 				}
 			}
-			if c, ok := e.rowStore[rowIdx].Cols[colIdx]; ok {
+			if cachec, ok := e.rowStore[rowIdx].Cols.Load(colIdx); ok {
+				c := cachec.(*Cell)
 				if c.StyleID > 0 {
 					if !override {
 						return ErrOverrideCellStyle
@@ -290,10 +290,10 @@ func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex
 			if err != nil {
 				return err
 			}
-			e.rowStore[rowIdx].Cols[colIdx] = &Cell{
+			e.rowStore[rowIdx].Cols.Store(colIdx, &Cell{
 				StyleID: styleID,
 				Value:   nil,
-			}
+			})
 		}
 	}
 	return nil
@@ -473,10 +473,10 @@ func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, e
 					Row: Row{
 						Index: rowIdx,
 					},
-					Cols: make(map[int]*Cell, DefaultColBufferSize),
 				}
 			}
-			if c, ok := e.rowStore[rowIdx].Cols[colIdx]; ok {
+			if cachec, ok := e.rowStore[rowIdx].Cols.Load(colIdx); ok {
+				c := cachec.(*Cell)
 				if c.StyleID > 0 {
 					if !override {
 						return ErrOverrideCellStyle
@@ -499,10 +499,10 @@ func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, e
 			if err != nil {
 				return err
 			}
-			e.rowStore[rowIdx].Cols[colIdx] = &Cell{
+			e.rowStore[rowIdx].Cols.Store(colIdx, &Cell{
 				StyleID: styleID,
 				Value:   nil,
-			}
+			})
 		}
 	}
 	return nil
@@ -678,10 +678,13 @@ func (e *excelizeam) writeStream() error {
 			canWrite = true
 			copy(cellValues, defaultStyleCells)
 		}
-		for colIdx, c := range r.Cols {
-			canWrite = true
+		r.Cols.Range(func(key, cachec any) bool {
+			colIdx := key.(int)
+			c := cachec.(*Cell)
 			cellValues[colIdx-1] = excelize.Cell{StyleID: c.StyleID, Value: c.Value}
-		}
+			canWrite = true
+			return true
+		})
 
 		if canWrite {
 			cell, err := excelize.CoordinatesToCellName(1, rowIdx)
