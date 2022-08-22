@@ -18,15 +18,15 @@ When using SyncMethod such as `SetCellValue()`, there is no advantage in speed, 
 ```
 BenchmarkExcelizeam
 BenchmarkExcelizeam/Excelize
-BenchmarkExcelizeam/Excelize-12         	       8	 130153007 ns/op
+BenchmarkExcelizeam/Excelize-12                  	       9	 124964492 ns/op
 BenchmarkExcelizeam/Excelize_Async
-BenchmarkExcelizeam/Excelize_Async-12   	       6	 186520832 ns/op
+BenchmarkExcelizeam/Excelize_Async-12   	               6	 208647106 ns/op
 BenchmarkExcelizeam/Excelize_StreamWriter
-BenchmarkExcelizeam/Excelize_StreamWriter-12         	      12	  88987332 ns/op
-BenchmarkExcelizeam/Excelizeam
-BenchmarkExcelizeam/Excelizeam-12                    	       4	 252973924 ns/op
+BenchmarkExcelizeam/Excelize_StreamWriter-12         	      12	  89386412 ns/op
+BenchmarkExcelizeam/Excelizeam_Sync
+BenchmarkExcelizeam/Excelizeam_Sync-12               	       5	 232665514 ns/op
 BenchmarkExcelizeam/Excelizeam_Async
-BenchmarkExcelizeam/Excelizeam_Async-12              	      12	  88823689 ns/op
+BenchmarkExcelizeam/Excelizeam_Async-12              	      13	  86562598 ns/op
 ```
 
 ## Usage

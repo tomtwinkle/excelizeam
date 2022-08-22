@@ -462,7 +462,7 @@ func BenchmarkExcelizeam(b *testing.B) {
 			}
 		}
 	})
-	b.Run("Excelizeam", func(b *testing.B) {
+	b.Run("Excelizeam Sync", func(b *testing.B) {
 		var buf bytes.Buffer
 		defer buf.Reset()
 
@@ -616,28 +616,16 @@ func benchExcelizeamAsync(w io.Writer) error {
 		return err
 	}
 
-	var eg errgroup.Group
-
 	for rowIdx := 1; rowIdx <= 1000; rowIdx++ {
-		rowIdx := rowIdx
 		for colIdx := 1; colIdx <= 10; colIdx++ {
-			colIdx := colIdx
-			eg.Go(func() error {
-				if err := e.SetCellValue(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), &excelize.Style{
-					Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
-					Font:      &excelize.Font{Size: 12, Bold: true},
-					Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
-				}, false); err != nil {
-					return err
-				}
-				return nil
+			e.SetCellValueAsync(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), &excelize.Style{
+				Border:    excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+				Font:      &excelize.Font{Size: 12, Bold: true},
+				Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
 			})
 		}
 	}
 
-	if err := eg.Wait(); err != nil {
-		return err
-	}
 	return e.Write(w)
 }
 
