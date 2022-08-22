@@ -335,7 +335,7 @@ func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, e
 }
 
 func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
-	e.checkMaxIndex(startColIndex, startRowIndex)
+	e.checkMaxIndex(endColIndex, endRowIndex)
 	for rowIdx := startRowIndex; rowIdx <= endRowIndex; rowIdx++ {
 		for colIdx := startColIndex; colIdx <= endColIndex; colIdx++ {
 			key := e.getCacheKey(colIdx, rowIdx)
@@ -522,7 +522,7 @@ func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, e
 			if err != nil {
 				return err
 			}
-			e.cellStore.Store(colIdx, &Cell{
+			e.cellStore.Store(key, &Cell{
 				StyleID: styleID,
 				Value:   nil,
 			})
