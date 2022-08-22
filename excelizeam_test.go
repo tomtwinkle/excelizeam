@@ -258,12 +258,12 @@ func TestExcelizeam_Sync(t *testing.T) {
 				return
 			}
 
-			//f, err := os.Create("testdata/" + name + ".xlsx")
+			//f, err := os.Create("testdata/sync/" + name + ".xlsx")
 			//assert.NoError(t, err)
 			//_, err = f.Write(buf.Bytes())
 			//assert.NoError(t, err)
 
-			expected, err := excelize.OpenFile("testdata/" + name + ".xlsx")
+			expected, err := excelize.OpenFile("testdata/sync/" + name + ".xlsx")
 			if !assert.NoError(t, err) {
 				return
 			}
@@ -341,6 +341,30 @@ func TestExcelizeam_Async(t *testing.T) {
 				})
 			},
 		},
+		"SetCellValue-with_style_border_fill_font_alignment_odd_row": {
+			testFunc: func(w excelizeam.Excelizeam) {
+				for rowIdx := 1; rowIdx <= 10; rowIdx++ {
+					if rowIdx%2 == 0 {
+						continue
+					}
+					for colIdx := 1; colIdx <= 10; colIdx++ {
+						if colIdx%2 == 0 {
+							continue
+						}
+						w.SetCellValueAsync(colIdx, rowIdx, fmt.Sprintf("%d-%d", rowIdx, colIdx), &excelize.Style{
+							Border: excelizestyle.BorderAround(excelizestyle.BorderStyleContinuous2, excelizestyle.BorderColorBlack),
+							Fill:   excelizestyle.Fill(excelizestyle.FillPatternSolid, "#315D3C"),
+							Font: &excelize.Font{
+								Bold:  true,
+								Size:  8,
+								Color: "#718DDC",
+							},
+							Alignment: excelizestyle.Alignment(excelizestyle.AlignmentHorizontalCenter, excelizestyle.AlignmentVerticalCenter, true),
+						})
+					}
+				}
+			},
+		},
 		"SetCellValue-with_style_border_fill_font_alignment_override_value_error": {
 			testFunc: func(w excelizeam.Excelizeam) {
 				w.SetCellValue(2, 2, "test1", &excelize.Style{
@@ -386,12 +410,12 @@ func TestExcelizeam_Async(t *testing.T) {
 				return
 			}
 
-			//f, err := os.Create("testdata/" + name + ".xlsx")
+			//f, err := os.Create("testdata/async/" + name + ".xlsx")
 			//assert.NoError(t, err)
 			//_, err = f.Write(buf.Bytes())
 			//assert.NoError(t, err)
 
-			expected, err := excelize.OpenFile("testdata/" + name + ".xlsx")
+			expected, err := excelize.OpenFile("testdata/async/" + name + ".xlsx")
 			if !assert.NoError(t, err) {
 				return
 			}
