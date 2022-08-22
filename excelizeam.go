@@ -2,6 +2,7 @@ package excelizeam
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 
@@ -33,12 +34,23 @@ type Excelizeam interface {
 
 	// SetCellValue Set value and style to cell
 	SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error
+	// SetCellValueAsync Set value and style to cell asynchronously
+	SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style)
+
 	// SetStyleCell Set style to cell
 	SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error
+	// SetStyleCellAsync Set style to cell asynchronously
+	SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style)
+
 	// SetStyleCellRange Set style to cell with range
 	SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error
+	// SetStyleCellRangeAsync Set style to cell with range asynchronously
+	SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style)
+
 	// SetBorderRange Set border around cell range
 	SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error
+	// SetBorderRangeAsync Set border around cell range asynchronously
+	SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange)
 
 	// Write StreamWriter
 	Write(w io.Writer) error
@@ -49,11 +61,13 @@ type excelizeam struct {
 
 	eg errgroup.Group
 
-	maxRow        int
-	maxCol        int
+	mu     sync.Mutex
+	maxRow int
+	maxCol int
+
 	defaultBorder *DefaultBorders
 	styleStore    sync.Map
-	rowStore      sync.Map
+	cellStore     sync.Map
 }
 
 type DefaultBorders struct {
@@ -81,15 +95,6 @@ type BorderRange struct {
 type StoredStyle struct {
 	StyleID int
 	Style   *excelize.Style
-}
-
-type StoredRow struct {
-	Row
-	Cols sync.Map
-}
-
-type Row struct {
-	Index int
 }
 
 type Cell struct {
@@ -157,175 +162,182 @@ func (e *excelizeam) MergeCell(startColIndex, startRowIndex, endColIndex, endRow
 	return e.sw.MergeCell(startCell, endCell)
 }
 
-func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
-	if e.maxCol < colIndex {
-		e.maxCol = colIndex
-	}
-	if e.maxRow < rowIndex {
-		e.maxRow = rowIndex
-	}
-	if _, ok := e.rowStore.Load(rowIndex); !ok {
-		e.rowStore.Store(rowIndex, &StoredRow{
-			Row: Row{
-				Index: rowIndex,
-			},
-		})
-	}
-	if cacherow, ok := e.rowStore.Load(rowIndex); ok {
-		r := cacherow.(*StoredRow)
-		if cachec, ok := r.Cols.Load(colIndex); ok {
-			c := cachec.(*Cell)
-			if c.Value != nil && value != nil && !override {
-				return ErrOverrideCellValue
-			}
-			if value != nil {
-				c.Value = value
-			}
+func (e *excelizeam) SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style) {
+	e.eg.Go(func() error {
+		return e.setCellValue(colIndex, rowIndex, value, style, false)
+	})
+}
 
-			if style != nil {
-				if c.StyleID > 0 {
-					if !override {
-						return ErrOverrideCellStyle
-					}
-					styleID, err := e.overrideStyle(c.StyleID, *style)
-					if err != nil {
-						return err
-					}
-					c.StyleID = styleID
-				} else {
-					styleID, err := e.getStyleID(style)
-					if err != nil {
-						return err
-					}
-					c.StyleID = styleID
+func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setCellValue(colIndex, rowIndex, value, style, override)
+}
+
+func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+	e.checkMaxIndex(colIndex, rowIndex)
+	key := e.getCacheKey(colIndex, rowIndex)
+
+	if cached, ok := e.cellStore.Load(key); ok {
+		cell := cached.(*Cell)
+		if cell.Value != nil && value != nil && !override {
+			return ErrOverrideCellValue
+		}
+		if value != nil {
+			cell.Value = value
+		}
+
+		if style != nil {
+			if cell.StyleID > 0 {
+				if !override {
+					return ErrOverrideCellStyle
 				}
+				styleID, err := e.overrideStyle(cell.StyleID, *style)
+				if err != nil {
+					return err
+				}
+				cell.StyleID = styleID
+			} else {
+				styleID, err := e.getStyleID(style)
+				if err != nil {
+					return err
+				}
+				cell.StyleID = styleID
 			}
-			return nil
 		}
 		styleID, err := e.getStyleID(style)
 		if err != nil {
 			return err
 		}
-		r.Cols.Store(colIndex, &Cell{
-			StyleID: styleID,
-			Value:   value,
-		})
+		cell.StyleID = styleID
+		return nil
 	}
+
+	styleID, err := e.getStyleID(style)
+	if err != nil {
+		return err
+	}
+	e.cellStore.Store(key, &Cell{
+		StyleID: styleID,
+		Value:   value,
+	})
 	return nil
+}
+
+func (e *excelizeam) SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style) {
+	e.eg.Go(func() error {
+		err := e.setStyleCell(colIndex, rowIndex, style, false)
+		return err
+	})
 }
 
 func (e *excelizeam) SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error {
-	if e.maxCol < colIndex {
-		e.maxCol = colIndex
+	if err := e.eg.Wait(); err != nil {
+		return err
 	}
-	if e.maxRow < rowIndex {
-		e.maxRow = rowIndex
+	return e.setStyleCell(colIndex, rowIndex, style, override)
+}
+
+func (e *excelizeam) setStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error {
+	e.checkMaxIndex(colIndex, rowIndex)
+	key := e.getCacheKey(colIndex, rowIndex)
+	if cached, ok := e.cellStore.Load(key); ok {
+		c := cached.(*Cell)
+		if c.StyleID > 0 {
+			if !override {
+				return ErrOverrideCellStyle
+			}
+			styleID, err := e.overrideStyle(c.StyleID, style)
+			if err != nil {
+				return err
+			}
+			c.StyleID = styleID
+		}
 	}
 
-	if _, ok := e.rowStore.Load(rowIndex); !ok {
-		e.rowStore.Store(rowIndex, &StoredRow{
-			Row: Row{
-				Index: rowIndex,
-			},
-		})
+	styleID, err := e.getStyleID(&style)
+	if err != nil {
+		return err
 	}
-	if cacherow, ok := e.rowStore.Load(rowIndex); ok {
-		r := cacherow.(*StoredRow)
-		if cachec, ok := r.Cols.Load(colIndex); ok {
-			c := cachec.(*Cell)
-			if c.StyleID > 0 {
-				if !override {
-					return ErrOverrideCellStyle
-				}
-				styleID, err := e.overrideStyle(c.StyleID, style)
-				if err != nil {
-					return err
-				}
-				c.StyleID = styleID
-			} else {
-				styleID, err := e.getStyleID(&style)
-				if err != nil {
-					return err
-				}
-				c.StyleID = styleID
-			}
-			return nil
-		}
-		styleID, err := e.getStyleID(&style)
-		if err != nil {
-			return err
-		}
-		r.Cols.Store(colIndex, &Cell{
-			StyleID: styleID,
-			Value:   nil,
-		})
-	}
+	e.cellStore.Store(key, &Cell{
+		StyleID: styleID,
+		Value:   nil,
+	})
 	return nil
+}
+
+func (e *excelizeam) SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style) {
+	e.eg.Go(func() error {
+		err := e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, false)
+		return err
+	})
 }
 
 func (e *excelizeam) SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error {
-	if e.maxCol < endColIndex {
-		e.maxCol = endColIndex
+	if err := e.eg.Wait(); err != nil {
+		return err
 	}
-	if e.maxRow < endRowIndex {
-		e.maxRow = endRowIndex
-	}
+	return e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, override)
+}
 
+func (e *excelizeam) setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error {
+	e.checkMaxIndex(endColIndex, endRowIndex)
 	for rowIdx := startRowIndex; rowIdx <= endRowIndex; rowIdx++ {
 		for colIdx := startColIndex; colIdx <= endColIndex; colIdx++ {
-			if _, ok := e.rowStore.Load(rowIdx); !ok {
-				e.rowStore.Store(rowIdx, &StoredRow{
-					Row: Row{
-						Index: rowIdx,
-					},
-				})
-			}
-			if cacherow, ok := e.rowStore.Load(rowIdx); ok {
-				r := cacherow.(*StoredRow)
-				if cachec, ok := r.Cols.Load(colIdx); ok {
-					c := cachec.(*Cell)
-					if c.StyleID > 0 {
-						if !override {
-							return ErrOverrideCellStyle
-						}
-						styleID, err := e.overrideStyle(c.StyleID, style)
-						if err != nil {
-							return err
-						}
-						c.StyleID = styleID
-					} else {
-						styleID, err := e.getStyleID(&style)
-						if err != nil {
-							return err
-						}
-						c.StyleID = styleID
+			key := e.getCacheKey(colIdx, rowIdx)
+			if cached, ok := e.cellStore.Load(key); ok {
+				c := cached.(*Cell)
+				if c.StyleID > 0 {
+					if !override {
+						return ErrOverrideCellStyle
 					}
-					return nil
+					styleID, err := e.overrideStyle(c.StyleID, style)
+					if err != nil {
+						return err
+					}
+					c.StyleID = styleID
+				} else {
+					styleID, err := e.getStyleID(&style)
+					if err != nil {
+						return err
+					}
+					c.StyleID = styleID
 				}
-				styleID, err := e.getStyleID(&style)
-				if err != nil {
-					return err
-				}
-				r.Cols.Store(colIdx, &Cell{
-					StyleID: styleID,
-					Value:   nil,
-				})
+				return nil
 			}
+			styleID, err := e.getStyleID(&style)
+			if err != nil {
+				return err
+			}
+			e.cellStore.Store(key, &Cell{
+				StyleID: styleID,
+				Value:   nil,
+			})
 		}
 	}
 	return nil
 }
 
-func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
-	if e.maxCol < endColIndex {
-		e.maxCol = endColIndex
-	}
-	if e.maxRow < endRowIndex {
-		e.maxRow = endRowIndex
-	}
+func (e *excelizeam) SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange) {
+	e.eg.Go(func() error {
+		err := e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, false)
+		return err
+	})
+}
 
+func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
+	return e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, override)
+}
+
+func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error {
+	e.checkMaxIndex(startColIndex, startRowIndex)
 	for rowIdx := startRowIndex; rowIdx <= endRowIndex; rowIdx++ {
 		for colIdx := startColIndex; colIdx <= endColIndex; colIdx++ {
+			key := e.getCacheKey(colIdx, rowIdx)
 			borderStyles := make([]excelize.Border, 0, 4)
 			switch {
 			case rowIdx == startRowIndex && colIdx == startColIndex: // TopLeft
@@ -485,44 +497,34 @@ func (e *excelizeam) SetBorderRange(startColIndex, startRowIndex, endColIndex, e
 			}
 			style := excelize.Style{Border: borderStyles}
 
-			if _, ok := e.rowStore.Load(rowIdx); !ok {
-				e.rowStore.Store(rowIdx, &StoredRow{
-					Row: Row{
-						Index: rowIdx,
-					},
-				})
-			}
-			if cacherow, ok := e.rowStore.Load(rowIdx); ok {
-				r := cacherow.(*StoredRow)
-				if cachec, ok := r.Cols.Load(colIdx); ok {
-					c := cachec.(*Cell)
-					if c.StyleID > 0 {
-						if !override {
-							return ErrOverrideCellStyle
-						}
-						styleID, err := e.overrideStyle(c.StyleID, style)
-						if err != nil {
-							return err
-						}
-						c.StyleID = styleID
-					} else {
-						styleID, err := e.getStyleID(&style)
-						if err != nil {
-							return err
-						}
-						c.StyleID = styleID
+			if cached, ok := e.cellStore.Load(key); ok {
+				c := cached.(*Cell)
+				if c.StyleID > 0 {
+					if !override {
+						return ErrOverrideCellStyle
 					}
-					continue
+					styleID, err := e.overrideStyle(c.StyleID, style)
+					if err != nil {
+						return err
+					}
+					c.StyleID = styleID
+				} else {
+					styleID, err := e.getStyleID(&style)
+					if err != nil {
+						return err
+					}
+					c.StyleID = styleID
 				}
-				styleID, err := e.getStyleID(&style)
-				if err != nil {
-					return err
-				}
-				r.Cols.Store(colIdx, &Cell{
-					StyleID: styleID,
-					Value:   nil,
-				})
+				continue
 			}
+			styleID, err := e.getStyleID(&style)
+			if err != nil {
+				return err
+			}
+			e.cellStore.Store(colIdx, &Cell{
+				StyleID: styleID,
+				Value:   nil,
+			})
 		}
 	}
 	return nil
@@ -652,6 +654,21 @@ func (e *excelizeam) overrideStyle(originStyleID int, overrideStyle excelize.Sty
 	return e.getStyleID(style)
 }
 
+func (e *excelizeam) getCacheKey(colIndex, rowIndex int) string {
+	return fmt.Sprintf("%d-%d", rowIndex, colIndex)
+}
+
+func (e *excelizeam) checkMaxIndex(colIndex, rowIndex int) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.maxCol < colIndex {
+		e.maxCol = colIndex
+	}
+	if e.maxRow < rowIndex {
+		e.maxRow = rowIndex
+	}
+}
+
 func (e *excelizeam) Write(w io.Writer) error {
 	if err := e.writeStream(); err != nil {
 		return err
@@ -666,6 +683,9 @@ func (e *excelizeam) Write(w io.Writer) error {
 }
 
 func (e *excelizeam) writeStream() error {
+	if err := e.eg.Wait(); err != nil {
+		return err
+	}
 	defaultStyleCells := make([]interface{}, e.maxCol)
 	if e.defaultBorder != nil {
 		for i := 0; i < e.maxCol; i++ {
@@ -673,51 +693,47 @@ func (e *excelizeam) writeStream() error {
 		}
 	}
 
-	for rowIdx := 1; rowIdx <= e.maxRow; rowIdx++ {
-		cacherow, rowOK := e.rowStore.Load(rowIdx)
-		if !rowOK {
-			// Value/Styleのない行はデフォルトStyleのみ設定
-			if e.defaultBorder != nil {
-				cell, err := excelize.CoordinatesToCellName(1, rowIdx)
-				if err != nil {
-					return err
-				}
-				if err := e.sw.SetRow(
-					cell,
-					defaultStyleCells,
-				); err != nil {
-					return err
-				}
+	type writeCols struct {
+		Cols     []interface{}
+		CanWrite bool
+	}
+
+	writeRows := make([]writeCols, e.maxRow)
+	for i := 0; i < e.maxRow; i++ {
+		rowIdx := i + 1
+		writeRows[i] = writeCols{
+			Cols: make([]interface{}, e.maxCol),
+		}
+		if e.defaultBorder != nil {
+			copy(writeRows[i].Cols, defaultStyleCells)
+			writeRows[i].CanWrite = true
+		}
+		for ii := 0; ii < e.maxCol; ii++ {
+			colIdx := ii + 1
+			cached, ok := e.cellStore.Load(e.getCacheKey(colIdx, rowIdx))
+			if !ok {
+				continue
 			}
+			c := cached.(*Cell)
+			writeRows[i].Cols[ii] = excelize.Cell{StyleID: c.StyleID, Value: c.Value}
+			writeRows[i].CanWrite = true
+		}
+	}
+
+	for i, row := range writeRows {
+		if !row.CanWrite {
 			continue
 		}
 
-		r := cacherow.(*StoredRow)
-		canWrite := false
-		cellValues := make([]interface{}, e.maxCol)
-		if e.defaultBorder != nil {
-			canWrite = true
-			copy(cellValues, defaultStyleCells)
+		cell, err := excelize.CoordinatesToCellName(1, i+1)
+		if err != nil {
+			return err
 		}
-		r.Cols.Range(func(key, cachec any) bool {
-			colIdx := key.(int)
-			c := cachec.(*Cell)
-			cellValues[colIdx-1] = excelize.Cell{StyleID: c.StyleID, Value: c.Value}
-			canWrite = true
-			return true
-		})
-
-		if canWrite {
-			cell, err := excelize.CoordinatesToCellName(1, rowIdx)
-			if err != nil {
-				return err
-			}
-			if err := e.sw.SetRow(
-				cell,
-				cellValues,
-			); err != nil {
-				return err
-			}
+		if err := e.sw.SetRow(
+			cell,
+			row.Cols,
+		); err != nil {
+			return err
 		}
 	}
 	return nil
