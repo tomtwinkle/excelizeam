@@ -11,6 +11,22 @@ Therefore, a Wrapper was created to automatically meet the restrictions.
 
 そのため制限を自動的に満たすためのWrapperを作成した。
 
+`SetCellValue()` のようなSyncMethodを使用する場合は速度面でのメリットを享受出来ないが、 `SetCellValueAsync()` のようなAsync関数を利用することでStreamWriterとほぼ同様の速度を出すことが可能になる。
+
+```
+BenchmarkExcelizeam
+BenchmarkExcelizeam/Excelize
+BenchmarkExcelizeam/Excelize-12         	       8	 130153007 ns/op
+BenchmarkExcelizeam/Excelize_Async
+BenchmarkExcelizeam/Excelize_Async-12   	       6	 186520832 ns/op
+BenchmarkExcelizeam/Excelize_StreamWriter
+BenchmarkExcelizeam/Excelize_StreamWriter-12         	      12	  88987332 ns/op
+BenchmarkExcelizeam/Excelizeam
+BenchmarkExcelizeam/Excelizeam-12                    	       4	 252973924 ns/op
+BenchmarkExcelizeam/Excelizeam_Async
+BenchmarkExcelizeam/Excelizeam_Async-12              	      12	  88823689 ns/op
+```
+
 ## Usage
 
 TODO
