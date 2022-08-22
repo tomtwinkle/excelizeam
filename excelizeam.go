@@ -211,11 +211,6 @@ func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, sty
 			cell.StyleID = styleID
 			return nil
 		}
-		styleID, err := e.getStyleID(style)
-		if err != nil {
-			return err
-		}
-		cell.StyleID = styleID
 		return nil
 	}
 
