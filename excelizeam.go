@@ -525,7 +525,7 @@ func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, e
 			if err != nil {
 				return err
 			}
-			e.cellStore.Store(colIdx, &Cell{
+			e.cellStore.Store(key, &Cell{
 				StyleID: styleID,
 				Value:   nil,
 			})
