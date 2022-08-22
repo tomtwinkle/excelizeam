@@ -202,13 +202,14 @@ func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, sty
 					return err
 				}
 				cell.StyleID = styleID
-			} else {
-				styleID, err := e.getStyleID(style)
-				if err != nil {
-					return err
-				}
-				cell.StyleID = styleID
+				return nil
 			}
+			styleID, err := e.getStyleID(style)
+			if err != nil {
+				return err
+			}
+			cell.StyleID = styleID
+			return nil
 		}
 		styleID, err := e.getStyleID(style)
 		if err != nil {
@@ -525,7 +526,7 @@ func (e *excelizeam) setBorderRange(startColIndex, startRowIndex, endColIndex, e
 			if err != nil {
 				return err
 			}
-			e.cellStore.Store(key, &Cell{
+			e.cellStore.Store(colIdx, &Cell{
 				StyleID: styleID,
 				Value:   nil,
 			})
