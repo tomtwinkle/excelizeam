@@ -33,9 +33,9 @@ type Excelizeam interface {
 	MergeCell(startColIndex, startRowIndex, endColIndex, endRowIndex int) error
 
 	// SetCellValue Set value and style to cell
-	SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error
+	SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, overrideValue, overrideStyle bool) error
 	// SetCellValueAsync Set value and style to cell asynchronously
-	SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style)
+	SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style, overrideStyle bool)
 
 	// SetStyleCell Set style to cell
 	SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error
@@ -51,6 +51,10 @@ type Excelizeam interface {
 	SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error
 	// SetBorderRangeAsync Set border around cell range asynchronously
 	SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange)
+
+	// Wait
+	// Wait for all running asynchronous operations to finish
+	Wait() error
 
 	// Write StreamWriter
 	Write(w io.Writer) error
@@ -162,26 +166,26 @@ func (e *excelizeam) MergeCell(startColIndex, startRowIndex, endColIndex, endRow
 	return e.sw.MergeCell(startCell, endCell)
 }
 
-func (e *excelizeam) SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style) {
+func (e *excelizeam) SetCellValueAsync(colIndex, rowIndex int, value interface{}, style *excelize.Style, overrideStyle bool) {
 	e.eg.Go(func() error {
-		return e.setCellValue(colIndex, rowIndex, value, style, false)
+		return e.setCellValue(colIndex, rowIndex, value, style, false, overrideStyle)
 	})
 }
 
-func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+func (e *excelizeam) SetCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, overrideValue bool, overrideStyle bool) error {
 	if err := e.eg.Wait(); err != nil {
 		return err
 	}
-	return e.setCellValue(colIndex, rowIndex, value, style, override)
+	return e.setCellValue(colIndex, rowIndex, value, style, overrideValue, overrideStyle)
 }
 
-func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, override bool) error {
+func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, style *excelize.Style, overrideValue bool, overrideStyle bool) error {
 	e.checkMaxIndex(colIndex, rowIndex)
 	key := e.getCacheKey(colIndex, rowIndex)
 
 	if cached, ok := e.cellStore.Load(key); ok {
 		cell := cached.(*Cell)
-		if cell.Value != nil && value != nil && !override {
+		if cell.Value != nil && value != nil && !overrideValue {
 			return ErrOverrideCellValue
 		}
 		if value != nil {
@@ -190,7 +194,7 @@ func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, sty
 
 		if style != nil {
 			if cell.StyleID > 0 {
-				if !override {
+				if !overrideStyle {
 					return ErrOverrideCellStyle
 				}
 				styleID, err := e.overrideStyle(cell.StyleID, *style)
@@ -667,6 +671,10 @@ func (e *excelizeam) checkMaxIndex(colIndex, rowIndex int) {
 	if e.maxRow < rowIndex {
 		e.maxRow = rowIndex
 	}
+}
+
+func (e *excelizeam) Wait() error {
+	return e.eg.Wait()
 }
 
 func (e *excelizeam) Write(w io.Writer) error {
