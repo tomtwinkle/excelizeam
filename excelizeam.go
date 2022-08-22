@@ -259,6 +259,7 @@ func (e *excelizeam) setStyleCell(colIndex, rowIndex int, style excelize.Style, 
 			}
 			c.StyleID = styleID
 		}
+		return nil
 	}
 
 	styleID, err := e.getStyleID(&style)
@@ -309,7 +310,7 @@ func (e *excelizeam) setStyleCellRange(startColIndex, startRowIndex, endColIndex
 					}
 					c.StyleID = styleID
 				}
-				return nil
+				continue
 			}
 			styleID, err := e.getStyleID(&style)
 			if err != nil {
