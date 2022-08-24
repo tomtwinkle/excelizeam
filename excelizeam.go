@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -61,6 +63,9 @@ type Excelizeam interface {
 
 	// File Get the original excelize.File
 	File() (*excelize.File, error)
+
+	// CSVRecords Make csv records
+	CSVRecords() ([][]string, error)
 }
 
 type excelizeam struct {
@@ -637,6 +642,20 @@ func (e *excelizeam) getCacheKey(colIndex, rowIndex int) string {
 	return fmt.Sprintf("%d-%d", rowIndex, colIndex)
 }
 
+func (e *excelizeam) getCacheAddress(key string) (colIndex, rowIndex int) {
+	indexes := strings.Split(key, "-")
+	if len(indexes) == 2 {
+		var err error
+		if rowIndex, err = strconv.Atoi(indexes[0]); err != nil {
+			return 0, 0
+		}
+		if colIndex, err = strconv.Atoi(indexes[1]); err != nil {
+			return 0, 0
+		}
+	}
+	return colIndex, rowIndex
+}
+
 func (e *excelizeam) checkMaxIndex(colIndex, rowIndex int) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -673,6 +692,25 @@ func (e *excelizeam) File() (*excelize.File, error) {
 		return nil, err
 	}
 	return e.sw.File, nil
+}
+
+func (e *excelizeam) CSVRecords() ([][]string, error) {
+	if err := e.eg.Wait(); err != nil {
+		return nil, err
+	}
+	records := make([][]string, e.maxRow)
+	for i := 0; i < e.maxRow; i++ {
+		records[i] = make([]string, e.maxCol)
+	}
+
+	e.cellStore.Range(func(k, cached any) bool {
+		key := k.(string)
+		c := cached.(*Cell)
+		colIdx, rowIdx := e.getCacheAddress(key)
+		records[rowIdx-1][colIdx-1] = fmt.Sprintf("%v", c.Value)
+		return true
+	})
+	return records, nil
 }
 
 func (e *excelizeam) writeStream() error {

@@ -574,6 +574,81 @@ func TestExcelizeam_Async(t *testing.T) {
 	}
 }
 
+func TestExcelizeam_CSVRecords(t *testing.T) {
+	tests := map[string]struct {
+		testFunc    func(w excelizeam.Excelizeam)
+		wantRecords [][]string
+		wantErr     error
+	}{
+		"CSVRecords-row5_col5_full": {
+			testFunc: func(w excelizeam.Excelizeam) {
+				for rowIdx := 1; rowIdx <= 5; rowIdx++ {
+					for colIdx := 1; colIdx <= 5; colIdx++ {
+						w.SetCellValueAsync(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), nil, false)
+					}
+				}
+			},
+			wantRecords: [][]string{
+				{"test1-1", "test1-2", "test1-3", "test1-4", "test1-5"},
+				{"test2-1", "test2-2", "test2-3", "test2-4", "test2-5"},
+				{"test3-1", "test3-2", "test3-3", "test3-4", "test3-5"},
+				{"test4-1", "test4-2", "test4-3", "test4-4", "test4-5"},
+				{"test5-1", "test5-2", "test5-3", "test5-4", "test5-5"},
+			},
+		},
+		"CSVRecords-row5_col5_odd": {
+			testFunc: func(w excelizeam.Excelizeam) {
+				for rowIdx := 1; rowIdx <= 5; rowIdx++ {
+					if rowIdx%2 == 0 {
+						continue
+					}
+					for colIdx := 1; colIdx <= 5; colIdx++ {
+						if colIdx%2 == 0 {
+							continue
+						}
+						w.SetCellValueAsync(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), nil, false)
+					}
+				}
+			},
+			wantRecords: [][]string{
+				{"test1-1", "", "test1-3", "", "test1-5"},
+				{"", "", "", "", ""},
+				{"test3-1", "", "test3-3", "", "test3-5"},
+				{"", "", "", "", ""},
+				{"test5-1", "", "test5-3", "", "test5-5"},
+			},
+		},
+	}
+
+	for n, v := range tests {
+		name := n
+		tt := v
+		t.Run(name, func(t *testing.T) {
+			w, err := excelizeam.New("test")
+			assert.NoError(t, err)
+			tt.testFunc(w)
+			records, err := w.CSVRecords()
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+				return
+			}
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			if assert.Equal(t, len(tt.wantRecords), len(records)) {
+				for i, wantCols := range tt.wantRecords {
+					if assert.Equal(t, len(wantCols), len(records[i])) {
+						for ii, wantVal := range wantCols {
+							assert.Equal(t, wantVal, records[i][ii])
+						}
+					}
+				}
+			}
+		})
+	}
+}
+
 func BenchmarkExcelizeam(b *testing.B) {
 	b.Run("Excelize", func(b *testing.B) {
 		var buf bytes.Buffer
