@@ -707,7 +707,9 @@ func (e *excelizeam) CSVRecords() ([][]string, error) {
 		key := k.(string)
 		c := cached.(*Cell)
 		colIdx, rowIdx := e.getCacheAddress(key)
-		records[rowIdx-1][colIdx-1] = fmt.Sprintf("%v", c.Value)
+		if c.Value != nil {
+			records[rowIdx-1][colIdx-1] = fmt.Sprintf("%v", c.Value)
+		}
 		return true
 	})
 	return records, nil

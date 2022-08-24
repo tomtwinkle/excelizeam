@@ -604,6 +604,7 @@ func TestExcelizeam_CSVRecords(t *testing.T) {
 					}
 					for colIdx := 1; colIdx <= 5; colIdx++ {
 						if colIdx%2 == 0 {
+							w.SetCellValueAsync(colIdx, rowIdx, nil, nil, false)
 							continue
 						}
 						w.SetCellValueAsync(colIdx, rowIdx, fmt.Sprintf("test%d-%d", rowIdx, colIdx), nil, false)
