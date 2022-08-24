@@ -58,6 +58,9 @@ type Excelizeam interface {
 
 	// Write StreamWriter
 	Write(w io.Writer) error
+
+	// File Get the original excelize.File
+	File() (*excelize.File, error)
 }
 
 type excelizeam struct {
@@ -685,6 +688,16 @@ func (e *excelizeam) Write(w io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func (e *excelizeam) File() (*excelize.File, error) {
+	if err := e.writeStream(); err != nil {
+		return nil, err
+	}
+	if err := e.sw.Flush(); err != nil {
+		return nil, err
+	}
+	return e.sw.File, nil
 }
 
 func (e *excelizeam) writeStream() error {
