@@ -508,14 +508,14 @@ func TestExcelizeam_Async(t *testing.T) {
 					Left:   &excelizeam.BorderItem{Style: excelizestyle.BorderStyleDash2, Color: excelizestyle.BorderColorBlack},
 					Right:  &excelizeam.BorderItem{Style: excelizestyle.BorderStyleDash2, Color: excelizestyle.BorderColorBlack},
 					Inside: &excelizeam.BorderItem{Style: excelizestyle.BorderStyleDash2, Color: excelizestyle.BorderColorBlack},
-				})
+				}, false)
 				w.SetBorderRangeAsync(6, 6, 10, 10, excelizeam.BorderRange{
 					Top:    &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Bottom: &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Left:   &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Right:  &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Inside: &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
-				})
+				}, false)
 			},
 		},
 		"SetBorderRangeAsync-override_error": {
@@ -533,7 +533,7 @@ func TestExcelizeam_Async(t *testing.T) {
 					Left:   &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Right:  &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
 					Inside: &excelizeam.BorderItem{Style: excelizestyle.BorderStyleContinuous2, Color: excelizestyle.BorderColorBlack},
-				})
+				}, false)
 			},
 			wantErr: excelizeam.ErrOverrideCellStyle,
 		},

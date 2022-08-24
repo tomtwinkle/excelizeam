@@ -40,17 +40,17 @@ type Excelizeam interface {
 	// SetStyleCell Set style to cell
 	SetStyleCell(colIndex, rowIndex int, style excelize.Style, override bool) error
 	// SetStyleCellAsync Set style to cell asynchronously
-	SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style)
+	SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style, override bool)
 
 	// SetStyleCellRange Set style to cell with range
 	SetStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) error
 	// SetStyleCellRangeAsync Set style to cell with range asynchronously
-	SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style)
+	SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool)
 
 	// SetBorderRange Set border around cell range
 	SetBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) error
 	// SetBorderRangeAsync Set border around cell range asynchronously
-	SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange)
+	SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool)
 
 	// Wait
 	// Wait for all running asynchronous operations to finish
@@ -228,9 +228,9 @@ func (e *excelizeam) setCellValue(colIndex, rowIndex int, value interface{}, sty
 	return nil
 }
 
-func (e *excelizeam) SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style) {
+func (e *excelizeam) SetStyleCellAsync(colIndex, rowIndex int, style excelize.Style, override bool) {
 	e.eg.Go(func() error {
-		err := e.setStyleCell(colIndex, rowIndex, style, false)
+		err := e.setStyleCell(colIndex, rowIndex, style, override)
 		return err
 	})
 }
@@ -271,9 +271,9 @@ func (e *excelizeam) setStyleCell(colIndex, rowIndex int, style excelize.Style, 
 	return nil
 }
 
-func (e *excelizeam) SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style) {
+func (e *excelizeam) SetStyleCellRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, style excelize.Style, override bool) {
 	e.eg.Go(func() error {
-		err := e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, false)
+		err := e.setStyleCellRange(startColIndex, startRowIndex, endColIndex, endRowIndex, style, override)
 		return err
 	})
 }
@@ -323,9 +323,9 @@ func (e *excelizeam) setStyleCellRange(startColIndex, startRowIndex, endColIndex
 	return nil
 }
 
-func (e *excelizeam) SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange) {
+func (e *excelizeam) SetBorderRangeAsync(startColIndex, startRowIndex, endColIndex, endRowIndex int, borderRange BorderRange, override bool) {
 	e.eg.Go(func() error {
-		err := e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, false)
+		err := e.setBorderRange(startColIndex, startRowIndex, endColIndex, endRowIndex, borderRange, override)
 		return err
 	})
 }
