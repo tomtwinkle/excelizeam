@@ -31,4 +31,10 @@ BenchmarkExcelizeam/Excelizeam_Async-12              	      13	  86562598 ns/op
 
 ## Usage
 
+### install your project
+
+```
+go get github.com/tomtwinkle/excelizeam@v0.3.4
+```
+
 TODO
