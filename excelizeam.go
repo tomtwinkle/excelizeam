@@ -1,6 +1,7 @@
 package excelizeam
 
 import (
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	"io"
@@ -10,7 +11,6 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mitchellh/hashstructure/v2"
 	"github.com/tomtwinkle/excelizeam/excelizestyle"
 	"github.com/xuri/excelize/v2"
 )
@@ -522,14 +522,12 @@ func (e *excelizeam) getStyleID(style *excelize.Style) (int, error) {
 	if style != nil {
 		styl = *style
 	}
-	hash, err := hashstructure.Hash(styl, hashstructure.FormatV2, nil)
-	if err != nil {
-		return 0, err
-	}
+	hash := fmt.Sprintf("%x", sha1.Sum([]byte(fmt.Sprintf("%+v", styl))))
 	var styleID int
 	if s, ok := e.styleStore.Load(hash); ok {
 		styleID = s.(StoredStyle).StyleID
 	} else {
+		var err error
 		styleID, err = e.sw.File.NewStyle(&styl)
 		if err != nil {
 			return 0, err
