@@ -29,7 +29,7 @@ type Excelizeam interface {
 
 	// Excelize StreamWriter Wrapper
 
-	SetPageMargins(options ...excelize.PageMarginsOptions) error
+	SetPageMargins(options *excelize.PageLayoutMarginsOptions) error
 	SetColWidth(colIndex int, width float64) error
 	SetColWidthRange(colIndexMin, colIndexMax int, width float64) error
 	MergeCell(startColIndex, startRowIndex, endColIndex, endRowIndex int) error
@@ -69,7 +69,8 @@ type Excelizeam interface {
 }
 
 type excelizeam struct {
-	sw *excelize.StreamWriter
+	sw   *excelize.StreamWriter
+	file *excelize.File
 
 	eg errgroup.Group
 
@@ -116,12 +117,15 @@ type Cell struct {
 
 func New(sheetName string) (Excelizeam, error) {
 	f := excelize.NewFile()
-	f.SetSheetName("Sheet1", sheetName)
+	err := f.SetSheetName("Sheet1", sheetName)
+	if err != nil {
+		return nil, err
+	}
 	sw, err := f.NewStreamWriter(sheetName)
 	if err != nil {
 		return nil, err
 	}
-	return &excelizeam{sw: sw}, nil
+	return &excelizeam{sw: sw, file: f}, nil
 }
 
 func (e *excelizeam) SetDefaultBorderStyle(style excelizestyle.BorderStyle, color excelizestyle.BorderColor) error {
@@ -155,10 +159,10 @@ func (e *excelizeam) SetColWidthRange(colIndexMin, colIndexMax int, width float6
 	return e.sw.SetColWidth(colIndexMin, colIndexMax, width)
 }
 
-func (e *excelizeam) SetPageMargins(options ...excelize.PageMarginsOptions) error {
-	return e.sw.File.SetPageMargins(
+func (e *excelizeam) SetPageMargins(options *excelize.PageLayoutMarginsOptions) error {
+	return e.file.SetPageMargins(
 		e.sw.Sheet,
-		options...,
+		options,
 	)
 }
 
@@ -528,7 +532,7 @@ func (e *excelizeam) getStyleID(style *excelize.Style) (int, error) {
 		styleID = s.(StoredStyle).StyleID
 	} else {
 		var err error
-		styleID, err = e.sw.File.NewStyle(&styl)
+		styleID, err = e.file.NewStyle(&styl)
 		if err != nil {
 			return 0, err
 		}
@@ -676,7 +680,7 @@ func (e *excelizeam) Write(w io.Writer) error {
 	if err := e.sw.Flush(); err != nil {
 		return err
 	}
-	if err := e.sw.File.Write(w); err != nil {
+	if err := e.file.Write(w); err != nil {
 		return err
 	}
 	return nil
@@ -689,7 +693,7 @@ func (e *excelizeam) File() (*excelize.File, error) {
 	if err := e.sw.Flush(); err != nil {
 		return nil, err
 	}
-	return e.sw.File, nil
+	return e.file, nil
 }
 
 func (e *excelizeam) CSVRecords() ([][]string, error) {

@@ -17,3 +17,6 @@
 # Editor Config
 .idea
 .vscode
+
+# Excel Temp File
+~$*.xlsx
