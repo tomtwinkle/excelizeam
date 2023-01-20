@@ -1,11 +1,11 @@
 module github.com/tomtwinkle/excelizeam
 
-go 1.18
+go 1.19
 
 require (
-	github.com/stretchr/testify v1.7.1
-	github.com/xuri/excelize/v2 v2.6.1
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	github.com/stretchr/testify v1.8.1
+	github.com/xuri/excelize/v2 v2.7.0
+	golang.org/x/sync v0.1.0
 )
 
 require (
@@ -16,8 +16,8 @@ require (
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/xuri/efp v0.0.0-20220603152613-6918739fd470 // indirect
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
-	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
-	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
-	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/yaml.v3 v3.0.0 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
