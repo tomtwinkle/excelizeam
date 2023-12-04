@@ -561,7 +561,6 @@ func (e *excelizeam) overrideStyle(originStyleID int, overrideStyle excelize.Sty
 	style.Fill = originStyle.Fill
 	style.Alignment = originStyle.Alignment
 	style.Font = originStyle.Font
-	style.Lang = originStyle.Lang
 	style.CustomNumFmt = originStyle.CustomNumFmt
 	style.DecimalPlaces = originStyle.DecimalPlaces
 	style.NegRed = originStyle.NegRed
@@ -607,18 +606,13 @@ func (e *excelizeam) overrideStyle(originStyleID int, overrideStyle excelize.Sty
 		style.Font = overrideStyle.Font
 	}
 
-	// Lang
-	if overrideStyle.Lang != "" {
-		style.Lang = overrideStyle.Lang
-	}
-
 	// CustomNumFmt
 	if overrideStyle.CustomNumFmt != nil {
 		style.CustomNumFmt = overrideStyle.CustomNumFmt
 	}
 
 	// DecimalPlaces
-	if overrideStyle.DecimalPlaces != 0 {
+	if overrideStyle.DecimalPlaces != nil {
 		style.DecimalPlaces = overrideStyle.DecimalPlaces
 	}
 
