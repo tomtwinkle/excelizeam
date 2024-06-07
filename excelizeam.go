@@ -30,6 +30,8 @@ type Excelizeam interface {
 	// Excelize StreamWriter Wrapper
 
 	SetPageMargins(options *excelize.PageLayoutMarginsOptions) error
+	SetPageLayout(options *excelize.PageLayoutOptions) error
+	GetPageLayout() (excelize.PageLayoutOptions, error)
 	SetColWidth(colIndex int, width float64) error
 	SetColWidthRange(colIndexMin, colIndexMax int, width float64) error
 	MergeCell(startColIndex, startRowIndex, endColIndex, endRowIndex int) error
@@ -164,6 +166,14 @@ func (e *excelizeam) SetPageMargins(options *excelize.PageLayoutMarginsOptions) 
 		e.sw.Sheet,
 		options,
 	)
+}
+
+func (e *excelizeam) SetPageLayout(options *excelize.PageLayoutOptions) error {
+	return e.file.SetPageLayout(e.sw.Sheet, options)
+}
+
+func (e *excelizeam) GetPageLayout() (excelize.PageLayoutOptions, error) {
+	return e.file.GetPageLayout(e.sw.Sheet)
 }
 
 func (e *excelizeam) MergeCell(startColIndex, startRowIndex, endColIndex, endRowIndex int) error {
