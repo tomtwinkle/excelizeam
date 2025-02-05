@@ -3,9 +3,9 @@ module github.com/tomtwinkle/excelizeam
 go 1.22
 
 require (
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/xuri/excelize/v2 v2.9.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.11.0
 )
 
 require (
