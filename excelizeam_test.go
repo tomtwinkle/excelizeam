@@ -6,16 +6,16 @@ import (
 	"io"
 	"testing"
 
-	"golang.org/x/sync/errgroup"
+	"gotest.tools/assert"
 
 	"github.com/tomtwinkle/excelizeam"
 	"github.com/tomtwinkle/excelizeam/excelizestyle"
-
-	"github.com/stretchr/testify/assert"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/sync/errgroup"
 )
 
 func TestExcelizeam_Sync(t *testing.T) {
+	t.Parallel()
 	tests := map[string]struct {
 		testFunc func(w excelizeam.Excelizeam) error
 		wantErr  error
@@ -334,23 +334,20 @@ func TestExcelizeam_Sync(t *testing.T) {
 		},
 	}
 
-	for n, v := range tests {
-		name := n
-		tt := v
+	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			w, err := excelizeam.New("test")
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			err = tt.testFunc(w)
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
+				assert.ErrorContains(t, err, tt.wantErr.Error())
 				return
 			}
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			var buf bytes.Buffer
 			err = w.Write(&buf)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 
 			//f, err := os.Create("testdata/sync/" + name + ".xlsx")
 			//assert.NoError(t, err)
@@ -358,19 +355,16 @@ func TestExcelizeam_Sync(t *testing.T) {
 			//assert.NoError(t, err)
 
 			expected, err := excelize.OpenFile("testdata/sync/" + name + ".xlsx")
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			actual, err := excelize.OpenReader(&buf)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			Assert(t, expected, actual)
 		})
 	}
 }
 
 func TestExcelizeam_Async(t *testing.T) {
+	t.Parallel()
 	tests := map[string]struct {
 		testFunc func(w excelizeam.Excelizeam)
 		wantErr  error
@@ -539,22 +533,19 @@ func TestExcelizeam_Async(t *testing.T) {
 		},
 	}
 
-	for n, v := range tests {
-		name := n
-		tt := v
+	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			w, err := excelizeam.New("test")
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			tt.testFunc(w)
 			var buf bytes.Buffer
 			err = w.Write(&buf)
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
+				assert.ErrorContains(t, err, tt.wantErr.Error())
 				return
 			}
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 
 			//f, err := os.Create("testdata/async/" + name + ".xlsx")
 			//assert.NoError(t, err)
@@ -562,19 +553,16 @@ func TestExcelizeam_Async(t *testing.T) {
 			//assert.NoError(t, err)
 
 			expected, err := excelize.OpenFile("testdata/async/" + name + ".xlsx")
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			actual, err := excelize.OpenReader(&buf)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			Assert(t, expected, actual)
 		})
 	}
 }
 
 func TestExcelizeam_CSVRecords(t *testing.T) {
+	t.Parallel()
 	tests := map[string]struct {
 		testFunc    func(w excelizeam.Excelizeam)
 		wantRecords [][]string
@@ -621,31 +609,19 @@ func TestExcelizeam_CSVRecords(t *testing.T) {
 		},
 	}
 
-	for n, v := range tests {
-		name := n
-		tt := v
+	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			w, err := excelizeam.New("test")
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			tt.testFunc(w)
 			records, err := w.CSVRecords()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
+				assert.ErrorContains(t, err, tt.wantErr.Error())
 				return
 			}
-			if !assert.NoError(t, err) {
-				return
-			}
-
-			if assert.Equal(t, len(tt.wantRecords), len(records)) {
-				for i, wantCols := range tt.wantRecords {
-					if assert.Equal(t, len(wantCols), len(records[i])) {
-						for ii, wantVal := range wantCols {
-							assert.Equal(t, wantVal, records[i][ii])
-						}
-					}
-				}
-			}
+			assert.NilError(t, err)
+			assert.DeepEqual(t, tt.wantRecords, records)
 		})
 	}
 }
@@ -855,23 +831,21 @@ func Assert(t *testing.T, expected, actual *excelize.File) {
 	for rowIdx := 1; rowIdx <= 10; rowIdx++ {
 		for colIdx := 1; colIdx <= 10; colIdx++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 
 			// Assert Value
 			expectedValue, err := expected.GetCellValue("test", cell)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			actualValue, err := actual.GetCellValue("test", cell)
-			if !assert.NoError(t, err) {
-				return
-			}
+			assert.NilError(t, err)
 			assert.Equal(t, expectedValue, actualValue)
 
 			// Assert Style
-			// TODO
+			// TODO: implement GetCellStyle test
+			//expectedStyle, err := expected.GetCellStyle("test", cell)
+			//assert.NilError(t, err)
+			//actualStyle, err := actual.GetCellStyle("test", cell)
+			//assert.DeepEqual(t, expectedStyle, actualStyle)
 		}
 	}
 }
