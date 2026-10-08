@@ -148,6 +148,14 @@ func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
 		{themeIndex: 1, want: "#112233"},
 		{themeIndex: 2, want: "#DDEEFF"},
 		{themeIndex: 3, want: "#445566"},
+		{themeIndex: 4, want: "#5B9BD5"},
+		{themeIndex: 5, want: "#ED7D31"},
+		{themeIndex: 6, want: "#A5A5A5"},
+		{themeIndex: 7, want: "#FFC000"},
+		{themeIndex: 8, want: "#4472C4"},
+		{themeIndex: 9, want: "#70AD47"},
+		{themeIndex: 10, want: "#0563C1"},
+		{themeIndex: 11, want: "#954F72"},
 	}
 
 	for _, test := range tests {
@@ -170,6 +178,15 @@ func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
 				}
 				for _, replacement := range replacements {
 					old := []byte(replacement[0])
+					if bytes.Count(data, old) == 0 {
+						for _, colorElement := range []string{"sysClr", "srgbClr"} {
+							expanded := []byte(strings.Replace(replacement[0], "/>", "></a:"+colorElement+">", 1))
+							if bytes.Count(data, expanded) == 1 {
+								old = expanded
+								break
+							}
+						}
+					}
 					require.Equal(t, 1, bytes.Count(data, old))
 					data = bytes.Replace(data, old, []byte(replacement[1]), 1)
 				}

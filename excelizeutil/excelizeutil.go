@@ -2,6 +2,7 @@ package excelizeutil
 
 import (
 	"bytes"
+	"encoding/xml"
 	"strings"
 
 	"github.com/xuri/excelize/v2"
@@ -232,6 +233,30 @@ type xlsxColor struct {
 	Tint    float64 `xml:"tint,attr,omitempty"`
 }
 
+type xlsxThemeColor struct {
+	SysClr *struct {
+		LastClr string `xml:"lastClr,attr"`
+	} `xml:"sysClr"`
+	SrgbClr *struct {
+		Val *string `xml:"val,attr"`
+	} `xml:"srgbClr"`
+}
+
+type xlsxThemeColorScheme struct {
+	Dk1      xlsxThemeColor `xml:"dk1"`
+	Lt1      xlsxThemeColor `xml:"lt1"`
+	Dk2      xlsxThemeColor `xml:"dk2"`
+	Lt2      xlsxThemeColor `xml:"lt2"`
+	Accent1  xlsxThemeColor `xml:"accent1"`
+	Accent2  xlsxThemeColor `xml:"accent2"`
+	Accent3  xlsxThemeColor `xml:"accent3"`
+	Accent4  xlsxThemeColor `xml:"accent4"`
+	Accent5  xlsxThemeColor `xml:"accent5"`
+	Accent6  xlsxThemeColor `xml:"accent6"`
+	Hlink    xlsxThemeColor `xml:"hlink"`
+	FolHlink xlsxThemeColor `xml:"folHlink"`
+}
+
 func getCellFillColor(f *excelize.File, color *xlsxColor) []string {
 	if color == nil {
 		return nil
@@ -242,14 +267,22 @@ func getCellFillColor(f *excelize.File, color *xlsxColor) []string {
 		if f.Theme == nil {
 			return nil
 		}
-		children := f.Theme.ThemeElements.ClrScheme.Children
+		schemeXML, err := xml.Marshal(f.Theme.ThemeElements.ClrScheme)
+		if err != nil {
+			return nil
+		}
+		var scheme xlsxThemeColorScheme
+		if err := xml.Unmarshal(schemeXML, &scheme); err != nil {
+			return nil
+		}
+		children := [...]xlsxThemeColor{
+			scheme.Lt1, scheme.Dk1, scheme.Lt2, scheme.Dk2,
+			scheme.Accent1, scheme.Accent2, scheme.Accent3, scheme.Accent4,
+			scheme.Accent5, scheme.Accent6, scheme.Hlink, scheme.FolHlink,
+		}
 		index := *color.Theme
 		if index < 0 || index >= len(children) {
 			return nil
-		}
-		if index < 4 {
-			// Theme slots are lt1/dk1/lt2/dk2, while XML stores dk1/lt1/dk2/lt2.
-			index = []int{1, 0, 3, 2}[index]
 		}
 		child := children[index]
 		switch {
