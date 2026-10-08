@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"reflect"
 	"strings"
 
 	"github.com/xuri/excelize/v2"
@@ -68,19 +69,22 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) ex
 
 	format := resolveCellFormat(f, styleID)
 	numFmt, customNumFmt := getCellNumberFormat(format.NumFmtID, numberFormats)
-	return excelize.Style{
+	style := excelize.Style{
 		Border:       getCellBorder(f, format.BorderID, themeColors, indexedColors),
 		Fill:         getCellFill(f, format.FillID, themeColors, indexedColors),
-		Font:         getCellFont(f, format.FontID, themeColors, indexedColors),
+		Font:         getCellFont(f, format.FontID, format.HasFont, themeColors, indexedColors),
 		Alignment:    format.Alignment,
 		Protection:   format.Protection,
 		NumFmt:       numFmt,
 		CustomNumFmt: customNumFmt,
 	}
+	applyNativeNumberFormatMetadata(&style, f, styleID, format, customNumFmt)
+	return style
 }
 
 type resolvedCellFormat struct {
 	FontID     int
+	HasFont    bool
 	FillID     int
 	BorderID   int
 	NumFmtID   int
@@ -92,6 +96,7 @@ func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
 	cellXF := f.Styles.CellXfs.Xf[styleID]
 	resolved := resolvedCellFormat{
 		FontID:   integerValue(cellXF.FontID),
+		HasFont:  inheritedStylePresent(cellXF.FontID, nil, cellXF.ApplyFont),
 		FillID:   integerValue(cellXF.FillID),
 		BorderID: integerValue(cellXF.BorderID),
 		NumFmtID: integerValue(cellXF.NumFmtID),
@@ -101,6 +106,7 @@ func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
 	if cellXF.XfID != nil && f.Styles.CellStyleXfs != nil && *cellXF.XfID >= 0 && *cellXF.XfID < len(f.Styles.CellStyleXfs.Xf) {
 		baseXF := f.Styles.CellStyleXfs.Xf[*cellXF.XfID]
 		resolved.FontID = inheritedStyleID(cellXF.FontID, baseXF.FontID, cellXF.ApplyFont)
+		resolved.HasFont = inheritedStylePresent(cellXF.FontID, baseXF.FontID, cellXF.ApplyFont)
 		resolved.FillID = inheritedStyleID(cellXF.FillID, baseXF.FillID, cellXF.ApplyFill)
 		resolved.BorderID = inheritedStyleID(cellXF.BorderID, baseXF.BorderID, cellXF.ApplyBorder)
 		resolved.NumFmtID = inheritedStyleID(cellXF.NumFmtID, baseXF.NumFmtID, cellXF.ApplyNumberFormat)
@@ -145,6 +151,16 @@ func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
 	return resolved
 }
 
+func inheritedStylePresent(child, parent *int, apply *bool) bool {
+	if apply != nil {
+		return *apply
+	}
+	if parent != nil {
+		return true
+	}
+	return child != nil && *child != 0
+}
+
 func integerValue(value *int) int {
 	if value == nil {
 		return 0
@@ -166,7 +182,7 @@ func inheritedStyleID(child, parent *int, apply *bool) int {
 }
 
 func getCellBorder(f *excelize.File, borderID int, themeColors []string, indexedColors map[int]string) []excelize.Border {
-	if f.Styles.Borders == nil || borderID < 0 || borderID >= len(f.Styles.Borders.Border) {
+	if f.Styles.Borders == nil || borderID < 0 || borderID >= len(f.Styles.Borders.Border) || f.Styles.Borders.Border[borderID] == nil {
 		return nil
 	}
 
@@ -186,17 +202,44 @@ func getCellBorder(f *excelize.File, borderID int, themeColors []string, indexed
 		borders = append(borders, border)
 	}
 
-	appendBorder("top", definition.Top.Style, (*xlsxColor)(definition.Top.Color))
-	appendBorder("bottom", definition.Bottom.Style, (*xlsxColor)(definition.Bottom.Color))
-	appendBorder("left", definition.Left.Style, (*xlsxColor)(definition.Left.Color))
-	appendBorder("right", definition.Right.Style, (*xlsxColor)(definition.Right.Color))
+	topStyle, topColor := borderLine(definition.Top)
+	bottomStyle, bottomColor := borderLine(definition.Bottom)
+	leftStyle, leftColor := borderLine(definition.Left)
+	rightStyle, rightColor := borderLine(definition.Right)
+	appendBorder("top", topStyle, topColor)
+	appendBorder("bottom", bottomStyle, bottomColor)
+	appendBorder("left", leftStyle, leftColor)
+	appendBorder("right", rightStyle, rightColor)
 	if definition.DiagonalUp {
-		appendBorder("diagonalUp", definition.Diagonal.Style, (*xlsxColor)(definition.Diagonal.Color))
+		diagonalStyle, diagonalColor := borderLine(definition.Diagonal)
+		appendBorder("diagonalUp", diagonalStyle, diagonalColor)
 	}
 	if definition.DiagonalDown {
-		appendBorder("diagonalDown", definition.Diagonal.Style, (*xlsxColor)(definition.Diagonal.Color))
+		diagonalStyle, diagonalColor := borderLine(definition.Diagonal)
+		appendBorder("diagonalDown", diagonalStyle, diagonalColor)
 	}
 	return borders
+}
+
+func borderLine(line any) (string, *xlsxColor) {
+	value := reflect.ValueOf(line)
+	if !value.IsValid() {
+		return "", nil
+	}
+	if value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return "", nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return "", nil
+	}
+	style := value.FieldByName("Style")
+	if !style.IsValid() || style.Kind() != reflect.String {
+		return "", nil
+	}
+	return style.String(), colorValue(value.FieldByName("Color"))
 }
 
 func borderStyleID(style string) int {
@@ -209,10 +252,17 @@ func borderStyleID(style string) int {
 }
 
 func getCellFill(f *excelize.File, fillID int, themeColors []string, indexedColors map[int]string) excelize.Fill {
-	if f.Styles.Fills == nil || fillID < 0 || fillID >= len(f.Styles.Fills.Fill) {
+	if f.Styles.Fills == nil || fillID < 0 || fillID >= len(f.Styles.Fills.Fill) || f.Styles.Fills.Fill[fillID] == nil {
 		return excelize.Fill{}
 	}
-	patternFill := *f.Styles.Fills.Fill[fillID].PatternFill
+	definition := f.Styles.Fills.Fill[fillID]
+	if definition.GradientFill != nil {
+		return getCellGradientFill(definition.GradientFill, themeColors, indexedColors)
+	}
+	if definition.PatternFill == nil {
+		return excelize.Fill{}
+	}
+	patternFill := definition.PatternFill
 
 	pattern := 0
 	for i, name := range fillPatterns {
@@ -222,25 +272,187 @@ func getCellFill(f *excelize.File, fillID int, themeColors []string, indexedColo
 		}
 	}
 
+	color := patternFill.FgColor
+	if color == nil {
+		color = patternFill.BgColor
+	}
 	return excelize.Fill{
 		Type:    "pattern",
 		Pattern: pattern,
-		Color:   getCellFillColor((*xlsxColor)(patternFill.FgColor), themeColors, indexedColors),
+		Color:   getCellFillColor((*xlsxColor)(color), themeColors, indexedColors),
 	}
 }
 
-func getCellFont(f *excelize.File, fontID int, themeColors []string, indexedColors map[int]string) *excelize.Font {
-	if f.Styles.Fonts == nil || fontID <= 0 || fontID >= len(f.Styles.Fonts.Font) {
+type gradientGeometry struct {
+	typeName  string
+	degree    float64
+	left      float64
+	right     float64
+	top       float64
+	bottom    float64
+	positions []float64
+}
+
+func getCellGradientFill(value any, themeColors []string, indexedColors map[int]string) excelize.Fill {
+	geometry, colors, ok := readGradient(value)
+	if !ok {
+		return excelize.Fill{Type: "gradient"}
+	}
+	for shading, preset := range gradientGeometries() {
+		if !sameGradientGeometry(geometry, preset) || len(colors) != len(preset.positions) {
+			continue
+		}
+		matchesPositions := true
+		for index, position := range preset.positions {
+			if colors[index].position != position {
+				matchesPositions = false
+				break
+			}
+		}
+		if !matchesPositions {
+			continue
+		}
+		resolved := make([][]string, len(colors))
+		for index, stop := range colors {
+			resolved[index] = getCellFillColor(stop.color, themeColors, indexedColors)
+			if len(resolved[index]) == 0 {
+				return excelize.Fill{Type: "gradient"}
+			}
+		}
+		if len(colors) == 3 && !reflect.DeepEqual(resolved[0], resolved[2]) {
+			// Excelize's public API models these presets as color0, color1,
+			// color0. A different final stop cannot be represented.
+			return excelize.Fill{Type: "gradient"}
+		}
+		return excelize.Fill{Type: "gradient", Shading: shading, Color: []string{resolved[0][0], resolved[1][0]}}
+	}
+	return excelize.Fill{Type: "gradient"}
+}
+
+func readGradient(value any) (gradientGeometry, []struct {
+	position float64
+	color    *xlsxColor
+}, bool) {
+	ref := reflect.ValueOf(value)
+	if !ref.IsValid() {
+		return gradientGeometry{}, nil, false
+	}
+	if ref.Kind() == reflect.Ptr {
+		if ref.IsNil() {
+			return gradientGeometry{}, nil, false
+		}
+		ref = ref.Elem()
+	}
+	if ref.Kind() != reflect.Struct {
+		return gradientGeometry{}, nil, false
+	}
+	getFloat := func(name string) float64 {
+		field := ref.FieldByName(name)
+		if field.IsValid() && field.CanFloat() {
+			return field.Float()
+		}
+		return 0
+	}
+	getString := func(name string) string {
+		field := ref.FieldByName(name)
+		if field.IsValid() && field.Kind() == reflect.String {
+			return field.String()
+		}
+		return ""
+	}
+	geometry := gradientGeometry{
+		typeName: getString("Type"),
+		degree:   getFloat("Degree"),
+		left:     getFloat("Left"),
+		right:    getFloat("Right"),
+		top:      getFloat("Top"),
+		bottom:   getFloat("Bottom"),
+	}
+	stops := ref.FieldByName("Stop")
+	if !stops.IsValid() || stops.Kind() != reflect.Slice {
+		return gradientGeometry{}, nil, false
+	}
+	colors := make([]struct {
+		position float64
+		color    *xlsxColor
+	}, 0, stops.Len())
+	for index := 0; index < stops.Len(); index++ {
+		stop := stops.Index(index)
+		if stop.Kind() == reflect.Ptr {
+			if stop.IsNil() {
+				return gradientGeometry{}, nil, false
+			}
+			stop = stop.Elem()
+		}
+		position := stop.FieldByName("Position")
+		color := stop.FieldByName("Color")
+		if !position.IsValid() || !position.CanFloat() || !color.IsValid() {
+			return gradientGeometry{}, nil, false
+		}
+		colors = append(colors, struct {
+			position float64
+			color    *xlsxColor
+		}{position: position.Float(), color: colorValue(color)})
+	}
+	geometry.positions = make([]float64, len(colors))
+	for index, stop := range colors {
+		geometry.positions[index] = stop.position
+	}
+	return geometry, colors, true
+}
+
+func gradientGeometries() []gradientGeometry {
+	if !hasExcelizeField(reflect.TypeOf(excelize.Fill{}), "Transparency") {
+		return []gradientGeometry{
+			{degree: 90, positions: []float64{0, 1}},
+			{positions: []float64{0, 1}},
+			{degree: 45, positions: []float64{0, 1}},
+			{degree: 135, positions: []float64{0, 1}},
+			{typeName: "path", positions: []float64{0, 1}},
+			{typeName: "path", left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, positions: []float64{0, 1}},
+		}
+	}
+	return []gradientGeometry{
+		{degree: 90, positions: []float64{0, 1}},
+		{degree: 270, positions: []float64{0, 1}},
+		{degree: 90, positions: []float64{0, 0.5, 1}},
+		{positions: []float64{0, 1}},
+		{degree: 180, positions: []float64{0, 1}},
+		{positions: []float64{0, 0.5, 1}},
+		{degree: 45, positions: []float64{0, 1}},
+		{degree: 255, positions: []float64{0, 1}},
+		{degree: 45, positions: []float64{0, 0.5, 1}},
+		{degree: 135, positions: []float64{0, 1}},
+		{degree: 315, positions: []float64{0, 1}},
+		{degree: 135, positions: []float64{0, 0.5, 1}},
+		{typeName: "path", positions: []float64{0, 1}},
+		{typeName: "path", left: 1, right: 1, positions: []float64{0, 1}},
+		{typeName: "path", bottom: 1, top: 1, positions: []float64{0, 1}},
+		{typeName: "path", left: 1, right: 1, top: 1, bottom: 1, positions: []float64{0, 1}},
+		{typeName: "path", left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, positions: []float64{0, 1}},
+	}
+}
+
+func hasExcelizeField(typ reflect.Type, fieldName string) bool {
+	_, ok := typ.FieldByName(fieldName)
+	return ok
+}
+
+func sameGradientGeometry(a, b gradientGeometry) bool {
+	return a.typeName == b.typeName && a.degree == b.degree && a.left == b.left && a.right == b.right && a.top == b.top && a.bottom == b.bottom
+}
+
+func getCellFont(f *excelize.File, fontID int, hasFont bool, themeColors []string, indexedColors map[int]string) *excelize.Font {
+	if f.Styles.Fonts == nil || fontID < 0 || fontID >= len(f.Styles.Fonts.Font) || (!hasFont && fontID == 0) || f.Styles.Fonts.Font[fontID] == nil {
 		return nil
 	}
 	font := f.Styles.Fonts.Font[fontID]
 	result := &excelize.Font{}
-	if font.B != nil && font.B.Val != nil {
-		result.Bold = *font.B.Val
-	}
-	if font.I != nil && font.I.Val != nil {
-		result.Italic = *font.I.Val
-	}
+	// Excelize v2.10.1 treats ColorIndexed's zero value as an explicit
+	// indexed color. Use -1 unless the OOXML color actually selects an index.
+	setExcelizeField(result, "ColorIndexed", -1)
+	result.Bold = xmlBooleanValue(font.B)
+	result.Italic = xmlBooleanValue(font.I)
 	if font.U != nil {
 		result.Underline = "single"
 		if font.U.Val != nil && *font.U.Val != "" {
@@ -253,13 +465,138 @@ func getCellFont(f *excelize.File, fontID int, themeColors []string, indexedColo
 	if font.Sz != nil && font.Sz.Val != nil {
 		result.Size = *font.Sz.Val
 	}
-	if font.Strike != nil && font.Strike.Val != nil {
-		result.Strike = *font.Strike.Val
+	result.Strike = xmlBooleanValue(font.Strike)
+	color := colorValue(reflect.ValueOf(font.Color))
+	if color != nil {
+		if hasExcelizeField(reflect.TypeOf(excelize.Font{}), "ColorTint") {
+			// v2.10.1 exposes tint and the theme/indexed selectors separately.
+			// Keep the untinted RGB fallback; returning a resolved tint here too
+			// would cause NewStyle to serialize and apply the tint twice.
+			result.Color = normalizeRGB(color.RGB)
+		} else if colors := getCellFillColor(color, themeColors, indexedColors); len(colors) > 0 {
+			// Older Style APIs lack selector and tint fields, so keep appearance.
+			result.Color = colors[0]
+		}
 	}
-	if colors := getCellFillColor((*xlsxColor)(font.Color), themeColors, indexedColors); len(colors) > 0 {
-		result.Color = colors[0]
+	if color != nil {
+		if color.RGB == "" && color.Theme == nil && !color.Auto {
+			setExcelizeField(result, "ColorIndexed", color.Indexed)
+		}
+		if color.Theme != nil {
+			setExcelizeField(result, "ColorTheme", color.Theme)
+		}
+		setExcelizeField(result, "ColorTint", color.Tint)
+	}
+	if charset, ok := xmlAttributeValue(font, "Charset", "Val"); ok {
+		setExcelizeField(result, "Charset", charset)
+	}
+	if vertical, ok := xmlAttributeValue(font, "VertAlign", "Val"); ok {
+		setExcelizeField(result, "VertAlign", vertical)
 	}
 	return result
+}
+
+func xmlBooleanValue(value any) bool {
+	ref := reflect.ValueOf(value)
+	if !ref.IsValid() || ref.Kind() != reflect.Ptr || ref.IsNil() {
+		return false
+	}
+	attribute := ref.Elem().FieldByName("Val")
+	if !attribute.IsValid() || (attribute.Kind() == reflect.Ptr && attribute.IsNil()) {
+		return true
+	}
+	if attribute.Kind() == reflect.Ptr {
+		attribute = attribute.Elem()
+	}
+	return attribute.Bool()
+}
+
+func xmlAttributeValue(value any, elementName, attributeName string) (any, bool) {
+	ref := reflect.ValueOf(value)
+	if !ref.IsValid() {
+		return nil, false
+	}
+	if ref.Kind() == reflect.Ptr {
+		if ref.IsNil() {
+			return nil, false
+		}
+		ref = ref.Elem()
+	}
+	element := ref.FieldByName(elementName)
+	if !element.IsValid() || element.Kind() != reflect.Ptr || element.IsNil() {
+		return nil, false
+	}
+	attribute := element.Elem().FieldByName(attributeName)
+	if !attribute.IsValid() {
+		return nil, false
+	}
+	if attribute.Kind() == reflect.Ptr {
+		if attribute.IsNil() {
+			return nil, false
+		}
+		attribute = attribute.Elem()
+	}
+	return attribute.Interface(), true
+}
+
+func colorValue(value reflect.Value) *xlsxColor {
+	if !value.IsValid() {
+		return nil
+	}
+	if value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	result := &xlsxColor{}
+	if field := value.FieldByName("Auto"); field.IsValid() && field.Kind() == reflect.Bool {
+		result.Auto = field.Bool()
+	}
+	if field := value.FieldByName("RGB"); field.IsValid() && field.Kind() == reflect.String {
+		result.RGB = field.String()
+	}
+	if field := value.FieldByName("Indexed"); field.IsValid() && field.Kind() == reflect.Int {
+		result.Indexed = int(field.Int())
+	}
+	if field := value.FieldByName("Theme"); field.IsValid() && field.Kind() == reflect.Ptr && !field.IsNil() {
+		theme := int(field.Elem().Int())
+		result.Theme = &theme
+	}
+	if field := value.FieldByName("Tint"); field.IsValid() && field.Kind() == reflect.Float64 {
+		result.Tint = field.Float()
+	}
+	return result
+}
+
+func setExcelizeField(target any, name string, value any) bool {
+	ref := reflect.ValueOf(target)
+	if !ref.IsValid() || ref.Kind() != reflect.Ptr || ref.IsNil() {
+		return false
+	}
+	field := ref.Elem().FieldByName(name)
+	if !field.IsValid() || !field.CanSet() {
+		return false
+	}
+	input := reflect.ValueOf(value)
+	if field.Kind() == reflect.Ptr && input.Type().AssignableTo(field.Type().Elem()) {
+		pointer := reflect.New(field.Type().Elem())
+		pointer.Elem().Set(input)
+		field.Set(pointer)
+		return true
+	}
+	if input.Type().AssignableTo(field.Type()) {
+		field.Set(input)
+		return true
+	}
+	if input.Type().ConvertibleTo(field.Type()) {
+		field.Set(input.Convert(field.Type()))
+		return true
+	}
+	return false
 }
 
 func getCellNumberFormat(numFmtID int, numberFormats map[int]string) (int, *string) {
@@ -270,6 +607,60 @@ func getCellNumberFormat(numFmtID int, numberFormats map[int]string) (int, *stri
 		return numFmtID, nil
 	}
 	return 0, nil
+}
+
+type excelizeStyleGetter interface {
+	GetStyle(int) (*excelize.Style, error)
+}
+
+func applyNativeNumberFormatMetadata(style *excelize.Style, f *excelize.File, styleID int, resolved resolvedCellFormat, customNumFmt *string) {
+	if customNumFmt != nil || f.Styles.CellXfs == nil || styleID < 0 || styleID >= len(f.Styles.CellXfs.Xf) {
+		return
+	}
+	cellXF := f.Styles.CellXfs.Xf[styleID]
+	if cellXF.NumFmtID == nil || *cellXF.NumFmtID != resolved.NumFmtID {
+		// A named-style XF can supply the effective ID. Its custom code is
+		// retained above; do not infer currency metadata from format text.
+		return
+	}
+	getter, ok := any(f).(excelizeStyleGetter)
+	if !ok {
+		return
+	}
+	nativeStyle, err := getter.GetStyle(styleID)
+	if err != nil || nativeStyle == nil {
+		return
+	}
+	if decimalPlaces, ok := excelizePublicFieldValue(nativeStyle, "DecimalPlaces"); ok {
+		setExcelizeField(style, "DecimalPlaces", decimalPlaces)
+	}
+	if negativeRed, ok := excelizePublicFieldValue(nativeStyle, "NegRed"); ok {
+		setExcelizeField(style, "NegRed", negativeRed)
+	}
+}
+
+func excelizePublicFieldValue(target any, name string) (any, bool) {
+	ref := reflect.ValueOf(target)
+	if !ref.IsValid() {
+		return nil, false
+	}
+	if ref.Kind() == reflect.Ptr {
+		if ref.IsNil() {
+			return nil, false
+		}
+		ref = ref.Elem()
+	}
+	field := ref.FieldByName(name)
+	if !field.IsValid() {
+		return nil, false
+	}
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return nil, false
+		}
+		field = field.Elem()
+	}
+	return field.Interface(), true
 }
 
 type xlsxColor struct {

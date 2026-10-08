@@ -91,10 +91,12 @@ func TestGetStylePreservesFullStyle(t *testing.T) {
 			},
 			check: func(t *testing.T, got excelize.Style) {
 				require.NotNil(t, got.Font)
-				assert.Equal(t, &excelize.Font{
+				wantFont := &excelize.Font{
 					Bold: true, Italic: true, Underline: "single", Family: "Aptos",
 					Size: 11, Strike: true, Color: "#123456",
-				}, got.Font)
+				}
+				setPublicField(wantFont, "ColorIndexed", -1)
+				assert.Equal(t, wantFont, got.Font)
 				assert.Equal(t, &excelize.Alignment{
 					Horizontal: "center", Indent: 2, JustifyLastLine: true,
 					ReadingOrder: 1, RelativeIndent: 3, ShrinkToFit: true,
@@ -120,7 +122,10 @@ func TestGetStylePreservesFullStyle(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			buffer := workbookWithStyle(t, test.style)
-			test.check(t, GetStyle(buffer, "Sheet1", 1, 1))
+			got := GetStyle(buffer, "Sheet1", 1, 1)
+			test.check(t, got)
+			reapplied := workbookWithStyle(t, &got)
+			test.check(t, GetStyle(reapplied, "Sheet1", 1, 1))
 		})
 	}
 }
@@ -133,11 +138,13 @@ func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
 
 	got := GetStyle(buffer, "Sheet1", 1, 1)
 	require.Equal(t, 14, got.NumFmt)
-	require.NotNil(t, got.Font)
-	assert.Equal(t, &excelize.Font{
+	wantFont := &excelize.Font{
 		Bold: true, Italic: true, Underline: "single", Family: "Aptos",
 		Size: 14, Color: "#123456",
-	}, got.Font)
+	}
+	setPublicField(wantFont, "ColorIndexed", -1)
+	require.NotNil(t, got.Font)
+	assert.Equal(t, wantFont, got.Font)
 	assert.Equal(t, excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#315D3C"}}, got.Fill)
 	assert.ElementsMatch(t, []excelize.Border{
 		{Type: "left", Style: 1, Color: "#111111"},
@@ -243,6 +250,8 @@ func TestGetStylePreservesAllBorderSides(t *testing.T) {
 
 	got := GetStyle(buffer, "Sheet1", 1, 1).Border
 	assert.ElementsMatch(t, want, got)
+	reapplied := workbookWithStyle(t, &excelize.Style{Border: got})
+	assert.ElementsMatch(t, want, GetStyle(reapplied, "Sheet1", 1, 1).Border)
 }
 
 func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
