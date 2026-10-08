@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -124,6 +125,111 @@ func TestGetStylePreservesFullStyle(t *testing.T) {
 	}
 }
 
+func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func([]byte) []byte {
+		return []byte(namedStyleStylesXML)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	require.Equal(t, 14, got.NumFmt)
+	require.NotNil(t, got.Font)
+	assert.Equal(t, &excelize.Font{
+		Bold: true, Italic: true, Underline: "single", Family: "Aptos",
+		Size: 14, Color: "#123456",
+	}, got.Font)
+	assert.Equal(t, excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#315D3C"}}, got.Fill)
+	assert.ElementsMatch(t, []excelize.Border{
+		{Type: "left", Style: 1, Color: "#111111"},
+		{Type: "right", Style: 2, Color: "#222222"},
+	}, got.Border)
+	assert.Equal(t, &excelize.Alignment{Horizontal: "center", Vertical: "center", WrapText: true}, got.Alignment)
+	assert.Equal(t, &excelize.Protection{Locked: false, Hidden: true}, got.Protection)
+}
+
+func TestGetStylePreservesLocalizedBuiltInNumberFormatID(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		old := []byte(`<xf numFmtId="14"`)
+		require.Equal(t, 1, bytes.Count(data, old))
+		return bytes.Replace(data, old, []byte(`<xf numFmtId="27"`), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	assert.Equal(t, 27, got.NumFmt)
+	assert.Nil(t, got.CustomNumFmt)
+}
+
+func TestGetStylePreservesLocalizedBuiltInNumberFormatCode(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		code := `[$-ja-JP]yyyy&quot;年&quot;m&quot;月&quot;d&quot;日&quot;`
+		return bytes.Replace(data, []byte("<fonts"), []byte(`<numFmts count="1"><numFmt numFmtId="14" formatCode="`+code+`"/></numFmts><fonts`), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	require.NotNil(t, got.CustomNumFmt)
+	assert.Equal(t, `[$-ja-JP]yyyy"年"m"月"d"日"`, *got.CustomNumFmt)
+	assert.Zero(t, got.NumFmt)
+}
+
+func TestGetStylePrefersLocalizedNumberFormatCode16(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		data = bytes.Replace(data, []byte("<styleSheet "), []byte(`<styleSheet xmlns:x16test="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main" `), 1)
+		local := `[$-ja-JP-x-gannen,80]ggge&quot;年&quot;m&quot;月&quot;d&quot;日&quot;`
+		return bytes.Replace(data, []byte("<fonts"), []byte(`<numFmts count="1"><numFmt numFmtId="14" formatCode="yyyy-mm-dd" x16test:formatCode16="`+local+`"/></numFmts><fonts`), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	require.NotNil(t, got.CustomNumFmt)
+	assert.Equal(t, `[$-ja-JP-x-gannen,80]ggge"年"m"月"d"日"`, *got.CustomNumFmt)
+	assert.Zero(t, got.NumFmt)
+}
+
+func TestGetStyleResolvesIndexedOOXMLColor(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{
+		Fill: excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#123456"}},
+	})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		old := []byte(`rgb="FF123456"`)
+		require.Equal(t, 1, bytes.Count(data, old))
+		data = bytes.Replace(data, old, []byte(`indexed="3"`), 1)
+		colors := []byte(`<colors><indexedColors><rgbColor rgb="FF010101"/><rgbColor rgb="FF020202"/><rgbColor rgb="FF030303"/><rgbColor rgb="FFBEAD10"/></indexedColors></colors>`)
+		return bytes.Replace(data, []byte("</styleSheet>"), append(colors, []byte("</styleSheet>")...), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1).Fill.Color
+	assert.Equal(t, []string{"#BEAD10"}, got)
+}
+
+func TestGetStyleResolvesDefaultIndexedOOXMLColor(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{
+		Fill: excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#123456"}},
+	})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		old := []byte(`rgb="FF123456"`)
+		require.Equal(t, 1, bytes.Count(data, old))
+		return bytes.Replace(data, old, []byte(`indexed="5"`), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1).Fill.Color
+	assert.Equal(t, []string{"#FFFF00"}, got)
+}
+
+func TestGetStyleDefaultsOmittedUnderlineValueToSingle(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{Font: &excelize.Font{Underline: "single"}})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		old := []byte(`val="single"`)
+		require.Equal(t, 1, bytes.Count(data, old))
+		return bytes.Replace(data, old, nil, 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1).Font
+	require.NotNil(t, got)
+	assert.Equal(t, "single", got.Underline)
+}
+
 func TestGetStylePreservesAllBorderSides(t *testing.T) {
 	want := []excelize.Border{
 		{Type: "top", Style: 1, Color: "#111111"},
@@ -171,24 +277,15 @@ func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
 			})
 			buffer = rewriteXLSXEntry(t, buffer, "xl/theme/theme1.xml", func(data []byte) []byte {
 				replacements := [][2]string{
-					{`<a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1>`, `<a:dk1><a:srgbClr val="112233"/></a:dk1>`},
-					{`<a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1>`, `<a:lt1><a:srgbClr val="AABBCC"/></a:lt1>`},
-					{`<a:dk2><a:srgbClr val="44546A"/></a:dk2>`, `<a:dk2><a:sysClr val="windowText" lastClr="445566"/></a:dk2>`},
-					{`<a:lt2><a:srgbClr val="E7E6E6"/></a:lt2>`, `<a:lt2><a:sysClr val="window" lastClr="DDEEFF"/></a:lt2>`},
+					{"dk1", `<a:srgbClr val="112233"/>`},
+					{"lt1", `<a:srgbClr val="AABBCC"/>`},
+					{"dk2", `<a:sysClr val="windowText" lastClr="445566"/>`},
+					{"lt2", `<a:sysClr val="window" lastClr="DDEEFF"/>`},
 				}
 				for _, replacement := range replacements {
-					old := []byte(replacement[0])
-					if bytes.Count(data, old) == 0 {
-						for _, colorElement := range []string{"sysClr", "srgbClr"} {
-							expanded := []byte(strings.Replace(replacement[0], "/>", "></a:"+colorElement+">", 1))
-							if bytes.Count(data, expanded) == 1 {
-								old = expanded
-								break
-							}
-						}
-					}
-					require.Equal(t, 1, bytes.Count(data, old))
-					data = bytes.Replace(data, old, []byte(replacement[1]), 1)
+					pattern := regexp.MustCompile(`(?s)<a:` + replacement[0] + `>.*?</a:` + replacement[0] + `>`)
+					require.Equal(t, 1, len(pattern.FindAll(data, -1)))
+					data = pattern.ReplaceAll(data, []byte(`<a:`+replacement[0]+`>`+replacement[1]+`</a:`+replacement[0]+`>`))
 				}
 				return data
 			})
@@ -257,3 +354,12 @@ func rewriteXLSXEntry(t *testing.T, buffer bytes.Buffer, name string, rewrite fu
 	require.NoError(t, writer.Close())
 	return output
 }
+
+const namedStyleStylesXML = `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+	<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b val="1"/><i val="1"/><u val="single"/><sz val="14"/><color rgb="FF123456"/><name val="Aptos"/></font></fonts>
+	<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF315D3C"/></patternFill></fill></fills>
+	<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FF111111"/></left><right style="medium"><color rgb="FF222222"/></right><top/><bottom/><diagonal/></border></borders>
+	<cellStyleXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="14" fontId="1" fillId="2" borderId="1"><alignment horizontal="center" vertical="center" wrapText="1"/><protection locked="0" hidden="1"/></xf></cellStyleXfs>
+	<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf xfId="1"/></cellXfs>
+	<cellStyles count="2"><cellStyle name="Normal" xfId="0" builtinId="0"/><cellStyle name="Inherited" xfId="1" builtinId="1"/></cellStyles>
+</styleSheet>`

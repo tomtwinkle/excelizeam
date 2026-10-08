@@ -1,8 +1,10 @@
 package excelizeutil
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/xml"
+	"io"
 	"strings"
 
 	"github.com/xuri/excelize/v2"
@@ -48,6 +50,7 @@ var borderStyles = []string{
 }
 
 func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) excelize.Style {
+	themeColors, numberFormats, indexedColors := readStyleMetadata(excelBuffer)
 	f, err := excelize.OpenReader(&excelBuffer)
 	if err != nil {
 		panic(err)
@@ -63,25 +66,111 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) ex
 		panic(err)
 	}
 
-	numFmt, customNumFmt := getCellNumberFormat(f, styleID)
+	format := resolveCellFormat(f, styleID)
+	numFmt, customNumFmt := getCellNumberFormat(format.NumFmtID, numberFormats)
 	return excelize.Style{
-		Border:       getCellBorder(f, styleID),
-		Fill:         getCellFill(f, styleID),
-		Font:         getCellFont(f, styleID),
-		Alignment:    getCellAlignment(f, styleID),
-		Protection:   getCellProtection(f, styleID),
+		Border:       getCellBorder(f, format.BorderID, themeColors, indexedColors),
+		Fill:         getCellFill(f, format.FillID, themeColors, indexedColors),
+		Font:         getCellFont(f, format.FontID, themeColors, indexedColors),
+		Alignment:    format.Alignment,
+		Protection:   format.Protection,
 		NumFmt:       numFmt,
 		CustomNumFmt: customNumFmt,
 	}
 }
 
-func getCellBorder(f *excelize.File, styleID int) []excelize.Border {
-	borderID := f.Styles.CellXfs.Xf[styleID].BorderID
-	if borderID == nil || *borderID < 0 || *borderID >= len(f.Styles.Borders.Border) {
+type resolvedCellFormat struct {
+	FontID     int
+	FillID     int
+	BorderID   int
+	NumFmtID   int
+	Alignment  *excelize.Alignment
+	Protection *excelize.Protection
+}
+
+func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
+	cellXF := f.Styles.CellXfs.Xf[styleID]
+	resolved := resolvedCellFormat{
+		FontID:   integerValue(cellXF.FontID),
+		FillID:   integerValue(cellXF.FillID),
+		BorderID: integerValue(cellXF.BorderID),
+		NumFmtID: integerValue(cellXF.NumFmtID),
+	}
+	alignment := cellXF.Alignment
+	protection := cellXF.Protection
+	if cellXF.XfID != nil && f.Styles.CellStyleXfs != nil && *cellXF.XfID >= 0 && *cellXF.XfID < len(f.Styles.CellStyleXfs.Xf) {
+		baseXF := f.Styles.CellStyleXfs.Xf[*cellXF.XfID]
+		resolved.FontID = inheritedStyleID(cellXF.FontID, baseXF.FontID, cellXF.ApplyFont)
+		resolved.FillID = inheritedStyleID(cellXF.FillID, baseXF.FillID, cellXF.ApplyFill)
+		resolved.BorderID = inheritedStyleID(cellXF.BorderID, baseXF.BorderID, cellXF.ApplyBorder)
+		resolved.NumFmtID = inheritedStyleID(cellXF.NumFmtID, baseXF.NumFmtID, cellXF.ApplyNumberFormat)
+
+		if cellXF.ApplyAlignment == nil || !*cellXF.ApplyAlignment {
+			if baseXF.Alignment != nil {
+				alignment = baseXF.Alignment
+			} else if cellXF.ApplyAlignment != nil {
+				alignment = nil
+			}
+		}
+		if cellXF.ApplyProtection == nil || !*cellXF.ApplyProtection {
+			if baseXF.Protection != nil {
+				protection = baseXF.Protection
+			} else if cellXF.ApplyProtection != nil {
+				protection = nil
+			}
+		}
+	}
+	if alignment != nil {
+		resolved.Alignment = &excelize.Alignment{
+			Horizontal:      alignment.Horizontal,
+			Indent:          alignment.Indent,
+			JustifyLastLine: alignment.JustifyLastLine,
+			ReadingOrder:    alignment.ReadingOrder,
+			RelativeIndent:  alignment.RelativeIndent,
+			ShrinkToFit:     alignment.ShrinkToFit,
+			TextRotation:    alignment.TextRotation,
+			Vertical:        alignment.Vertical,
+			WrapText:        alignment.WrapText,
+		}
+	}
+	if protection != nil {
+		resolved.Protection = &excelize.Protection{Locked: true}
+		if protection.Locked != nil {
+			resolved.Protection.Locked = *protection.Locked
+		}
+		if protection.Hidden != nil {
+			resolved.Protection.Hidden = *protection.Hidden
+		}
+	}
+	return resolved
+}
+
+func integerValue(value *int) int {
+	if value == nil {
+		return 0
+	}
+	return *value
+}
+
+func inheritedStyleID(child, parent *int, apply *bool) int {
+	if apply != nil && *apply {
+		return integerValue(child)
+	}
+	if parent != nil {
+		return *parent
+	}
+	if apply != nil && !*apply {
+		return 0
+	}
+	return integerValue(child)
+}
+
+func getCellBorder(f *excelize.File, borderID int, themeColors []string, indexedColors map[int]string) []excelize.Border {
+	if f.Styles.Borders == nil || borderID < 0 || borderID >= len(f.Styles.Borders.Border) {
 		return nil
 	}
 
-	definition := f.Styles.Borders.Border[*borderID]
+	definition := f.Styles.Borders.Border[borderID]
 	borders := make([]excelize.Border, 0, 6)
 	appendBorder := func(side, style string, color *xlsxColor) {
 		if style == "" {
@@ -91,7 +180,7 @@ func getCellBorder(f *excelize.File, styleID int) []excelize.Border {
 			Type:  side,
 			Style: borderStyleID(style),
 		}
-		if colors := getCellFillColor(f, color); len(colors) > 0 {
+		if colors := getCellFillColor(color, themeColors, indexedColors); len(colors) > 0 {
 			border.Color = colors[0]
 		}
 		borders = append(borders, border)
@@ -119,12 +208,11 @@ func borderStyleID(style string) int {
 	return 0
 }
 
-func getCellFill(f *excelize.File, styleID int) excelize.Fill {
-	fillID := f.Styles.CellXfs.Xf[styleID].FillID
-	if fillID == nil || *fillID < 0 || *fillID >= len(f.Styles.Fills.Fill) {
+func getCellFill(f *excelize.File, fillID int, themeColors []string, indexedColors map[int]string) excelize.Fill {
+	if f.Styles.Fills == nil || fillID < 0 || fillID >= len(f.Styles.Fills.Fill) {
 		return excelize.Fill{}
 	}
-	patternFill := *f.Styles.Fills.Fill[*fillID].PatternFill
+	patternFill := *f.Styles.Fills.Fill[fillID].PatternFill
 
 	pattern := 0
 	for i, name := range fillPatterns {
@@ -137,16 +225,15 @@ func getCellFill(f *excelize.File, styleID int) excelize.Fill {
 	return excelize.Fill{
 		Type:    "pattern",
 		Pattern: pattern,
-		Color:   getCellFillColor(f, (*xlsxColor)(patternFill.FgColor)),
+		Color:   getCellFillColor((*xlsxColor)(patternFill.FgColor), themeColors, indexedColors),
 	}
 }
 
-func getCellFont(f *excelize.File, styleID int) *excelize.Font {
-	fontID := f.Styles.CellXfs.Xf[styleID].FontID
-	if fontID == nil || *fontID <= 0 || *fontID >= len(f.Styles.Fonts.Font) {
+func getCellFont(f *excelize.File, fontID int, themeColors []string, indexedColors map[int]string) *excelize.Font {
+	if f.Styles.Fonts == nil || fontID <= 0 || fontID >= len(f.Styles.Fonts.Font) {
 		return nil
 	}
-	font := f.Styles.Fonts.Font[*fontID]
+	font := f.Styles.Fonts.Font[fontID]
 	result := &excelize.Font{}
 	if font.B != nil && font.B.Val != nil {
 		result.Bold = *font.B.Val
@@ -154,8 +241,11 @@ func getCellFont(f *excelize.File, styleID int) *excelize.Font {
 	if font.I != nil && font.I.Val != nil {
 		result.Italic = *font.I.Val
 	}
-	if font.U != nil && font.U.Val != nil {
-		result.Underline = *font.U.Val
+	if font.U != nil {
+		result.Underline = "single"
+		if font.U.Val != nil && *font.U.Val != "" {
+			result.Underline = *font.U.Val
+		}
 	}
 	if font.Name != nil && font.Name.Val != nil {
 		result.Family = *font.Name.Val
@@ -166,61 +256,18 @@ func getCellFont(f *excelize.File, styleID int) *excelize.Font {
 	if font.Strike != nil && font.Strike.Val != nil {
 		result.Strike = *font.Strike.Val
 	}
-	if colors := getCellFillColor(f, (*xlsxColor)(font.Color)); len(colors) > 0 {
+	if colors := getCellFillColor((*xlsxColor)(font.Color), themeColors, indexedColors); len(colors) > 0 {
 		result.Color = colors[0]
 	}
 	return result
 }
 
-func getCellAlignment(f *excelize.File, styleID int) *excelize.Alignment {
-	alignment := f.Styles.CellXfs.Xf[styleID].Alignment
-	if alignment == nil {
-		return nil
+func getCellNumberFormat(numFmtID int, numberFormats map[int]string) (int, *string) {
+	if format, ok := numberFormats[numFmtID]; ok {
+		return 0, &format
 	}
-	return &excelize.Alignment{
-		Horizontal:      alignment.Horizontal,
-		Indent:          alignment.Indent,
-		JustifyLastLine: alignment.JustifyLastLine,
-		ReadingOrder:    alignment.ReadingOrder,
-		RelativeIndent:  alignment.RelativeIndent,
-		ShrinkToFit:     alignment.ShrinkToFit,
-		TextRotation:    alignment.TextRotation,
-		Vertical:        alignment.Vertical,
-		WrapText:        alignment.WrapText,
-	}
-}
-
-func getCellProtection(f *excelize.File, styleID int) *excelize.Protection {
-	protection := f.Styles.CellXfs.Xf[styleID].Protection
-	if protection == nil {
-		return nil
-	}
-	result := &excelize.Protection{Locked: true}
-	if protection.Locked != nil {
-		result.Locked = *protection.Locked
-	}
-	if protection.Hidden != nil {
-		result.Hidden = *protection.Hidden
-	}
-	return result
-}
-
-func getCellNumberFormat(f *excelize.File, styleID int) (int, *string) {
-	numFmtID := f.Styles.CellXfs.Xf[styleID].NumFmtID
-	if numFmtID == nil {
-		return 0, nil
-	}
-	if *numFmtID < 164 {
-		return *numFmtID, nil
-	}
-	if f.Styles.NumFmts == nil {
-		return 0, nil
-	}
-	for _, numFmt := range f.Styles.NumFmts.NumFmt {
-		if numFmt.NumFmtID == *numFmtID {
-			format := numFmt.FormatCode
-			return 0, &format
-		}
+	if numFmtID >= 0 && numFmtID < 164 {
+		return numFmtID, nil
 	}
 	return 0, nil
 }
@@ -233,77 +280,194 @@ type xlsxColor struct {
 	Tint    float64 `xml:"tint,attr,omitempty"`
 }
 
-type xlsxThemeColor struct {
-	SysClr *struct {
-		LastClr string `xml:"lastClr,attr"`
-	} `xml:"sysClr"`
-	SrgbClr *struct {
-		Val *string `xml:"val,attr"`
-	} `xml:"srgbClr"`
-}
-
-type xlsxThemeColorScheme struct {
-	Dk1      xlsxThemeColor `xml:"dk1"`
-	Lt1      xlsxThemeColor `xml:"lt1"`
-	Dk2      xlsxThemeColor `xml:"dk2"`
-	Lt2      xlsxThemeColor `xml:"lt2"`
-	Accent1  xlsxThemeColor `xml:"accent1"`
-	Accent2  xlsxThemeColor `xml:"accent2"`
-	Accent3  xlsxThemeColor `xml:"accent3"`
-	Accent4  xlsxThemeColor `xml:"accent4"`
-	Accent5  xlsxThemeColor `xml:"accent5"`
-	Accent6  xlsxThemeColor `xml:"accent6"`
-	Hlink    xlsxThemeColor `xml:"hlink"`
-	FolHlink xlsxThemeColor `xml:"folHlink"`
-}
-
-func getCellFillColor(f *excelize.File, color *xlsxColor) []string {
-	if color == nil {
+func getCellFillColor(color *xlsxColor, themeColors []string, indexedColors map[int]string) []string {
+	if color == nil || color.Auto {
 		return nil
 	}
 
 	rgb := color.RGB
 	if color.Theme != nil {
-		if f.Theme == nil {
-			return nil
-		}
-		schemeXML, err := xml.Marshal(f.Theme.ThemeElements.ClrScheme)
-		if err != nil {
-			return nil
-		}
-		var scheme xlsxThemeColorScheme
-		if err := xml.Unmarshal(schemeXML, &scheme); err != nil {
-			return nil
-		}
-		children := [...]xlsxThemeColor{
-			scheme.Lt1, scheme.Dk1, scheme.Lt2, scheme.Dk2,
-			scheme.Accent1, scheme.Accent2, scheme.Accent3, scheme.Accent4,
-			scheme.Accent5, scheme.Accent6, scheme.Hlink, scheme.FolHlink,
-		}
 		index := *color.Theme
-		if index < 0 || index >= len(children) {
+		if index < 0 || index >= len(themeColors) {
 			return nil
 		}
-		child := children[index]
-		switch {
-		case child.SysClr != nil:
-			rgb = child.SysClr.LastClr
-		case child.SrgbClr != nil && child.SrgbClr.Val != nil:
-			rgb = *child.SrgbClr.Val
-		default:
-			return nil
-		}
+		rgb = themeColors[index]
+	} else if rgb == "" {
+		rgb = indexedColor(indexedColors, color.Indexed)
 	}
 
+	rgb = normalizeRGB(rgb)
+	if rgb == "" {
+		return nil
+	}
+	if color.Tint != 0 {
+		rgb = normalizeRGB(excelize.ThemeColor(strings.TrimPrefix(rgb, "#"), color.Tint))
+	}
+	return []string{rgb}
+}
+
+func normalizeRGB(rgb string) string {
 	rgb = strings.TrimPrefix(strings.ToUpper(rgb), "#")
 	if len(rgb) == 8 {
 		rgb = rgb[2:]
 	}
 	if len(rgb) != 6 {
+		return ""
+	}
+	return "#" + rgb
+}
+
+func indexedColor(indexedColors map[int]string, index int) string {
+	if index < 0 {
+		return ""
+	}
+	if color, ok := indexedColors[index]; ok {
+		return color
+	}
+	if index < len(indexedColorMapping) {
+		return indexedColorMapping[index]
+	}
+	return ""
+}
+
+func readStyleMetadata(buffer bytes.Buffer) ([]string, map[int]string, map[int]string) {
+	reader, err := zip.NewReader(bytes.NewReader(buffer.Bytes()), int64(buffer.Len()))
+	if err != nil {
+		return nil, nil, nil
+	}
+
+	var themeColors []string
+	var numberFormats map[int]string
+	var indexedColors map[int]string
+	for _, entry := range reader.File {
+		if entry.Name != "xl/theme/theme1.xml" && entry.Name != "xl/styles.xml" {
+			continue
+		}
+		file, err := entry.Open()
+		if err != nil {
+			continue
+		}
+		data, readErr := io.ReadAll(file)
+		_ = file.Close()
+		if readErr != nil {
+			continue
+		}
+		switch entry.Name {
+		case "xl/theme/theme1.xml":
+			themeColors = parseThemeColors(data)
+		case "xl/styles.xml":
+			numberFormats = parseNumberFormats(data)
+			indexedColors = parseIndexedColors(data)
+		}
+	}
+	return themeColors, numberFormats, indexedColors
+}
+
+func parseThemeColors(data []byte) []string {
+	type colorChoice struct {
+		SysColor *struct {
+			LastColor string `xml:"lastClr,attr"`
+		} `xml:"sysClr"`
+		SRGBColor *struct {
+			Value string `xml:"val,attr"`
+		} `xml:"srgbClr"`
+	}
+	var theme struct {
+		Elements struct {
+			Scheme struct {
+				Dk1      colorChoice `xml:"dk1"`
+				Lt1      colorChoice `xml:"lt1"`
+				Dk2      colorChoice `xml:"dk2"`
+				Lt2      colorChoice `xml:"lt2"`
+				Accent1  colorChoice `xml:"accent1"`
+				Accent2  colorChoice `xml:"accent2"`
+				Accent3  colorChoice `xml:"accent3"`
+				Accent4  colorChoice `xml:"accent4"`
+				Accent5  colorChoice `xml:"accent5"`
+				Accent6  colorChoice `xml:"accent6"`
+				Hlink    colorChoice `xml:"hlink"`
+				FolHlink colorChoice `xml:"folHlink"`
+			} `xml:"clrScheme"`
+		} `xml:"themeElements"`
+	}
+	if xml.Unmarshal(data, &theme) != nil {
 		return nil
 	}
-	if color.Theme != nil && color.Tint != 0 {
-		rgb = strings.TrimPrefix(excelize.ThemeColor(rgb, color.Tint), "FF")
+	choices := []colorChoice{
+		theme.Elements.Scheme.Lt1, theme.Elements.Scheme.Dk1,
+		theme.Elements.Scheme.Lt2, theme.Elements.Scheme.Dk2,
+		theme.Elements.Scheme.Accent1, theme.Elements.Scheme.Accent2,
+		theme.Elements.Scheme.Accent3, theme.Elements.Scheme.Accent4,
+		theme.Elements.Scheme.Accent5, theme.Elements.Scheme.Accent6,
+		theme.Elements.Scheme.Hlink, theme.Elements.Scheme.FolHlink,
 	}
-	return []string{"#" + rgb}
+	colors := make([]string, len(choices))
+	for index, choice := range choices {
+		switch {
+		case choice.SysColor != nil:
+			colors[index] = choice.SysColor.LastColor
+		case choice.SRGBColor != nil:
+			colors[index] = choice.SRGBColor.Value
+		}
+	}
+	return colors
+}
+
+func parseNumberFormats(data []byte) map[int]string {
+	type numberFormat struct {
+		ID           int    `xml:"numFmtId,attr"`
+		FormatCode   string `xml:"formatCode,attr"`
+		FormatCode16 string `xml:"http://schemas.microsoft.com/office/spreadsheetml/2015/02/main formatCode16,attr"`
+	}
+	var formats struct {
+		NumFmts struct {
+			NumFmt []numberFormat `xml:"numFmt"`
+		} `xml:"numFmts"`
+	}
+	if xml.Unmarshal(data, &formats) != nil {
+		return nil
+	}
+	result := make(map[int]string, len(formats.NumFmts.NumFmt))
+	for _, format := range formats.NumFmts.NumFmt {
+		code := format.FormatCode16
+		if code == "" {
+			code = format.FormatCode
+		}
+		if code != "" {
+			result[format.ID] = code
+		}
+	}
+	return result
+}
+
+func parseIndexedColors(data []byte) map[int]string {
+	var styles struct {
+		Colors struct {
+			IndexedColors struct {
+				RGBColors []struct {
+					RGB string `xml:"rgb,attr"`
+				} `xml:"rgbColor"`
+			} `xml:"indexedColors"`
+		} `xml:"colors"`
+	}
+	if xml.Unmarshal(data, &styles) != nil {
+		return nil
+	}
+	colors := make(map[int]string, len(styles.Colors.IndexedColors.RGBColors))
+	for index, color := range styles.Colors.IndexedColors.RGBColors {
+		colors[index] = color.RGB
+	}
+	return colors
+}
+
+var indexedColorMapping = []string{
+	"000000", "FFFFFF", "FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF",
+	"000000", "FFFFFF", "FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF",
+	"800000", "008000", "000080", "808000", "800080", "008080", "C0C0C0", "808080",
+	"9999FF", "993366", "FFFFCC", "CCFFFF", "660066", "FF8080", "0066CC", "CCCCFF",
+	"000080", "FF00FF", "FFFF00", "00FFFF", "800080", "800000", "008080", "0000FF",
+	"00CCFF", "CCFFFF", "CCFFCC", "FFFF99", "99CCFF", "FF99CC", "CC99FF", "FFCC99",
+	"3366FF", "33CCCC", "99CC00", "FFCC00", "FF9900", "FF6600", "666699", "969696",
+	"003366", "339966", "003300", "333300", "993300", "993366", "333399", "333333",
+	"000000", "FFFFFF",
 }
