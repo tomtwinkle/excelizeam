@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -97,6 +98,66 @@ func TestGetStyleRoundTripsEveryPublicFontField(t *testing.T) {
 			assert.Contains(t, xlsxEntry(t, reapplied, "xl/styles.xml"), test.xmlMarker)
 		})
 	}
+}
+
+func TestGetStyleRoundTripsEveryAlignmentFieldInXML(t *testing.T) {
+	alignment := &excelize.Alignment{
+		Horizontal:      "center",
+		Indent:          2,
+		JustifyLastLine: true,
+		ReadingOrder:    1,
+		RelativeIndent:  3,
+		ShrinkToFit:     true,
+		TextRotation:    45,
+		Vertical:        "center",
+		WrapText:        true,
+	}
+	original := workbookWithStyle(t, &excelize.Style{Alignment: alignment})
+	got := GetStyle(original, "Sheet1", 1, 1)
+	assert.Equal(t, alignment, got.Alignment)
+	assert.Equal(t, alignmentStyleXML{
+		Horizontal: "center", Indent: "2", JustifyLastLine: "true", ReadingOrder: "1",
+		RelativeIndent: "3", ShrinkToFit: "true", TextRotation: "45", Vertical: "center", WrapText: "true",
+	}, styleAlignmentXML(t, original))
+
+	reapplied := workbookWithStyle(t, &got)
+	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	assert.Equal(t, alignment, reread.Alignment)
+	assert.Equal(t, styleAlignmentXML(t, original), styleAlignmentXML(t, reapplied), "all nine alignment attributes must survive in saved OOXML")
+}
+
+func TestGetStylePreservesProtectionDefaultAndExplicitRelease(t *testing.T) {
+	t.Run("omitted attributes use OOXML defaults", func(t *testing.T) {
+		buffer := workbookWithStyle(t, &excelize.Style{Protection: &excelize.Protection{Hidden: true, Locked: false}})
+		buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+			return stripProtectionAttributes(t, data)
+		})
+		assertProtectionAttrsOmitted(t, styleProtectionXML(t, buffer))
+
+		got := GetStyle(buffer, "Sheet1", 1, 1)
+		assert.Equal(t, &excelize.Protection{Locked: true, Hidden: false}, got.Protection)
+		reapplied := workbookWithStyle(t, &got)
+		reread := GetStyle(reapplied, "Sheet1", 1, 1)
+		assert.Equal(t, got.Protection, reread.Protection)
+		attrs := styleProtectionXML(t, reapplied)
+		assertXMLBool(t, attrs.Locked, true)
+		assertXMLBool(t, attrs.Hidden, false)
+	})
+
+	t.Run("explicit unlock survives", func(t *testing.T) {
+		protection := &excelize.Protection{Hidden: true, Locked: false}
+		original := workbookWithStyle(t, &excelize.Style{Protection: protection})
+		got := GetStyle(original, "Sheet1", 1, 1)
+		assert.Equal(t, protection, got.Protection)
+		assertXMLBool(t, styleProtectionXML(t, original).Locked, false)
+		assertXMLBool(t, styleProtectionXML(t, original).Hidden, true)
+
+		reapplied := workbookWithStyle(t, &got)
+		reread := GetStyle(reapplied, "Sheet1", 1, 1)
+		assert.Equal(t, protection, reread.Protection)
+		assertXMLBool(t, styleProtectionXML(t, reapplied).Locked, false)
+		assertXMLBool(t, styleProtectionXML(t, reapplied).Hidden, true)
+	})
 }
 
 func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T) {
@@ -344,6 +405,94 @@ type fontColorXML struct {
 	Indexed *int    `xml:"indexed,attr"`
 	Theme   *int    `xml:"theme,attr"`
 	Tint    float64 `xml:"tint,attr"`
+}
+
+type alignmentStyleXML struct {
+	Horizontal      string `xml:"horizontal,attr"`
+	Indent          string `xml:"indent,attr"`
+	JustifyLastLine string `xml:"justifyLastLine,attr"`
+	ReadingOrder    string `xml:"readingOrder,attr"`
+	RelativeIndent  string `xml:"relativeIndent,attr"`
+	ShrinkToFit     string `xml:"shrinkToFit,attr"`
+	TextRotation    string `xml:"textRotation,attr"`
+	Vertical        string `xml:"vertical,attr"`
+	WrapText        string `xml:"wrapText,attr"`
+}
+
+type protectionStyleXML struct {
+	Locked *string `xml:"locked,attr"`
+	Hidden *string `xml:"hidden,attr"`
+}
+
+type cellXFStyleXML struct {
+	Alignment  *alignmentStyleXML  `xml:"alignment"`
+	Protection *protectionStyleXML `xml:"protection"`
+}
+
+func cellXFStylesXML(t *testing.T, buffer bytes.Buffer) []cellXFStyleXML {
+	t.Helper()
+	var styles struct {
+		CellXFs struct {
+			XFs []cellXFStyleXML `xml:"xf"`
+		} `xml:"cellXfs"`
+	}
+	require.NoError(t, xml.Unmarshal([]byte(xlsxEntry(t, buffer, "xl/styles.xml")), &styles))
+	return styles.CellXFs.XFs
+}
+
+func styleAlignmentXML(t *testing.T, buffer bytes.Buffer) alignmentStyleXML {
+	t.Helper()
+	var alignments []alignmentStyleXML
+	for _, xf := range cellXFStylesXML(t, buffer) {
+		if xf.Alignment != nil {
+			alignments = append(alignments, *xf.Alignment)
+		}
+	}
+	require.Len(t, alignments, 1)
+	return alignments[0]
+}
+
+func styleProtectionXML(t *testing.T, buffer bytes.Buffer) protectionStyleXML {
+	t.Helper()
+	var protections []protectionStyleXML
+	for _, xf := range cellXFStylesXML(t, buffer) {
+		if xf.Protection != nil {
+			protections = append(protections, *xf.Protection)
+		}
+	}
+	require.Len(t, protections, 1)
+	return protections[0]
+}
+
+func assertXMLBool(t *testing.T, value *string, want bool) {
+	t.Helper()
+	require.NotNil(t, value)
+	var got bool
+	switch strings.ToLower(*value) {
+	case "1", "true":
+		got = true
+	case "0", "false":
+		got = false
+	default:
+		t.Fatalf("unsupported XML boolean value %q", *value)
+	}
+	assert.Equal(t, want, got)
+}
+
+func stripProtectionAttributes(t *testing.T, data []byte) []byte {
+	t.Helper()
+	openingTag := regexp.MustCompile(`<protection\b[^>]*>`).Find(data)
+	require.NotEmpty(t, openingTag, "fixture must contain a protection element")
+	require.NotContains(t, string(openingTag), `/>`, "fixture must retain an explicit empty protection element")
+	stripped := regexp.MustCompile(`\s+(?:locked|hidden)="[^"]*"`).ReplaceAll(openingTag, nil)
+	require.NotEqual(t, string(openingTag), string(stripped), "fixture must contain explicit protection attributes")
+	return bytes.Replace(data, openingTag, []byte(`<protection>`), 1)
+}
+
+func assertProtectionAttrsOmitted(t *testing.T, protection protectionStyleXML) {
+	t.Helper()
+	assert.Nil(t, protection.Locked)
+	assert.Nil(t, protection.Hidden)
 }
 
 func styleFontColors(t *testing.T, buffer bytes.Buffer) []fontColorXML {

@@ -23,8 +23,10 @@ PR ブランチ自身の `go.mod` は v2.6.0 です。v2.6.0 には `Style.Lang`
 | `Font` | `Underline`, `Family`, `Size`, `VertAlign`, `Charset` | 取得後に再適用し、XML 属性と再読込値を確認します。v2.10.1 固有の `VertAlign` / `Charset` は v2.6.0 では型にありません。 |
 | `Font` | `Color` | v2.10.1 では OOXML に RGB がある場合に限り、Tint 適用前の RGB を保持します。theme / indexed のみの色では空です。これにより同じ tint を二度適用しません。v2.6.0 は色参照フィールドがないため、解決した見た目の RGB を返します。RGB のみで再適用する見た目も別に検証します。 |
 | `Font` | `ColorIndexed`, `ColorTheme`, `ColorTint` | v2.10.1 では元の selector と tint を保持し、同じ theme / palette の workbook で再適用できることを確認します。色の selector と見た目の RGB は別々に検証します。v2.6.0 ではこれらの公開フィールドがありません。 |
-| `Alignment` | `Horizontal`, `Vertical`, `Indent`, `RelativeIndent`, `ReadingOrder`, `TextRotation`, `WrapText`, `ShrinkToFit`, `JustifyLastLine` | 9項目を全て設定し、返却値と保存・再読込後の値を検証します。 |
-| `Protection` | `Hidden`, `Locked` | 両方の値を保持します。XMLで `locked` が省略された場合は Excel の既定である `true` として扱います。保存・再読込を検証します。 |
+| `Alignment` | `Horizontal`, `Vertical`, `Indent`, `RelativeIndent`, `ReadingOrder`, `TextRotation`, `WrapText`, `ShrinkToFit`, `JustifyLastLine` | 9項目を全て設定し、返却値、保存・再読込後の値、再出力 XML の全属性を検証します。親 `cellStyleXfs` からの継承も確認します。 |
+| `Protection` | `Hidden`, `Locked` | 両方の値を保持します。XMLで `locked` が省略された場合は既定値 `true` として扱います。属性省略、明示的な解除 (`locked="0"`)、親 `cellStyleXfs` からの継承を、保存・再読込と XML 属性で検証します。 |
+
+`applyFont="0"` の `cellXfs` は参照先 `cellStyleXfs` のフォントを継承する規則です。親の `fontId="0"` も有効な参照として扱い、親フォント0をカスタマイズした fixture の取得・別 workbook への再適用・再読込を確認します。`applyFont="1"` で `fontId` が省略された場合も、実装が解決する font ID 0 を適用し、カスタム font0 の再適用を確認します。`applyFont` / `applyAlignment` / `applyProtection` の継承規則は [MS-OE376 §3.8.45](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oe376/59922f8b-0edc-4e93-a822-9f22254aec46) に記載されています。CT_Xf で `fontId` は optional 属性、ID は `<fonts>` collection への0-based indexです（[ECMA-376 §3.8.45](https://c-rex.net/samples/ooxml/e1/Part4/OOXML_P4_DOCX_xf_topic_ID0E13S6.html)）。
 
 ## 再適用できない入力
 
@@ -40,4 +42,4 @@ PR ブランチ自身の `go.mod` は v2.6.0 です。v2.6.0 には `Style.Lang`
 
 ## 検証
 
-`style_roundtrip_test.go` のテストは v2.10.1 の40フィールド棚卸し、Font fieldごとの再適用、全 gradient preset、pattern 0〜18、border style 0〜13、theme/indexed identity と RGB、組み込み decimal 数、明示適用された Font ID 0、空 boolean 属性、疎な border、pattern の2色制約を確認します。gradient や色参照などの焦点項目は、独自 extractor の戻り値だけでなく、保存後の `xl/styles.xml` を XML として読み直して比較します。
+`style_roundtrip_test.go` のテストは v2.10.1 の40フィールド棚卸し、Font fieldごとの再適用、全 gradient preset、pattern 0〜18、border style 0〜13、theme/indexed identity と RGB、組み込み decimal 数、明示適用・継承および省略 ID による Font ID 0、空 boolean 属性、疎な border、pattern の2色制約、Alignment 全9属性、Protection の既定値・解除・継承を確認します。gradient、色参照、Alignment、Protection などの焦点項目は、独自 extractor の戻り値だけでなく、保存後の `xl/styles.xml` を XML として読み直して比較します。

@@ -133,7 +133,10 @@ func TestGetStylePreservesFullStyle(t *testing.T) {
 func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
 	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
 	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func([]byte) []byte {
-		return []byte(namedStyleStylesXML)
+		data := []byte(namedStyleStylesXML)
+		oldChild := []byte(`<xf xfId="1"/>`)
+		require.Equal(t, 1, bytes.Count(data, oldChild))
+		return bytes.Replace(data, oldChild, []byte(`<xf xfId="1" applyAlignment="0" applyProtection="0"/>`), 1)
 	})
 
 	got := GetStyle(buffer, "Sheet1", 1, 1)
@@ -152,6 +155,77 @@ func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
 	}, got.Border)
 	assert.Equal(t, &excelize.Alignment{Horizontal: "center", Vertical: "center", WrapText: true}, got.Alignment)
 	assert.Equal(t, &excelize.Protection{Locked: false, Hidden: true}, got.Protection)
+
+	reapplied := workbookWithStyle(t, &got)
+	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	assert.Equal(t, got.Alignment, reread.Alignment)
+	assert.Equal(t, got.Protection, reread.Protection)
+	assert.Equal(t, styleAlignmentXML(t, reapplied), alignmentStyleXML{
+		Horizontal: "center", Vertical: "center", WrapText: "true",
+	})
+	protection := styleProtectionXML(t, reapplied)
+	assertXMLBool(t, protection.Locked, false)
+	assertXMLBool(t, protection.Hidden, true)
+}
+
+func TestGetStyleInheritsCustomizedFontZeroWhenChildDoesNotApplyFont(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func([]byte) []byte {
+		data := []byte(namedStyleStylesXML)
+		oldFont := []byte(`<font><sz val="11"/><name val="Calibri"/></font>`)
+		newFont := []byte(`<font><b/><sz val="15"/><name val="InheritedZero"/></font>`)
+		require.Equal(t, 1, bytes.Count(data, oldFont))
+		data = bytes.Replace(data, oldFont, newFont, 1)
+		oldParent := []byte(`numFmtId="14" fontId="1"`)
+		require.Equal(t, 1, bytes.Count(data, oldParent))
+		data = bytes.Replace(data, oldParent, []byte(`numFmtId="14" fontId="0"`), 1)
+		oldChild := []byte(`<xf xfId="1"/>`)
+		require.Equal(t, 1, bytes.Count(data, oldChild))
+		return bytes.Replace(data, oldChild, []byte(`<xf xfId="1" applyFont="0"/>`), 1)
+	})
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	require.NotNil(t, got.Font, "fontId=0 on the parent XF remains effective when the child explicitly inherits it")
+	assert.True(t, got.Font.Bold)
+	assert.Equal(t, float64(15), got.Font.Size)
+	assert.Equal(t, "InheritedZero", got.Font.Family)
+
+	reapplied := workbookWithStyle(t, &got)
+	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	require.NotNil(t, reread.Font)
+	assert.True(t, reread.Font.Bold)
+	assert.Equal(t, float64(15), reread.Font.Size)
+	assert.Equal(t, "InheritedZero", reread.Font.Family)
+	assert.Contains(t, xlsxEntry(t, reapplied, "xl/styles.xml"), `name val="InheritedZero"`)
+}
+
+func TestGetStyleAppliesImplicitFontZeroWhenApplyFontIsTrue(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{NumFmt: 14})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/styles.xml", func([]byte) []byte {
+		data := []byte(namedStyleStylesXML)
+		oldFont := []byte(`<font><sz val="11"/><name val="Calibri"/></font>`)
+		newFont := []byte(`<font><b/><sz val="15"/><name val="ImplicitZero"/></font>`)
+		require.Equal(t, 1, bytes.Count(data, oldFont))
+		data = bytes.Replace(data, oldFont, newFont, 1)
+		oldChild := []byte(`<xf xfId="1"/>`)
+		require.Equal(t, 1, bytes.Count(data, oldChild))
+		return bytes.Replace(data, oldChild, []byte(`<xf xfId="1" applyFont="1"/>`), 1)
+	})
+	assert.Contains(t, xlsxEntry(t, buffer, "xl/styles.xml"), `<xf xfId="1" applyFont="1"/>`)
+
+	got := GetStyle(buffer, "Sheet1", 1, 1)
+	require.NotNil(t, got.Font, "applyFont=true with omitted fontId applies schema-default fontId=0")
+	assert.True(t, got.Font.Bold)
+	assert.Equal(t, float64(15), got.Font.Size)
+	assert.Equal(t, "ImplicitZero", got.Font.Family)
+
+	reapplied := workbookWithStyle(t, &got)
+	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	require.NotNil(t, reread.Font)
+	assert.True(t, reread.Font.Bold)
+	assert.Equal(t, float64(15), reread.Font.Size)
+	assert.Equal(t, "ImplicitZero", reread.Font.Family)
+	assert.Contains(t, xlsxEntry(t, reapplied, "xl/styles.xml"), `name val="ImplicitZero"`)
 }
 
 func TestGetStylePreservesLocalizedBuiltInNumberFormatID(t *testing.T) {

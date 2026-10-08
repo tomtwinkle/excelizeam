@@ -152,11 +152,16 @@ func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
 }
 
 func inheritedStylePresent(child, parent *int, apply *bool) bool {
-	if apply != nil {
-		return *apply
+	if apply != nil && *apply {
+		// fontId defaults to zero in CT_Xf, so apply=true with no explicit
+		// fontId still applies the default (possibly customized) font record.
+		return true
 	}
 	if parent != nil {
 		return true
+	}
+	if apply != nil { // apply=false with no base XF means no child style is active.
+		return false
 	}
 	return child != nil && *child != 0
 }
