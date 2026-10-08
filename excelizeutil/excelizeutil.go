@@ -7,11 +7,52 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+var fillPatterns = []string{
+	"none",
+	"solid",
+	"mediumGray",
+	"darkGray",
+	"lightGray",
+	"darkHorizontal",
+	"darkVertical",
+	"darkDown",
+	"darkUp",
+	"darkGrid",
+	"darkTrellis",
+	"lightHorizontal",
+	"lightVertical",
+	"lightDown",
+	"lightUp",
+	"lightGrid",
+	"lightTrellis",
+	"gray125",
+	"gray0625",
+}
+
+var borderStyles = []string{
+	"none",
+	"thin",
+	"medium",
+	"dashed",
+	"dotted",
+	"thick",
+	"double",
+	"hair",
+	"mediumDashed",
+	"dashDot",
+	"mediumDashDot",
+	"dashDotDot",
+	"mediumDashDotDot",
+	"slantDashDot",
+}
+
 func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) excelize.Style {
 	f, err := excelize.OpenReader(&excelBuffer)
 	if err != nil {
 		panic(err)
 	}
+	defer func() { _ = f.Close() }()
+
 	cell, err := excelize.CoordinatesToCellName(corIdx, rowIdx)
 	if err != nil {
 		panic(err)
@@ -20,89 +61,114 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) ex
 	if err != nil {
 		panic(err)
 	}
-	return excelize.Style{
-		Border:        getCellBorder(f, styleID),
-		Fill:          getCellFill(f, styleID),
-		Font:          nil,
-		Alignment:     getCellAlignment(f, styleID),
-		Protection:    nil,
-		NumFmt:        0,
-		DecimalPlaces: 0,
-		CustomNumFmt:  nil,
-		Lang:          "",
-		NegRed:        false,
-	}
-}
 
-type xlsxLine struct {
-	Style string     `xml:"style,attr,omitempty"`
-	Color *xlsxColor `xml:"color,omitempty"`
+	numFmt, customNumFmt := getCellNumberFormat(f, styleID)
+	return excelize.Style{
+		Border:       getCellBorder(f, styleID),
+		Fill:         getCellFill(f, styleID),
+		Font:         getCellFont(f, styleID),
+		Alignment:    getCellAlignment(f, styleID),
+		Protection:   getCellProtection(f, styleID),
+		NumFmt:       numFmt,
+		CustomNumFmt: customNumFmt,
+	}
 }
 
 func getCellBorder(f *excelize.File, styleID int) []excelize.Border {
 	borderID := f.Styles.CellXfs.Xf[styleID].BorderID
-	if borderID == nil {
+	if borderID == nil || *borderID < 0 || *borderID >= len(f.Styles.Borders.Border) {
 		return nil
 	}
 
-	getStyleID := func(style string) int {
-		var styles = []string{
-			"none",
-			"thin",
-			"medium",
-			"dashed",
-			"dotted",
-			"thick",
-			"double",
-			"hair",
-			"mediumDashed",
-			"dashDot",
-			"mediumDashDot",
-			"dashDotDot",
-			"mediumDashDotDot",
-			"slantDashDot",
+	definition := f.Styles.Borders.Border[*borderID]
+	borders := make([]excelize.Border, 0, 6)
+	appendBorder := func(side, style string, color *xlsxColor) {
+		if style == "" {
+			return
 		}
-		for i, v := range styles {
-			if v == style {
-				return i
-			}
+		border := excelize.Border{
+			Type:  side,
+			Style: borderStyleID(style),
 		}
-		return 0
-	}
-	getBorder := func(style string, color *xlsxColor) excelize.Border {
-		b := excelize.Border{
-			Type:  "top",
-			Style: getStyleID(style),
+		if colors := getCellFillColor(f, color); len(colors) > 0 {
+			border.Color = colors[0]
 		}
-		if color != nil {
-			b.Color = getCellFillColor(f, color)[0]
-		}
-		return b
+		borders = append(borders, border)
 	}
 
-	borders := make([]excelize.Border, 0, 4)
-
-	if topStyle := f.Styles.Borders.Border[*borderID].Top; topStyle.Style != "" {
-		borders = append(borders, getBorder(topStyle.Style, (*xlsxColor)(topStyle.Color)))
+	appendBorder("top", definition.Top.Style, (*xlsxColor)(definition.Top.Color))
+	appendBorder("bottom", definition.Bottom.Style, (*xlsxColor)(definition.Bottom.Color))
+	appendBorder("left", definition.Left.Style, (*xlsxColor)(definition.Left.Color))
+	appendBorder("right", definition.Right.Style, (*xlsxColor)(definition.Right.Color))
+	if definition.DiagonalUp {
+		appendBorder("diagonalUp", definition.Diagonal.Style, (*xlsxColor)(definition.Diagonal.Color))
 	}
-
+	if definition.DiagonalDown {
+		appendBorder("diagonalDown", definition.Diagonal.Style, (*xlsxColor)(definition.Diagonal.Color))
+	}
 	return borders
+}
+
+func borderStyleID(style string) int {
+	for i, candidate := range borderStyles {
+		if candidate == style {
+			return i
+		}
+	}
+	return 0
 }
 
 func getCellFill(f *excelize.File, styleID int) excelize.Fill {
 	fillID := f.Styles.CellXfs.Xf[styleID].FillID
-	if fillID == nil {
+	if fillID == nil || *fillID < 0 || *fillID >= len(f.Styles.Fills.Fill) {
 		return excelize.Fill{}
 	}
 	patternFill := *f.Styles.Fills.Fill[*fillID].PatternFill
 
-	fgColor := f.Styles.Fills.Fill[*fillID].PatternFill.FgColor
+	pattern := 0
+	for i, name := range fillPatterns {
+		if name == patternFill.PatternType {
+			pattern = i
+			break
+		}
+	}
 
 	return excelize.Fill{
-		Type:    patternFill.PatternType,
-		Pattern: 0,
-		Color:   getCellFillColor(f, (*xlsxColor)(fgColor)),
+		Type:    "pattern",
+		Pattern: pattern,
+		Color:   getCellFillColor(f, (*xlsxColor)(patternFill.FgColor)),
 	}
+}
+
+func getCellFont(f *excelize.File, styleID int) *excelize.Font {
+	fontID := f.Styles.CellXfs.Xf[styleID].FontID
+	if fontID == nil || *fontID <= 0 || *fontID >= len(f.Styles.Fonts.Font) {
+		return nil
+	}
+	font := f.Styles.Fonts.Font[*fontID]
+	result := &excelize.Font{}
+	if font.B != nil && font.B.Val != nil {
+		result.Bold = *font.B.Val
+	}
+	if font.I != nil && font.I.Val != nil {
+		result.Italic = *font.I.Val
+	}
+	if font.U != nil && font.U.Val != nil {
+		result.Underline = *font.U.Val
+	}
+	if font.Name != nil && font.Name.Val != nil {
+		result.Family = *font.Name.Val
+	}
+	if font.Sz != nil && font.Sz.Val != nil {
+		result.Size = *font.Sz.Val
+	}
+	if font.Strike != nil && font.Strike.Val != nil {
+		result.Strike = *font.Strike.Val
+	}
+	if colors := getCellFillColor(f, (*xlsxColor)(font.Color)); len(colors) > 0 {
+		result.Color = colors[0]
+	}
+	return result
 }
 
 func getCellAlignment(f *excelize.File, styleID int) *excelize.Alignment {
@@ -111,16 +177,51 @@ func getCellAlignment(f *excelize.File, styleID int) *excelize.Alignment {
 		return nil
 	}
 	return &excelize.Alignment{
-		Horizontal:      "",
-		Indent:          0,
-		JustifyLastLine: false,
-		ReadingOrder:    0,
-		RelativeIndent:  0,
-		ShrinkToFit:     false,
-		TextRotation:    0,
-		Vertical:        "",
+		Horizontal:      alignment.Horizontal,
+		Indent:          alignment.Indent,
+		JustifyLastLine: alignment.JustifyLastLine,
+		ReadingOrder:    alignment.ReadingOrder,
+		RelativeIndent:  alignment.RelativeIndent,
+		ShrinkToFit:     alignment.ShrinkToFit,
+		TextRotation:    alignment.TextRotation,
+		Vertical:        alignment.Vertical,
 		WrapText:        alignment.WrapText,
 	}
+}
+
+func getCellProtection(f *excelize.File, styleID int) *excelize.Protection {
+	protection := f.Styles.CellXfs.Xf[styleID].Protection
+	if protection == nil {
+		return nil
+	}
+	result := &excelize.Protection{Locked: true}
+	if protection.Locked != nil {
+		result.Locked = *protection.Locked
+	}
+	if protection.Hidden != nil {
+		result.Hidden = *protection.Hidden
+	}
+	return result
+}
+
+func getCellNumberFormat(f *excelize.File, styleID int) (int, *string) {
+	numFmtID := f.Styles.CellXfs.Xf[styleID].NumFmtID
+	if numFmtID == nil {
+		return 0, nil
+	}
+	if *numFmtID < 164 {
+		return *numFmtID, nil
+	}
+	if f.Styles.NumFmts == nil {
+		return 0, nil
+	}
+	for _, numFmt := range f.Styles.NumFmts.NumFmt {
+		if numFmt.NumFmtID == *numFmtID {
+			format := numFmt.FormatCode
+			return 0, &format
+		}
+	}
+	return 0, nil
 }
 
 type xlsxColor struct {
@@ -132,25 +233,44 @@ type xlsxColor struct {
 }
 
 func getCellFillColor(f *excelize.File, color *xlsxColor) []string {
-	if color != nil {
-		if color.Theme != nil {
-			children := f.Theme.ThemeElements.ClrScheme.Children
-			if *color.Theme < 4 {
-				dklt := map[int]string{
-					0: children[1].SysClr.LastClr,
-					1: children[0].SysClr.LastClr,
-					2: *children[3].SrgbClr.Val,
-					3: *children[2].SrgbClr.Val,
-				}
-				return []string{
-					strings.TrimPrefix(
-						excelize.ThemeColor(dklt[*color.Theme], color.Tint), "FF"),
-				}
-			}
-			srgbClr := *children[*color.Theme].SrgbClr.Val
-			return []string{strings.TrimPrefix(excelize.ThemeColor(srgbClr, color.Tint), "FF")}
-		}
-		return []string{strings.TrimPrefix(color.RGB, "FF")}
+	if color == nil {
+		return nil
 	}
-	return nil
+
+	rgb := color.RGB
+	if color.Theme != nil {
+		if f.Theme == nil {
+			return nil
+		}
+		children := f.Theme.ThemeElements.ClrScheme.Children
+		index := *color.Theme
+		if index < 0 || index >= len(children) {
+			return nil
+		}
+		if index < 4 {
+			// Theme slots are lt1/dk1/lt2/dk2, while XML stores dk1/lt1/dk2/lt2.
+			index = []int{1, 0, 3, 2}[index]
+		}
+		child := children[index]
+		switch {
+		case child.SysClr != nil:
+			rgb = child.SysClr.LastClr
+		case child.SrgbClr != nil && child.SrgbClr.Val != nil:
+			rgb = *child.SrgbClr.Val
+		default:
+			return nil
+		}
+	}
+
+	rgb = strings.TrimPrefix(strings.ToUpper(rgb), "#")
+	if len(rgb) == 8 {
+		rgb = rgb[2:]
+	}
+	if len(rgb) != 6 {
+		return nil
+	}
+	if color.Theme != nil && color.Tint != 0 {
+		rgb = strings.TrimPrefix(excelize.ThemeColor(rgb, color.Tint), "FF")
+	}
+	return []string{"#" + rgb}
 }
