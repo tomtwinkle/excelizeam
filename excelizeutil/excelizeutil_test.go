@@ -30,6 +30,47 @@ func workbookWithStyle(t *testing.T, style *excelize.Style) bytes.Buffer {
 	return *buffer
 }
 
+func mustGetStyle(t *testing.T, buffer bytes.Buffer, sheetName string, corIdx, rowIdx int) excelize.Style {
+	t.Helper()
+	style, err := GetStyle(buffer, sheetName, corIdx, rowIdx)
+	require.NoError(t, err)
+	return style
+}
+
+func TestGetStyleReturnsOpenReaderError(t *testing.T) {
+	_, err := GetStyle(bytes.Buffer{}, "Sheet1", 1, 1)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "open workbook")
+}
+
+func TestGetStyleReturnsCoordinateError(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{})
+	for _, coordinates := range [][2]int{{0, 1}, {1, 0}} {
+		_, err := GetStyle(buffer, "Sheet1", coordinates[0], coordinates[1])
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "convert cell coordinates")
+	}
+}
+
+func TestGetStyleReturnsGetCellStyleError(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{})
+	_, err := GetStyle(buffer, "Missing", 1, 1)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "get cell style")
+}
+
+func TestGetStyleReturnsInvalidCellStyleIDError(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{Font: &excelize.Font{Bold: true}})
+	buffer = rewriteXLSXEntry(t, buffer, "xl/worksheets/sheet1.xml", func(data []byte) []byte {
+		old := []byte(`s="1"`)
+		require.Contains(t, string(data), string(old))
+		return bytes.Replace(data, old, []byte(`s="999"`), 1)
+	})
+
+	_, err := GetStyle(buffer, "Sheet1", 1, 1)
+	require.Error(t, err)
+}
+
 func TestGetStylePreservesPatternFill(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -49,7 +90,7 @@ func TestGetStylePreservesPatternFill(t *testing.T) {
 				},
 			})
 
-			got := GetStyle(buffer, "Sheet1", 1, 1).Fill
+			got := mustGetStyle(t, buffer, "Sheet1", 1, 1).Fill
 			assert.Equal(t, "pattern", got.Type)
 			assert.Equal(t, test.pattern, got.Pattern)
 			assert.Equal(t, []string{"#315D3C"}, got.Color)
@@ -122,10 +163,10 @@ func TestGetStylePreservesFullStyle(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			buffer := workbookWithStyle(t, test.style)
-			got := GetStyle(buffer, "Sheet1", 1, 1)
+			got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 			test.check(t, got)
 			reapplied := workbookWithStyle(t, &got)
-			test.check(t, GetStyle(reapplied, "Sheet1", 1, 1))
+			test.check(t, mustGetStyle(t, reapplied, "Sheet1", 1, 1))
 		})
 	}
 }
@@ -139,7 +180,7 @@ func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
 		return bytes.Replace(data, oldChild, []byte(`<xf xfId="1" applyAlignment="0" applyProtection="0"/>`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.Equal(t, 14, got.NumFmt)
 	wantFont := &excelize.Font{
 		Bold: true, Italic: true, Underline: "single", Family: "Aptos",
@@ -157,7 +198,7 @@ func TestGetStyleInheritsNamedStyleXF(t *testing.T) {
 	assert.Equal(t, &excelize.Protection{Locked: false, Hidden: true}, got.Protection)
 
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	assert.Equal(t, got.Alignment, reread.Alignment)
 	assert.Equal(t, got.Protection, reread.Protection)
 	assert.Equal(t, styleAlignmentXML(t, reapplied), alignmentStyleXML{
@@ -184,14 +225,14 @@ func TestGetStyleInheritsCustomizedFontZeroWhenChildDoesNotApplyFont(t *testing.
 		return bytes.Replace(data, oldChild, []byte(`<xf xfId="1" applyFont="0"/>`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font, "fontId=0 on the parent XF remains effective when the child explicitly inherits it")
 	assert.True(t, got.Font.Bold)
 	assert.Equal(t, float64(15), got.Font.Size)
 	assert.Equal(t, "InheritedZero", got.Font.Family)
 
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	require.NotNil(t, reread.Font)
 	assert.True(t, reread.Font.Bold)
 	assert.Equal(t, float64(15), reread.Font.Size)
@@ -213,14 +254,14 @@ func TestGetStyleAppliesImplicitFontZeroWhenApplyFontIsTrue(t *testing.T) {
 	})
 	assert.Contains(t, xlsxEntry(t, buffer, "xl/styles.xml"), `<xf xfId="1" applyFont="1"/>`)
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font, "applyFont=true with omitted fontId applies schema-default fontId=0")
 	assert.True(t, got.Font.Bold)
 	assert.Equal(t, float64(15), got.Font.Size)
 	assert.Equal(t, "ImplicitZero", got.Font.Family)
 
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	require.NotNil(t, reread.Font)
 	assert.True(t, reread.Font.Bold)
 	assert.Equal(t, float64(15), reread.Font.Size)
@@ -236,7 +277,7 @@ func TestGetStylePreservesLocalizedBuiltInNumberFormatID(t *testing.T) {
 		return bytes.Replace(data, old, []byte(`<xf numFmtId="27"`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	assert.Equal(t, 27, got.NumFmt)
 	assert.Nil(t, got.CustomNumFmt)
 }
@@ -248,7 +289,7 @@ func TestGetStylePreservesLocalizedBuiltInNumberFormatCode(t *testing.T) {
 		return bytes.Replace(data, []byte("<fonts"), []byte(`<numFmts count="1"><numFmt numFmtId="14" formatCode="`+code+`"/></numFmts><fonts`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.CustomNumFmt)
 	assert.Equal(t, `[$-ja-JP]yyyy"年"m"月"d"日"`, *got.CustomNumFmt)
 	assert.Zero(t, got.NumFmt)
@@ -262,7 +303,7 @@ func TestGetStylePrefersLocalizedNumberFormatCode16(t *testing.T) {
 		return bytes.Replace(data, []byte("<fonts"), []byte(`<numFmts count="1"><numFmt numFmtId="14" formatCode="yyyy-mm-dd" x16test:formatCode16="`+local+`"/></numFmts><fonts`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.CustomNumFmt)
 	assert.Equal(t, `[$-ja-JP-x-gannen,80]ggge"年"m"月"d"日"`, *got.CustomNumFmt)
 	assert.Zero(t, got.NumFmt)
@@ -280,7 +321,7 @@ func TestGetStyleResolvesIndexedOOXMLColor(t *testing.T) {
 		return bytes.Replace(data, []byte("</styleSheet>"), append(colors, []byte("</styleSheet>")...), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1).Fill.Color
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1).Fill.Color
 	assert.Equal(t, []string{"#BEAD10"}, got)
 }
 
@@ -294,7 +335,7 @@ func TestGetStyleResolvesDefaultIndexedOOXMLColor(t *testing.T) {
 		return bytes.Replace(data, old, []byte(`indexed="5"`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1).Fill.Color
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1).Fill.Color
 	assert.Equal(t, []string{"#FFFF00"}, got)
 }
 
@@ -306,7 +347,7 @@ func TestGetStyleDefaultsOmittedUnderlineValueToSingle(t *testing.T) {
 		return bytes.Replace(data, old, nil, 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1).Font
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1).Font
 	require.NotNil(t, got)
 	assert.Equal(t, "single", got.Underline)
 }
@@ -322,10 +363,10 @@ func TestGetStylePreservesAllBorderSides(t *testing.T) {
 	}
 	buffer := workbookWithStyle(t, &excelize.Style{Border: want})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1).Border
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1).Border
 	assert.ElementsMatch(t, want, got)
 	reapplied := workbookWithStyle(t, &excelize.Style{Border: got})
-	assert.ElementsMatch(t, want, GetStyle(reapplied, "Sheet1", 1, 1).Border)
+	assert.ElementsMatch(t, want, mustGetStyle(t, reapplied, "Sheet1", 1, 1).Border)
 }
 
 func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
@@ -373,10 +414,7 @@ func TestGetStyleResolvesThemeColorChoiceKinds(t *testing.T) {
 				return data
 			})
 
-			var got excelize.Style
-			if !assert.NotPanics(t, func() { got = GetStyle(buffer, "Sheet1", 1, 1) }) {
-				return
-			}
+			got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 			require.Len(t, got.Fill.Color, 1)
 			assert.Equal(t, test.want, got.Fill.Color[0])
 		})
@@ -401,7 +439,7 @@ func TestGetStyleClosesLargeWorkbookTemporaryFiles(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, f.Close())
 
-	_ = GetStyle(*buffer, sheet, 1, 1)
+	_ = mustGetStyle(t, *buffer, sheet, 1, 1)
 
 	entries, err := os.ReadDir(tempDir)
 	require.NoError(t, err)

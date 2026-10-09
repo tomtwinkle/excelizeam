@@ -42,13 +42,13 @@ func TestGetStyleRoundTripsAllGradientPresets(t *testing.T) {
 		t.Run(fmt.Sprintf("shading-%d", shading), func(t *testing.T) {
 			style := &excelize.Style{Fill: excelize.Fill{Type: "gradient", Shading: shading, Color: []string{"#123456", "#ABCDEF"}}}
 			original := workbookWithStyle(t, style)
-			got := GetStyle(original, "Sheet1", 1, 1)
+			got := mustGetStyle(t, original, "Sheet1", 1, 1)
 			require.Equal(t, "gradient", got.Fill.Type)
 			require.Equal(t, shading, got.Fill.Shading)
 			require.Equal(t, []string{"#123456", "#ABCDEF"}, got.Fill.Color)
 
 			reapplied := workbookWithStyle(t, &got)
-			reread := GetStyle(reapplied, "Sheet1", 1, 1)
+			reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 			assert.Equal(t, got.Fill, reread.Fill)
 			assert.Equal(t, styleGradientXML(t, original), styleGradientXML(t, reapplied), "the saved OOXML gradient geometry and stops must survive reapplication")
 		})
@@ -85,13 +85,13 @@ func TestGetStyleRoundTripsEveryPublicFontField(t *testing.T) {
 			require.True(t, setPublicField(font, test.field, test.value), "field %s must exist", test.field)
 			style := &excelize.Style{Font: font}
 			original := workbookWithStyle(t, style)
-			got := GetStyle(original, "Sheet1", 1, 1)
+			got := mustGetStyle(t, original, "Sheet1", 1, 1)
 			require.NotNil(t, got.Font)
 			gotValue := publicFieldValue(got.Font, test.field)
 			assert.Equal(t, test.want, gotValue)
 
 			reapplied := workbookWithStyle(t, &got)
-			reread := GetStyle(reapplied, "Sheet1", 1, 1)
+			reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 			require.NotNil(t, reread.Font)
 			rereadValue := publicFieldValue(reread.Font, test.field)
 			assert.Equal(t, test.want, rereadValue)
@@ -113,7 +113,7 @@ func TestGetStyleRoundTripsEveryAlignmentFieldInXML(t *testing.T) {
 		WrapText:        true,
 	}
 	original := workbookWithStyle(t, &excelize.Style{Alignment: alignment})
-	got := GetStyle(original, "Sheet1", 1, 1)
+	got := mustGetStyle(t, original, "Sheet1", 1, 1)
 	assert.Equal(t, alignment, got.Alignment)
 	assert.Equal(t, alignmentStyleXML{
 		Horizontal: "center", Indent: "2", JustifyLastLine: "true", ReadingOrder: "1",
@@ -121,7 +121,7 @@ func TestGetStyleRoundTripsEveryAlignmentFieldInXML(t *testing.T) {
 	}, styleAlignmentXML(t, original))
 
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	assert.Equal(t, alignment, reread.Alignment)
 	assert.Equal(t, styleAlignmentXML(t, original), styleAlignmentXML(t, reapplied), "all nine alignment attributes must survive in saved OOXML")
 }
@@ -134,10 +134,10 @@ func TestGetStylePreservesProtectionDefaultAndExplicitRelease(t *testing.T) {
 		})
 		assertProtectionAttrsOmitted(t, styleProtectionXML(t, buffer))
 
-		got := GetStyle(buffer, "Sheet1", 1, 1)
+		got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 		assert.Equal(t, &excelize.Protection{Locked: true, Hidden: false}, got.Protection)
 		reapplied := workbookWithStyle(t, &got)
-		reread := GetStyle(reapplied, "Sheet1", 1, 1)
+		reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 		assert.Equal(t, got.Protection, reread.Protection)
 		attrs := styleProtectionXML(t, reapplied)
 		assertXMLBool(t, attrs.Locked, true)
@@ -147,13 +147,13 @@ func TestGetStylePreservesProtectionDefaultAndExplicitRelease(t *testing.T) {
 	t.Run("explicit unlock survives", func(t *testing.T) {
 		protection := &excelize.Protection{Hidden: true, Locked: false}
 		original := workbookWithStyle(t, &excelize.Style{Protection: protection})
-		got := GetStyle(original, "Sheet1", 1, 1)
+		got := mustGetStyle(t, original, "Sheet1", 1, 1)
 		assert.Equal(t, protection, got.Protection)
 		assertXMLBool(t, styleProtectionXML(t, original).Locked, false)
 		assertXMLBool(t, styleProtectionXML(t, original).Hidden, true)
 
 		reapplied := workbookWithStyle(t, &got)
-		reread := GetStyle(reapplied, "Sheet1", 1, 1)
+		reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 		assert.Equal(t, protection, reread.Protection)
 		assertXMLBool(t, styleProtectionXML(t, reapplied).Locked, false)
 		assertXMLBool(t, styleProtectionXML(t, reapplied).Hidden, true)
@@ -170,7 +170,7 @@ func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T
 	require.True(t, setPublicField(themeFont, "ColorTheme", themeIndex))
 	require.True(t, setPublicField(themeFont, "ColorTint", float64(0.25)))
 	source := workbookWithStyle(t, &excelize.Style{Font: themeFont})
-	got := GetStyle(source, "Sheet1", 1, 1)
+	got := mustGetStyle(t, source, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font)
 	assert.Equal(t, themeIndex, publicFieldValue(got.Font, "ColorTheme"))
 	assert.Equal(t, float64(0.25), publicFieldValue(got.Font, "ColorTint"))
@@ -188,7 +188,7 @@ func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T
 	require.NotNil(t, themeColor.Theme)
 	assert.Equal(t, themeIndex, *themeColor.Theme)
 	assert.Equal(t, 0.25, themeColor.Tint)
-	assert.Equal(t, got.Font.Color, GetStyle(sameTheme, "Sheet1", 1, 1).Font.Color)
+	assert.Equal(t, got.Font.Color, mustGetStyle(t, sameTheme, "Sheet1", 1, 1).Font.Color)
 	assert.NotEmpty(t, wantThemeRGB, "resolved appearance color is computed separately from selector identity")
 
 	// A caller can choose appearance-only preservation by applying the resolved
@@ -197,7 +197,7 @@ func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T
 	require.True(t, setPublicField(&rgbFont, "ColorIndexed", -1))
 	rgbOnly := &excelize.Style{Font: &rgbFont}
 	rgbWorkbook := workbookWithStyle(t, rgbOnly)
-	rgbReread := GetStyle(rgbWorkbook, "Sheet1", 1, 1)
+	rgbReread := mustGetStyle(t, rgbWorkbook, "Sheet1", 1, 1)
 	assert.Equal(t, wantThemeRGB, rgbReread.Font.Color)
 	rgbColor := styleFontColors(t, rgbWorkbook)[1]
 	assert.Equal(t, "FF"+strings.TrimPrefix(wantThemeRGB, "#"), rgbColor.RGB)
@@ -208,7 +208,7 @@ func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T
 	require.True(t, setPublicField(indexedFont, "ColorIndexed", 7))
 	require.True(t, setPublicField(indexedFont, "ColorTint", float64(0.25)))
 	indexedSource := workbookWithStyle(t, &excelize.Style{Font: indexedFont})
-	indexed := GetStyle(indexedSource, "Sheet1", 1, 1)
+	indexed := mustGetStyle(t, indexedSource, "Sheet1", 1, 1)
 	require.NotNil(t, indexed.Font)
 	assert.Equal(t, 7, publicFieldValue(indexed.Font, "ColorIndexed"))
 	assert.Equal(t, float64(0.25), publicFieldValue(indexed.Font, "ColorTint"))
@@ -220,7 +220,7 @@ func TestGetStylePreservesFontColorIdentityAndResolvedRGBSeparately(t *testing.T
 	assert.Equal(t, 7, *indexedColor.Indexed)
 	assert.Nil(t, indexedColor.Theme)
 	assert.Equal(t, 0.25, indexedColor.Tint)
-	assert.Equal(t, indexed.Font.Color, GetStyle(indexedTarget, "Sheet1", 1, 1).Font.Color)
+	assert.Equal(t, indexed.Font.Color, mustGetStyle(t, indexedTarget, "Sheet1", 1, 1).Font.Color)
 	wantIndexedRGB := normalizeRGB(excelize.ThemeColor("00FFFF", 0.25))
 	assert.Equal(t, []string{wantIndexedRGB}, resolvedFontColor(t, indexedSource, 1))
 	assert.Equal(t, []string{wantIndexedRGB}, resolvedFontColor(t, indexedTarget, 1), "the indexed palette appearance remains the same after selector round-trip")
@@ -234,7 +234,7 @@ func TestGetStylePreservesRGBBaseAndFontTintOnReapply(t *testing.T) {
 	require.True(t, setPublicField(font, "ColorIndexed", -1))
 	require.True(t, setPublicField(font, "ColorTint", float64(0.25)))
 	original := workbookWithStyle(t, &excelize.Style{Font: font})
-	got := GetStyle(original, "Sheet1", 1, 1)
+	got := mustGetStyle(t, original, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font)
 	assert.Equal(t, "#123456", got.Font.Color)
 	assert.Equal(t, -1, publicFieldValue(got.Font, "ColorIndexed"))
@@ -256,7 +256,7 @@ func TestGetStyleDoesNotTurnAutomaticFontColorIntoIndexedBlack(t *testing.T) {
 		return bytes.Replace(data, old, []byte(`auto="1"`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font)
 	assert.Empty(t, got.Font.Color)
 	if hasPublicField(reflect.TypeOf(excelize.Font{}), "ColorIndexed") {
@@ -266,7 +266,7 @@ func TestGetStyleDoesNotTurnAutomaticFontColorIntoIndexedBlack(t *testing.T) {
 	reapplied := workbookWithStyle(t, &got)
 	assert.NotContains(t, xlsxEntry(t, reapplied, "xl/styles.xml"), `indexed="0"`, "the API cannot represent automatic color, but must not silently turn it black")
 	if hasPublicField(reflect.TypeOf(excelize.Font{}), "ColorIndexed") {
-		assert.Equal(t, -1, publicFieldValue(GetStyle(reapplied, "Sheet1", 1, 1).Font, "ColorIndexed"))
+		assert.Equal(t, -1, publicFieldValue(mustGetStyle(t, reapplied, "Sheet1", 1, 1).Font, "ColorIndexed"))
 	}
 }
 
@@ -286,7 +286,7 @@ func TestGetStylePreservesExplicitDefaultFontAndEmptyBooleanValues(t *testing.T)
 		return bytes.Replace(data, oldXF, []byte(`fontId="0" applyFont="1"`), 1)
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	require.NotNil(t, got.Font, "an explicitly applied fontId=0 is a real style, not an absent font")
 	assert.True(t, got.Font.Bold, "an empty <b/> means true")
 	assert.True(t, got.Font.Italic, "an empty <i/> means true")
@@ -301,10 +301,9 @@ func TestGetStyleHandlesSparseBorderXML(t *testing.T) {
 		data = bytes.Replace(data, []byte(`<right/><top/><bottom/><diagonal/>`), nil, 1)
 		return data
 	})
-	var got excelize.Style
-	require.NotPanics(t, func() { got = GetStyle(buffer, "Sheet1", 1, 1) })
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	assert.Equal(t, []excelize.Border{{Type: "top", Style: 1, Color: "#112233"}}, got.Border)
-	assert.Equal(t, got.Border, GetStyle(workbookWithStyle(t, &got), "Sheet1", 1, 1).Border)
+	assert.Equal(t, got.Border, mustGetStyle(t, workbookWithStyle(t, &got), "Sheet1", 1, 1).Border)
 }
 
 func TestGetStyleUsesForegroundColorWhenPatternHasBothColors(t *testing.T) {
@@ -319,10 +318,10 @@ func TestGetStyleUsesForegroundColorWhenPatternHasBothColors(t *testing.T) {
 		return data
 	})
 
-	got := GetStyle(buffer, "Sheet1", 1, 1)
+	got := mustGetStyle(t, buffer, "Sheet1", 1, 1)
 	assert.Equal(t, []string{"#123456"}, got.Fill.Color)
 	reapplied := workbookWithStyle(t, &got)
-	assert.Equal(t, []string{"#123456"}, GetStyle(reapplied, "Sheet1", 1, 1).Fill.Color)
+	assert.Equal(t, []string{"#123456"}, mustGetStyle(t, reapplied, "Sheet1", 1, 1).Fill.Color)
 	assert.NotContains(t, xlsxEntry(t, reapplied, "xl/styles.xml"), `FFABCDEF`, "Style.Fill has only one color and cannot encode both pattern colors")
 }
 
@@ -330,21 +329,21 @@ func TestGetStyleRoundTripsEveryPatternIDAndBorderStyle(t *testing.T) {
 	for pattern := 0; pattern <= 18; pattern++ {
 		t.Run(fmt.Sprintf("pattern-%d", pattern), func(t *testing.T) {
 			style := &excelize.Style{Fill: excelize.Fill{Type: "pattern", Pattern: pattern, Color: []string{"#315D3C"}}}
-			got := GetStyle(workbookWithStyle(t, style), "Sheet1", 1, 1)
+			got := mustGetStyle(t, workbookWithStyle(t, style), "Sheet1", 1, 1)
 			require.Equal(t, "pattern", got.Fill.Type)
 			assert.Equal(t, pattern, got.Fill.Pattern)
 			assert.Equal(t, []string{"#315D3C"}, got.Fill.Color)
 			reapplied := workbookWithStyle(t, &got)
-			assert.Equal(t, got.Fill, GetStyle(reapplied, "Sheet1", 1, 1).Fill)
+			assert.Equal(t, got.Fill, mustGetStyle(t, reapplied, "Sheet1", 1, 1).Fill)
 		})
 	}
 	for borderStyle := 0; borderStyle <= 13; borderStyle++ {
 		t.Run(fmt.Sprintf("border-style-%d", borderStyle), func(t *testing.T) {
 			style := &excelize.Style{Border: []excelize.Border{{Type: "top", Style: borderStyle, Color: "#112233"}}}
-			got := GetStyle(workbookWithStyle(t, style), "Sheet1", 1, 1)
+			got := mustGetStyle(t, workbookWithStyle(t, style), "Sheet1", 1, 1)
 			require.Equal(t, style.Border, got.Border)
 			reapplied := workbookWithStyle(t, &got)
-			assert.Equal(t, got.Border, GetStyle(reapplied, "Sheet1", 1, 1).Border)
+			assert.Equal(t, got.Border, mustGetStyle(t, reapplied, "Sheet1", 1, 1).Border)
 		})
 	}
 }
@@ -361,11 +360,11 @@ func TestGetStylePreservesNumberFormatIntentWithoutGuessingFormatTokens(t *testi
 	style := &excelize.Style{NumFmt: 164, CustomNumFmt: &code, NegRed: true}
 	require.True(t, setPublicField(style, "DecimalPlaces", 3))
 	original := workbookWithStyle(t, style)
-	got := GetStyle(original, "Sheet1", 1, 1)
+	got := mustGetStyle(t, original, "Sheet1", 1, 1)
 	require.NotNil(t, got.CustomNumFmt)
 	assert.Equal(t, code, *got.CustomNumFmt)
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	require.NotNil(t, reread.CustomNumFmt)
 	assert.Equal(t, code, *reread.CustomNumFmt)
 	assert.Contains(t, customNumberFormats(t, reapplied), code)
@@ -378,13 +377,13 @@ func TestGetStyleMapsBuiltInDecimalPlacesField(t *testing.T) {
 	}
 	style := &excelize.Style{NumFmt: 44}
 	original := workbookWithStyle(t, style)
-	got := GetStyle(original, "Sheet1", 1, 1)
+	got := mustGetStyle(t, original, "Sheet1", 1, 1)
 	assert.Equal(t, 44, got.NumFmt)
 	assert.Equal(t, 2, publicFieldValue(&got, "DecimalPlaces"))
 	assert.Nil(t, got.CustomNumFmt)
 
 	reapplied := workbookWithStyle(t, &got)
-	reread := GetStyle(reapplied, "Sheet1", 1, 1)
+	reread := mustGetStyle(t, reapplied, "Sheet1", 1, 1)
 	assert.Equal(t, 44, reread.NumFmt)
 	assert.Equal(t, 2, publicFieldValue(&reread, "DecimalPlaces"))
 }

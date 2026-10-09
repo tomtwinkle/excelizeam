@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"reflect"
 	"strings"
@@ -50,24 +51,29 @@ var borderStyles = []string{
 	"slantDashDot",
 }
 
-func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) excelize.Style {
+// GetStyle returns the effective style for a cell in an XLSX workbook.
+// It returns an error when the workbook, coordinates, sheet, or cell style is invalid.
+func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) (excelize.Style, error) {
 	themeColors, numberFormats, indexedColors := readStyleMetadata(excelBuffer)
 	f, err := excelize.OpenReader(&excelBuffer)
 	if err != nil {
-		panic(err)
+		return excelize.Style{}, fmt.Errorf("open workbook: %w", err)
 	}
 	defer func() { _ = f.Close() }()
 
 	cell, err := excelize.CoordinatesToCellName(corIdx, rowIdx)
 	if err != nil {
-		panic(err)
+		return excelize.Style{}, fmt.Errorf("convert cell coordinates: %w", err)
 	}
 	styleID, err := f.GetCellStyle(sheetName, cell)
 	if err != nil {
-		panic(err)
+		return excelize.Style{}, fmt.Errorf("get cell style: %w", err)
 	}
 
-	format := resolveCellFormat(f, styleID)
+	format, err := resolveCellFormat(f, styleID)
+	if err != nil {
+		return excelize.Style{}, fmt.Errorf("resolve cell style: %w", err)
+	}
 	numFmt, customNumFmt := getCellNumberFormat(format.NumFmtID, numberFormats)
 	style := excelize.Style{
 		Border:       getCellBorder(f, format.BorderID, themeColors, indexedColors),
@@ -79,7 +85,7 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) ex
 		CustomNumFmt: customNumFmt,
 	}
 	applyNativeNumberFormatMetadata(&style, f, styleID, format, customNumFmt)
-	return style
+	return style, nil
 }
 
 type resolvedCellFormat struct {
@@ -92,7 +98,10 @@ type resolvedCellFormat struct {
 	Protection *excelize.Protection
 }
 
-func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
+func resolveCellFormat(f *excelize.File, styleID int) (resolvedCellFormat, error) {
+	if f.Styles == nil || f.Styles.CellXfs == nil || styleID < 0 || styleID >= len(f.Styles.CellXfs.Xf) {
+		return resolvedCellFormat{}, fmt.Errorf("invalid cell style ID %d", styleID)
+	}
 	cellXF := f.Styles.CellXfs.Xf[styleID]
 	resolved := resolvedCellFormat{
 		FontID:   integerValue(cellXF.FontID),
@@ -148,7 +157,7 @@ func resolveCellFormat(f *excelize.File, styleID int) resolvedCellFormat {
 			resolved.Protection.Hidden = *protection.Hidden
 		}
 	}
-	return resolved
+	return resolved, nil
 }
 
 func inheritedStylePresent(child, parent *int, apply *bool) bool {
