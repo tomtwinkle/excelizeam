@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -51,6 +52,8 @@ var borderStyles = []string{
 	"slantDashDot",
 }
 
+var errInvalidStyleReference = errors.New("invalid style reference")
+
 // GetStyle returns the effective style for a cell in an XLSX workbook.
 // It returns an error when the workbook, coordinates, sheet, or cell style is invalid.
 func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) (excelize.Style, error) {
@@ -72,6 +75,9 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) (e
 
 	format, err := resolveCellFormat(f, styleID)
 	if err != nil {
+		return excelize.Style{}, fmt.Errorf("resolve cell style: %w", err)
+	}
+	if err := validateCellStyleReferences(f, format, numberFormats); err != nil {
 		return excelize.Style{}, fmt.Errorf("resolve cell style: %w", err)
 	}
 	numFmt, customNumFmt := getCellNumberFormat(format.NumFmtID, numberFormats)
@@ -100,7 +106,7 @@ type resolvedCellFormat struct {
 
 func resolveCellFormat(f *excelize.File, styleID int) (resolvedCellFormat, error) {
 	if f.Styles == nil || f.Styles.CellXfs == nil || styleID < 0 || styleID >= len(f.Styles.CellXfs.Xf) {
-		return resolvedCellFormat{}, fmt.Errorf("invalid cell style ID %d", styleID)
+		return resolvedCellFormat{}, fmt.Errorf("%w: cell style ID %d is out of range", errInvalidStyleReference, styleID)
 	}
 	cellXF := f.Styles.CellXfs.Xf[styleID]
 	resolved := resolvedCellFormat{
@@ -112,7 +118,10 @@ func resolveCellFormat(f *excelize.File, styleID int) (resolvedCellFormat, error
 	}
 	alignment := cellXF.Alignment
 	protection := cellXF.Protection
-	if cellXF.XfID != nil && f.Styles.CellStyleXfs != nil && *cellXF.XfID >= 0 && *cellXF.XfID < len(f.Styles.CellStyleXfs.Xf) {
+	if cellXF.XfID != nil {
+		if f.Styles.CellStyleXfs == nil || *cellXF.XfID < 0 || *cellXF.XfID >= len(f.Styles.CellStyleXfs.Xf) {
+			return resolvedCellFormat{}, fmt.Errorf("%w: xfId=%d references cellStyleXfs with %d entries", errInvalidStyleReference, *cellXF.XfID, cellStyleXFCount(f))
+		}
 		baseXF := f.Styles.CellStyleXfs.Xf[*cellXF.XfID]
 		resolved.FontID = inheritedStyleID(cellXF.FontID, baseXF.FontID, cellXF.ApplyFont)
 		resolved.HasFont = inheritedStylePresent(cellXF.FontID, baseXF.FontID, cellXF.ApplyFont)
@@ -158,6 +167,74 @@ func resolveCellFormat(f *excelize.File, styleID int) (resolvedCellFormat, error
 		}
 	}
 	return resolved, nil
+}
+
+func cellStyleXFCount(f *excelize.File) int {
+	if f == nil || f.Styles == nil || f.Styles.CellStyleXfs == nil {
+		return 0
+	}
+	return len(f.Styles.CellStyleXfs.Xf)
+}
+
+func validateCellStyleReferences(f *excelize.File, format resolvedCellFormat, numberFormats map[int]string) error {
+	styles := f.Styles
+	if format.HasFont {
+		if err := validateStyleCollectionReference("fontId", format.FontID, fontCount(f)); err != nil {
+			return err
+		}
+		if styles.Fonts.Font[format.FontID] == nil {
+			return fmt.Errorf("%w: fontId=%d references an empty font entry", errInvalidStyleReference, format.FontID)
+		}
+	}
+	if err := validateStyleCollectionReference("fillId", format.FillID, fillCount(f)); err != nil {
+		return err
+	}
+	if styles.Fills.Fill[format.FillID] == nil {
+		return fmt.Errorf("%w: fillId=%d references an empty fill entry", errInvalidStyleReference, format.FillID)
+	}
+	if err := validateStyleCollectionReference("borderId", format.BorderID, borderCount(f)); err != nil {
+		return err
+	}
+	if styles.Borders.Border[format.BorderID] == nil {
+		return fmt.Errorf("%w: borderId=%d references an empty border entry", errInvalidStyleReference, format.BorderID)
+	}
+	if format.NumFmtID < 0 {
+		return fmt.Errorf("%w: numFmtId=%d is negative", errInvalidStyleReference, format.NumFmtID)
+	}
+	if format.NumFmtID >= 164 {
+		if _, ok := numberFormats[format.NumFmtID]; !ok {
+			return fmt.Errorf("%w: numFmtId=%d has no custom number format definition", errInvalidStyleReference, format.NumFmtID)
+		}
+	}
+	return nil
+}
+
+func validateStyleCollectionReference(name string, id, length int) error {
+	if id < 0 || id >= length {
+		return fmt.Errorf("%w: %s=%d is out of range for a collection with %d entries", errInvalidStyleReference, name, id, length)
+	}
+	return nil
+}
+
+func fontCount(f *excelize.File) int {
+	if f == nil || f.Styles == nil || f.Styles.Fonts == nil {
+		return 0
+	}
+	return len(f.Styles.Fonts.Font)
+}
+
+func fillCount(f *excelize.File) int {
+	if f == nil || f.Styles == nil || f.Styles.Fills == nil {
+		return 0
+	}
+	return len(f.Styles.Fills.Fill)
+}
+
+func borderCount(f *excelize.File) int {
+	if f == nil || f.Styles == nil || f.Styles.Borders == nil {
+		return 0
+	}
+	return len(f.Styles.Borders.Border)
 }
 
 func inheritedStylePresent(child, parent *int, apply *bool) bool {

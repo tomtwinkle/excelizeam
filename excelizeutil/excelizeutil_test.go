@@ -3,6 +3,7 @@ package excelizeutil
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -43,6 +44,16 @@ func TestGetStyleReturnsOpenReaderError(t *testing.T) {
 	assert.Contains(t, err.Error(), "open workbook")
 }
 
+func TestGetStyleReturnsTruncatedWorkbookError(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{})
+	truncated := append([]byte(nil), buffer.Bytes()[:buffer.Len()-22]...)
+
+	_, err := GetStyle(*bytes.NewBuffer(truncated), "Sheet1", 1, 1)
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, zip.ErrFormat), "GetStyle should preserve the ZIP format error")
+	assert.Contains(t, err.Error(), "open workbook")
+}
+
 func TestGetStyleReturnsCoordinateError(t *testing.T) {
 	buffer := workbookWithStyle(t, &excelize.Style{})
 	for _, coordinates := range [][2]int{{0, 1}, {1, 0}} {
@@ -68,7 +79,40 @@ func TestGetStyleReturnsInvalidCellStyleIDError(t *testing.T) {
 	})
 
 	_, err := GetStyle(buffer, "Sheet1", 1, 1)
-	require.Error(t, err)
+	require.ErrorIs(t, err, errInvalidStyleReference)
+}
+
+func TestGetStyleReturnsInvalidStyleReferenceError(t *testing.T) {
+	format := `yyyy-mm-dd`
+	style := &excelize.Style{
+		Font:         &excelize.Font{Bold: true},
+		Fill:         excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#123456"}},
+		Border:       []excelize.Border{{Type: "top", Style: 1}},
+		CustomNumFmt: &format,
+	}
+	tests := []struct {
+		name      string
+		attribute string
+	}{
+		{name: "font ID", attribute: "fontId"},
+		{name: "fill ID", attribute: "fillId"},
+		{name: "border ID", attribute: "borderId"},
+		{name: "custom number format ID", attribute: "numFmtId"},
+		{name: "named style XF ID", attribute: "xfId"},
+	}
+
+	for _, test := range tests {
+		for _, invalidID := range []int{-1, 999} {
+			t.Run(fmt.Sprintf("%s/%d", test.name, invalidID), func(t *testing.T) {
+				buffer := workbookWithStyle(t, style)
+				buffer = rewriteCellXFAttribute(t, buffer, test.attribute, invalidID)
+
+				_, err := GetStyle(buffer, "Sheet1", 1, 1)
+				require.ErrorIs(t, err, errInvalidStyleReference)
+				assert.Contains(t, err.Error(), "resolve cell style")
+			})
+		}
+	}
 }
 
 func TestGetStylePreservesPatternFill(t *testing.T) {
@@ -474,6 +518,42 @@ func rewriteXLSXEntry(t *testing.T, buffer bytes.Buffer, name string, rewrite fu
 	require.True(t, found, "XLSX archive did not contain %q", name)
 	require.NoError(t, writer.Close())
 	return output
+}
+
+func rewriteCellXFAttribute(t *testing.T, buffer bytes.Buffer, attribute string, value int) bytes.Buffer {
+	t.Helper()
+	return rewriteXLSXEntry(t, buffer, "xl/styles.xml", func(data []byte) []byte {
+		cellXFsStart := bytes.Index(data, []byte("<cellXfs"))
+		require.NotEqual(t, -1, cellXFsStart, "cellXfs element must exist")
+		cellXFsEnd := bytes.Index(data[cellXFsStart:], []byte("</cellXfs>"))
+		require.NotEqual(t, -1, cellXFsEnd, "cellXfs element must be closed")
+		cellXFsEnd += cellXFsStart
+		cellXFs := data[cellXFsStart:cellXFsEnd]
+
+		firstXFStart := bytes.Index(cellXFs, []byte("<xf"))
+		require.NotEqual(t, -1, firstXFStart, "default cell XF must exist")
+		firstXFEnd := bytes.Index(cellXFs[firstXFStart:], []byte(">"))
+		require.NotEqual(t, -1, firstXFEnd, "default cell XF start tag must be closed")
+		secondXFStart := bytes.Index(cellXFs[firstXFStart+firstXFEnd+1:], []byte("<xf"))
+		require.NotEqual(t, -1, secondXFStart, "styled cell XF must exist")
+		secondXFStart += firstXFStart + firstXFEnd + 1
+		secondXFEnd := bytes.Index(cellXFs[secondXFStart:], []byte(">"))
+		require.NotEqual(t, -1, secondXFEnd, "styled cell XF start tag must be closed")
+		secondXFEnd += secondXFStart
+
+		startTag := cellXFs[secondXFStart : secondXFEnd+1]
+		attributePattern := regexp.MustCompile(`(^|\s)` + regexp.QuoteMeta(attribute) + `="[^"]*"`)
+		location := attributePattern.FindIndex(startTag)
+		require.NotNil(t, location, "%s attribute must exist in the styled cell XF", attribute)
+		absoluteStart := cellXFsStart + secondXFStart + location[0]
+		absoluteEnd := cellXFsStart + secondXFStart + location[1]
+		replacement := []byte(fmt.Sprintf(` %s="%d"`, attribute, value))
+		result := make([]byte, 0, len(data)+len(replacement)-(absoluteEnd-absoluteStart))
+		result = append(result, data[:absoluteStart]...)
+		result = append(result, replacement...)
+		result = append(result, data[absoluteEnd:]...)
+		return result
+	})
 }
 
 const namedStyleStylesXML = `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
