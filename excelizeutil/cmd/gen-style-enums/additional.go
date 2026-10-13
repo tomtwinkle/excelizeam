@@ -257,7 +257,7 @@ func additionalEnums(dir string, styles *ast.File, specs []enumSpec) ([]byte, []
 			return nil, nil, err
 		}
 	}
-	public.WriteString("// AlignmentReadingOrder follows the OOXML readingOrder attribute.\ntype AlignmentReadingOrder uint64\nconst (AlignmentReadingOrderContext AlignmentReadingOrder = iota; AlignmentReadingOrderLeftToRight; AlignmentReadingOrderRightToLeft)\n\n")
+	public.WriteString("type AlignmentReadingOrder uint64\nconst (AlignmentReadingOrderContext AlignmentReadingOrder = iota; AlignmentReadingOrderLeftToRight; AlignmentReadingOrderRightToLeft)\n\n")
 	numberSource := styles
 	if initializer(styles, "builtInNumFmt") == nil {
 		numberSource, err = parser.ParseFile(token.NewFileSet(), filepath.Join(dir, "numfmt.go"), nil, 0)
@@ -282,7 +282,12 @@ func additionalEnums(dir string, styles *ast.File, specs []enumSpec) ([]byte, []
 		return nil, nil, err
 	}
 	fmt.Fprintln(&public, "type GradientShading int\nconst (")
-	for i := range presets {
+	for i, preset := range presets {
+		kind := preset.kind
+		if kind == "" {
+			kind = "linear"
+		}
+		fmt.Fprintf(&public, "// GradientShadingPreset%d selects preset %d: %s gradient, degree %g, path bounds (left %g, right %g, top %g, bottom %g), and stop positions [%s].\n//\n// See %s\n", i, i, kind, preset.degree, preset.left, preset.right, preset.top, preset.bottom, numbers(preset.stops), officialStyleDocs)
 		fmt.Fprintf(&public, "GradientShadingPreset%d GradientShading = %d\n", i, i)
 	}
 	fmt.Fprintf(&public, "GradientShadingCount GradientShading = %d\n)\n", len(presets))

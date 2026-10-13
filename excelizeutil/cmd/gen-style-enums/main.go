@@ -95,6 +95,14 @@ func generatedSources(moduleDir string) ([]byte, []byte, error) {
 	output.Write(geometry)
 	public, err = format.Source(public)
 	if err != nil {
+		return nil, nil, err
+	}
+	public, err = documentEnums(public)
+	if err != nil {
+		return nil, nil, err
+	}
+	public, err = format.Source(public)
+	if err != nil {
 		return nil, nil, fmt.Errorf("format public enums: %w", err)
 	}
 	formatted, err := format.Source(output.Bytes())

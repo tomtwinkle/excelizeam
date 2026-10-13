@@ -4,28 +4,91 @@ package excelizestyle
 
 import "github.com/xuri/excelize/v2"
 
+// FillPattern selects the pattern index used by excelize.Fill.Pattern.
+//
+// See https://xuri.me/excelize/en/style.html
 type FillPattern int
 
 const (
+	// FillPatternNone selects the "none" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternNone FillPattern = iota
+	// FillPatternSolid selects the "solid" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternSolid
+	// FillPatternMediumGray selects the "mediumGray" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternMediumGray
+	// FillPatternDarkGray selects the "darkGray" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkGray
+	// FillPatternLightGray selects the "lightGray" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightGray
+	// FillPatternDarkHorizontal selects the "darkHorizontal" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkHorizontal
+	// FillPatternDarkVertical selects the "darkVertical" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkVertical
+	// FillPatternDarkDown selects the "darkDown" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkDown
+	// FillPatternDarkUp selects the "darkUp" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkUp
+	// FillPatternDarkGrid selects the "darkGrid" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkGrid
+	// FillPatternDarkTrellis selects the "darkTrellis" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternDarkTrellis
+	// FillPatternLightHorizontal selects the "lightHorizontal" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightHorizontal
+	// FillPatternLightVertical selects the "lightVertical" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightVertical
+	// FillPatternLightDown selects the "lightDown" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightDown
+	// FillPatternLightUp selects the "lightUp" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightUp
+	// FillPatternLightGrid selects the "lightGrid" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightGrid
+	// FillPatternLightTrellis selects the "lightTrellis" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternLightTrellis
+	// FillPatternGray125 selects the "gray125" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternGray125
+	// FillPatternGray0625 selects the "gray0625" cell-fill pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternGray0625
+	// FillPatternCount is the number of generated choices; it is not a valid formatting value.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillPatternCount
 )
 
@@ -119,23 +182,71 @@ func ParseFillPattern(value string) (FillPattern, bool) {
 	}
 }
 
+// BorderStyle selects the line style index used by excelize.Border.Style.
+//
+// See https://xuri.me/excelize/en/style.html
 type BorderStyle int
 
 const (
+	// BorderStyleNone selects no border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleNone BorderStyle = iota
+	// BorderStyleThin selects a thin solid border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleThin
+	// BorderStyleMedium selects a medium solid border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleMedium
+	// BorderStyleDashed selects a dashed border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleDashed
+	// BorderStyleDotted selects a dotted border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleDotted
+	// BorderStyleThick selects a thick solid border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleThick
+	// BorderStyleDouble selects a double-line border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleDouble
+	// BorderStyleHair selects a hairline border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleHair
+	// BorderStyleMediumDashed selects a medium dashed border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleMediumDashed
+	// BorderStyleDashDot selects a dash-dot border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleDashDot
+	// BorderStyleMediumDashDot selects a medium dash-dot border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleMediumDashDot
+	// BorderStyleDashDotDot selects a dash-dot-dot border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleDashDotDot
+	// BorderStyleMediumDashDotDot selects a medium dash-dot-dot border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleMediumDashDotDot
+	// BorderStyleSlantDashDot selects a slanted dash-dot border.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleSlantDashDot
+	// BorderStyleCount is the number of generated choices; it is not a valid formatting value.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderStyleCount
 )
 
@@ -209,14 +320,35 @@ func ParseBorderStyle(value string) (BorderStyle, bool) {
 	}
 }
 
+// BorderPosition selects the edge or diagonal used by excelize.Border.Type.
+//
+// See https://xuri.me/excelize/en/style.html
 type BorderPosition string
 
 const (
-	BorderPositionLeft         BorderPosition = "left"
-	BorderPositionRight        BorderPosition = "right"
-	BorderPositionTop          BorderPosition = "top"
-	BorderPositionBottom       BorderPosition = "bottom"
-	BorderPositionDiagonalUp   BorderPosition = "diagonalUp"
+	// BorderPositionLeft selects the left cell edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderPositionLeft BorderPosition = "left"
+	// BorderPositionRight selects the right cell edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderPositionRight BorderPosition = "right"
+	// BorderPositionTop selects the top cell edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderPositionTop BorderPosition = "top"
+	// BorderPositionBottom selects the bottom cell edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderPositionBottom BorderPosition = "bottom"
+	// BorderPositionDiagonalUp selects the diagonal from bottom-left to top-right.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderPositionDiagonalUp BorderPosition = "diagonalUp"
+	// BorderPositionDiagonalDown selects the diagonal from top-left to bottom-right.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderPositionDiagonalDown BorderPosition = "diagonalDown"
 )
 
@@ -224,622 +356,2343 @@ func BorderPositionValues() []BorderPosition {
 	return []BorderPosition{"left", "right", "top", "bottom", "diagonalUp", "diagonalDown"}
 }
 
+// FillType selects pattern or gradient filling for excelize.Fill.Type; the empty value leaves the fill unset.
+//
+// See https://xuri.me/excelize/en/style.html
 type FillType string
 
 const (
+	// FillTypeGradient uses the selected gradient preset with two endpoint colors.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillTypeGradient FillType = "gradient"
-	FillTypePattern  FillType = "pattern"
-	FillTypeUnset    FillType = ""
+	// FillTypePattern uses the selected fill pattern and its foreground color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillTypePattern FillType = "pattern"
+	// FillTypeUnset leaves the formatting selector unset.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillTypeUnset FillType = ""
 )
 
 func FillTypeValues() []FillType { return []FillType{"gradient", "pattern", ""} }
 
+// AlignmentHorizontal selects horizontal cell alignment, including general alignment.
+//
+// See https://xuri.me/excelize/en/style.html
 type AlignmentHorizontal string
 
 const (
-	AlignmentHorizontalLeft             AlignmentHorizontal = "left"
-	AlignmentHorizontalCenter           AlignmentHorizontal = "center"
-	AlignmentHorizontalRight            AlignmentHorizontal = "right"
-	AlignmentHorizontalFill             AlignmentHorizontal = "fill"
-	AlignmentHorizontalJustify          AlignmentHorizontal = "justify"
+	// AlignmentHorizontalLeft aligns text to the left edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalLeft AlignmentHorizontal = "left"
+	// AlignmentHorizontalCenter centers text horizontally.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalCenter AlignmentHorizontal = "center"
+	// AlignmentHorizontalRight aligns text to the right edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalRight AlignmentHorizontal = "right"
+	// AlignmentHorizontalFill repeats the cell text across the available width.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalFill AlignmentHorizontal = "fill"
+	// AlignmentHorizontalJustify justifies text to both horizontal edges.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalJustify AlignmentHorizontal = "justify"
+	// AlignmentHorizontalCenterContinuous centers text across adjacent cells.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentHorizontalCenterContinuous AlignmentHorizontal = "centerContinuous"
-	AlignmentHorizontalDistributed      AlignmentHorizontal = "distributed"
-	AlignmentHorizontalGeneral          AlignmentHorizontal = "general"
+	// AlignmentHorizontalDistributed distributes text evenly across the available width.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalDistributed AlignmentHorizontal = "distributed"
+	// AlignmentHorizontalGeneral aligns according to the cell value's data type.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentHorizontalGeneral AlignmentHorizontal = "general"
 )
 
 func AlignmentHorizontalValues() []AlignmentHorizontal {
 	return []AlignmentHorizontal{"left", "center", "right", "fill", "justify", "centerContinuous", "distributed", "general"}
 }
 
+// AlignmentVertical selects vertical cell alignment, including bottom alignment.
+//
+// See https://xuri.me/excelize/en/style.html
 type AlignmentVertical string
 
 const (
-	AlignmentVerticalTop         AlignmentVertical = "top"
-	AlignmentVerticalCenter      AlignmentVertical = "center"
-	AlignmentVerticalJustify     AlignmentVertical = "justify"
+	// AlignmentVerticalTop aligns text to the top edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentVerticalTop AlignmentVertical = "top"
+	// AlignmentVerticalCenter centers text vertically.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentVerticalCenter AlignmentVertical = "center"
+	// AlignmentVerticalJustify justifies text vertically.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentVerticalJustify AlignmentVertical = "justify"
+	// AlignmentVerticalDistributed distributes text evenly across the available height.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentVerticalDistributed AlignmentVertical = "distributed"
-	AlignmentVerticalBottom      AlignmentVertical = "bottom"
+	// AlignmentVerticalBottom aligns text to the bottom edge.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentVerticalBottom AlignmentVertical = "bottom"
 )
 
 func AlignmentVerticalValues() []AlignmentVertical {
 	return []AlignmentVertical{"top", "center", "justify", "distributed", "bottom"}
 }
 
+// FontUnderline selects the underline mode accepted by the selected Excelize dependency; the empty value leaves it unset.
+//
+// See https://xuri.me/excelize/en/style.html
 type FontUnderline string
 
 const (
-	FontUnderlineNone   FontUnderline = "none"
+	// FontUnderlineNone explicitly disables underlining.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontUnderlineNone FontUnderline = "none"
+	// FontUnderlineSingle uses a single underline.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontUnderlineSingle FontUnderline = "single"
+	// FontUnderlineDouble uses a double underline.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontUnderlineDouble FontUnderline = "double"
-	FontUnderlineUnset  FontUnderline = ""
+	// FontUnderlineUnset leaves the formatting selector unset.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontUnderlineUnset FontUnderline = ""
 )
 
 func FontUnderlineValues() []FontUnderline { return []FontUnderline{"none", "single", "double", ""} }
 
+// FontVerticalAlign selects baseline, superscript, or subscript placement of font text.
+//
+// See https://xuri.me/excelize/en/style.html
 type FontVerticalAlign string
 
 const (
-	FontVerticalAlignBaseline    FontVerticalAlign = "baseline"
+	// FontVerticalAlignBaseline uses normal baseline text.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontVerticalAlignBaseline FontVerticalAlign = "baseline"
+	// FontVerticalAlignSuperscript raises text above the baseline.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontVerticalAlignSuperscript FontVerticalAlign = "superscript"
-	FontVerticalAlignSubscript   FontVerticalAlign = "subscript"
+	// FontVerticalAlignSubscript lowers text below the baseline.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontVerticalAlignSubscript FontVerticalAlign = "subscript"
 )
 
 func FontVerticalAlignValues() []FontVerticalAlign {
 	return []FontVerticalAlign{"baseline", "superscript", "subscript"}
 }
 
-// AlignmentReadingOrder follows the OOXML readingOrder attribute.
+// AlignmentReadingOrder selects context-dependent, left-to-right, or right-to-left cell text direction.
+//
+// See https://xuri.me/excelize/en/style.html
 type AlignmentReadingOrder uint64
 
 const (
+	// AlignmentReadingOrderContext derives text direction from the first strong directional character.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentReadingOrderContext AlignmentReadingOrder = iota
+	// AlignmentReadingOrderLeftToRight reads cell text from left to right.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentReadingOrderLeftToRight
+	// AlignmentReadingOrderRightToLeft reads cell text from right to left.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentReadingOrderRightToLeft
 )
 
+// NumberFormat selects an Excelize number-format ID; Code and CodeForLanguage resolve the dependency's format tables, not custom workbook definitions.
+//
+// See https://xuri.me/excelize/en/style.html
 type NumberFormat int
 
 const (
-	NumberFormatID0   NumberFormat = 0
-	NumberFormatID1   NumberFormat = 1
-	NumberFormatID2   NumberFormat = 2
-	NumberFormatID3   NumberFormat = 3
-	NumberFormatID4   NumberFormat = 4
-	NumberFormatID9   NumberFormat = 9
-	NumberFormatID10  NumberFormat = 10
-	NumberFormatID11  NumberFormat = 11
-	NumberFormatID12  NumberFormat = 12
-	NumberFormatID13  NumberFormat = 13
-	NumberFormatID14  NumberFormat = 14
-	NumberFormatID15  NumberFormat = 15
-	NumberFormatID16  NumberFormat = 16
-	NumberFormatID17  NumberFormat = 17
-	NumberFormatID18  NumberFormat = 18
-	NumberFormatID19  NumberFormat = 19
-	NumberFormatID20  NumberFormat = 20
-	NumberFormatID21  NumberFormat = 21
-	NumberFormatID22  NumberFormat = 22
-	NumberFormatID27  NumberFormat = 27
-	NumberFormatID28  NumberFormat = 28
-	NumberFormatID29  NumberFormat = 29
-	NumberFormatID30  NumberFormat = 30
-	NumberFormatID31  NumberFormat = 31
-	NumberFormatID32  NumberFormat = 32
-	NumberFormatID33  NumberFormat = 33
-	NumberFormatID34  NumberFormat = 34
-	NumberFormatID35  NumberFormat = 35
-	NumberFormatID36  NumberFormat = 36
-	NumberFormatID37  NumberFormat = 37
-	NumberFormatID38  NumberFormat = 38
-	NumberFormatID39  NumberFormat = 39
-	NumberFormatID40  NumberFormat = 40
-	NumberFormatID41  NumberFormat = 41
-	NumberFormatID42  NumberFormat = 42
-	NumberFormatID43  NumberFormat = 43
-	NumberFormatID44  NumberFormat = 44
-	NumberFormatID45  NumberFormat = 45
-	NumberFormatID46  NumberFormat = 46
-	NumberFormatID47  NumberFormat = 47
-	NumberFormatID48  NumberFormat = 48
-	NumberFormatID49  NumberFormat = 49
-	NumberFormatID50  NumberFormat = 50
-	NumberFormatID51  NumberFormat = 51
-	NumberFormatID52  NumberFormat = 52
-	NumberFormatID53  NumberFormat = 53
-	NumberFormatID54  NumberFormat = 54
-	NumberFormatID55  NumberFormat = 55
-	NumberFormatID56  NumberFormat = 56
-	NumberFormatID57  NumberFormat = 57
-	NumberFormatID58  NumberFormat = 58
-	NumberFormatID59  NumberFormat = 59
-	NumberFormatID60  NumberFormat = 60
-	NumberFormatID61  NumberFormat = 61
-	NumberFormatID62  NumberFormat = 62
-	NumberFormatID67  NumberFormat = 67
-	NumberFormatID68  NumberFormat = 68
-	NumberFormatID69  NumberFormat = 69
-	NumberFormatID70  NumberFormat = 70
-	NumberFormatID71  NumberFormat = 71
-	NumberFormatID72  NumberFormat = 72
-	NumberFormatID73  NumberFormat = 73
-	NumberFormatID74  NumberFormat = 74
-	NumberFormatID75  NumberFormat = 75
-	NumberFormatID76  NumberFormat = 76
-	NumberFormatID77  NumberFormat = 77
-	NumberFormatID78  NumberFormat = 78
-	NumberFormatID79  NumberFormat = 79
-	NumberFormatID80  NumberFormat = 80
-	NumberFormatID81  NumberFormat = 81
+	// NumberFormatID0 selects Excelize number-format ID 0 with format code "general".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID0 NumberFormat = 0
+	// NumberFormatID1 selects Excelize number-format ID 1 with format code "0".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID1 NumberFormat = 1
+	// NumberFormatID2 selects Excelize number-format ID 2 with format code "0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID2 NumberFormat = 2
+	// NumberFormatID3 selects Excelize number-format ID 3 with format code "#,##0".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID3 NumberFormat = 3
+	// NumberFormatID4 selects Excelize number-format ID 4 with format code "#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID4 NumberFormat = 4
+	// NumberFormatID9 selects Excelize number-format ID 9 with format code "0%".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID9 NumberFormat = 9
+	// NumberFormatID10 selects Excelize number-format ID 10 with format code "0.00%".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID10 NumberFormat = 10
+	// NumberFormatID11 selects Excelize number-format ID 11 with format code "0.00E+00".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID11 NumberFormat = 11
+	// NumberFormatID12 selects Excelize number-format ID 12 with format code "# ?/?".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID12 NumberFormat = 12
+	// NumberFormatID13 selects Excelize number-format ID 13 with format code "# ??/??".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID13 NumberFormat = 13
+	// NumberFormatID14 selects Excelize number-format ID 14 with format code "mm-dd-yy".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID14 NumberFormat = 14
+	// NumberFormatID15 selects Excelize number-format ID 15 with format code "d-mmm-yy".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID15 NumberFormat = 15
+	// NumberFormatID16 selects Excelize number-format ID 16 with format code "d-mmm".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID16 NumberFormat = 16
+	// NumberFormatID17 selects Excelize number-format ID 17 with format code "mmm-yy".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID17 NumberFormat = 17
+	// NumberFormatID18 selects Excelize number-format ID 18 with format code "h:mm AM/PM".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID18 NumberFormat = 18
+	// NumberFormatID19 selects Excelize number-format ID 19 with format code "h:mm:ss AM/PM".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID19 NumberFormat = 19
+	// NumberFormatID20 selects Excelize number-format ID 20 with format code "hh:mm".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID20 NumberFormat = 20
+	// NumberFormatID21 selects Excelize number-format ID 21 with format code "hh:mm:ss".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID21 NumberFormat = 21
+	// NumberFormatID22 selects Excelize number-format ID 22 with format code "m/d/yy hh:mm".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID22 NumberFormat = 22
+	// NumberFormatID27 selects Excelize number-format ID 27; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID27 NumberFormat = 27
+	// NumberFormatID28 selects Excelize number-format ID 28; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID28 NumberFormat = 28
+	// NumberFormatID29 selects Excelize number-format ID 29; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID29 NumberFormat = 29
+	// NumberFormatID30 selects Excelize number-format ID 30; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID30 NumberFormat = 30
+	// NumberFormatID31 selects Excelize number-format ID 31; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID31 NumberFormat = 31
+	// NumberFormatID32 selects Excelize number-format ID 32; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID32 NumberFormat = 32
+	// NumberFormatID33 selects Excelize number-format ID 33; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID33 NumberFormat = 33
+	// NumberFormatID34 selects Excelize number-format ID 34; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID34 NumberFormat = 34
+	// NumberFormatID35 selects Excelize number-format ID 35; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID35 NumberFormat = 35
+	// NumberFormatID36 selects Excelize number-format ID 36; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID36 NumberFormat = 36
+	// NumberFormatID37 selects Excelize number-format ID 37 with format code "#,##0 ;(#,##0)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID37 NumberFormat = 37
+	// NumberFormatID38 selects Excelize number-format ID 38 with format code "#,##0 ;[red](#,##0)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID38 NumberFormat = 38
+	// NumberFormatID39 selects Excelize number-format ID 39 with format code "#,##0.00 ;(#,##0.00)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID39 NumberFormat = 39
+	// NumberFormatID40 selects Excelize number-format ID 40 with format code "#,##0.00 ;[red](#,##0.00)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID40 NumberFormat = 40
+	// NumberFormatID41 selects Excelize number-format ID 41 with format code "_(* #,##0_);_(* \\(#,##0\\);_(* \"-\"_);_(@_)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID41 NumberFormat = 41
+	// NumberFormatID42 selects Excelize number-format ID 42 with format code "_(\"$\"* #,##0_);_(\"$\"* \\(#,##0\\);_(\"$\"* \"-\"_);_(@_)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID42 NumberFormat = 42
+	// NumberFormatID43 selects Excelize number-format ID 43 with format code "_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID43 NumberFormat = 43
+	// NumberFormatID44 selects Excelize number-format ID 44 with format code "_(\"$\"* #,##0.00_);_(\"$\"* \\(#,##0.00\\);_(\"$\"* \"-\"??_);_(@_)".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID44 NumberFormat = 44
+	// NumberFormatID45 selects Excelize number-format ID 45 with format code "mm:ss".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID45 NumberFormat = 45
+	// NumberFormatID46 selects Excelize number-format ID 46 with format code "[h]:mm:ss".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID46 NumberFormat = 46
+	// NumberFormatID47 selects Excelize number-format ID 47 with format code "mm:ss.0".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID47 NumberFormat = 47
+	// NumberFormatID48 selects Excelize number-format ID 48 with format code "##0.0E+0".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID48 NumberFormat = 48
+	// NumberFormatID49 selects Excelize number-format ID 49 with format code "@".
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID49 NumberFormat = 49
+	// NumberFormatID50 selects Excelize number-format ID 50; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID50 NumberFormat = 50
+	// NumberFormatID51 selects Excelize number-format ID 51; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID51 NumberFormat = 51
+	// NumberFormatID52 selects Excelize number-format ID 52; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID52 NumberFormat = 52
+	// NumberFormatID53 selects Excelize number-format ID 53; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID53 NumberFormat = 53
+	// NumberFormatID54 selects Excelize number-format ID 54; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID54 NumberFormat = 54
+	// NumberFormatID55 selects Excelize number-format ID 55; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID55 NumberFormat = 55
+	// NumberFormatID56 selects Excelize number-format ID 56; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID56 NumberFormat = 56
+	// NumberFormatID57 selects Excelize number-format ID 57; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID57 NumberFormat = 57
+	// NumberFormatID58 selects Excelize number-format ID 58; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID58 NumberFormat = 58
+	// NumberFormatID59 selects Excelize number-format ID 59; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID59 NumberFormat = 59
+	// NumberFormatID60 selects Excelize number-format ID 60; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID60 NumberFormat = 60
+	// NumberFormatID61 selects Excelize number-format ID 61; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID61 NumberFormat = 61
+	// NumberFormatID62 selects Excelize number-format ID 62; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID62 NumberFormat = 62
+	// NumberFormatID67 selects Excelize number-format ID 67; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID67 NumberFormat = 67
+	// NumberFormatID68 selects Excelize number-format ID 68; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID68 NumberFormat = 68
+	// NumberFormatID69 selects Excelize number-format ID 69; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID69 NumberFormat = 69
+	// NumberFormatID70 selects Excelize number-format ID 70; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID70 NumberFormat = 70
+	// NumberFormatID71 selects Excelize number-format ID 71; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID71 NumberFormat = 71
+	// NumberFormatID72 selects Excelize number-format ID 72; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID72 NumberFormat = 72
+	// NumberFormatID73 selects Excelize number-format ID 73; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID73 NumberFormat = 73
+	// NumberFormatID74 selects Excelize number-format ID 74; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID74 NumberFormat = 74
+	// NumberFormatID75 selects Excelize number-format ID 75; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID75 NumberFormat = 75
+	// NumberFormatID76 selects Excelize number-format ID 76; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID76 NumberFormat = 76
+	// NumberFormatID77 selects Excelize number-format ID 77; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID77 NumberFormat = 77
+	// NumberFormatID78 selects Excelize number-format ID 78; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID78 NumberFormat = 78
+	// NumberFormatID79 selects Excelize number-format ID 79; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID79 NumberFormat = 79
+	// NumberFormatID80 selects Excelize number-format ID 80; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID80 NumberFormat = 80
+	// NumberFormatID81 selects Excelize number-format ID 81; its format depends on the language selected through CodeForLanguage.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	NumberFormatID81 NumberFormat = 81
+	// NumberFormatID164 selects Excelize number-format ID 164 with format code "\"¥\"#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID164 NumberFormat = 164
+	// NumberFormatID165 selects Excelize number-format ID 165 with format code "[$$-409]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID165 NumberFormat = 165
+	// NumberFormatID166 selects Excelize number-format ID 166 with format code "[$$-45C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID166 NumberFormat = 166
+	// NumberFormatID167 selects Excelize number-format ID 167 with format code "[$$-1004]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID167 NumberFormat = 167
+	// NumberFormatID168 selects Excelize number-format ID 168 with format code "[$$-404]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID168 NumberFormat = 168
+	// NumberFormatID169 selects Excelize number-format ID 169 with format code "[$$-C09]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID169 NumberFormat = 169
+	// NumberFormatID170 selects Excelize number-format ID 170 with format code "[$$-2809]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID170 NumberFormat = 170
+	// NumberFormatID171 selects Excelize number-format ID 171 with format code "[$$-1009]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID171 NumberFormat = 171
+	// NumberFormatID172 selects Excelize number-format ID 172 with format code "[$$-2009]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID172 NumberFormat = 172
+	// NumberFormatID173 selects Excelize number-format ID 173 with format code "[$$-1409]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID173 NumberFormat = 173
+	// NumberFormatID174 selects Excelize number-format ID 174 with format code "[$$-4809]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID174 NumberFormat = 174
+	// NumberFormatID175 selects Excelize number-format ID 175 with format code "[$$-2C09]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID175 NumberFormat = 175
+	// NumberFormatID176 selects Excelize number-format ID 176 with format code "[$$-2409]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID176 NumberFormat = 176
+	// NumberFormatID177 selects Excelize number-format ID 177 with format code "[$$-1000]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID177 NumberFormat = 177
+	// NumberFormatID178 selects Excelize number-format ID 178 with format code "#,##0.00\\ [$$-C0C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID178 NumberFormat = 178
+	// NumberFormatID179 selects Excelize number-format ID 179 with format code "[$$-475]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID179 NumberFormat = 179
+	// NumberFormatID180 selects Excelize number-format ID 180 with format code "[$$-83E]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID180 NumberFormat = 180
+	// NumberFormatID181 selects Excelize number-format ID 181 with format code "[$$-86B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID181 NumberFormat = 181
+	// NumberFormatID182 selects Excelize number-format ID 182 with format code "[$$-340A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID182 NumberFormat = 182
+	// NumberFormatID183 selects Excelize number-format ID 183 with format code "[$$-240A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID183 NumberFormat = 183
+	// NumberFormatID184 selects Excelize number-format ID 184 with format code "[$$-300A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID184 NumberFormat = 184
+	// NumberFormatID185 selects Excelize number-format ID 185 with format code "[$$-440A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID185 NumberFormat = 185
+	// NumberFormatID186 selects Excelize number-format ID 186 with format code "[$$-80A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID186 NumberFormat = 186
+	// NumberFormatID187 selects Excelize number-format ID 187 with format code "[$$-500A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID187 NumberFormat = 187
+	// NumberFormatID188 selects Excelize number-format ID 188 with format code "[$$-540A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID188 NumberFormat = 188
+	// NumberFormatID189 selects Excelize number-format ID 189 with format code "[$$-380A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID189 NumberFormat = 189
+	// NumberFormatID190 selects Excelize number-format ID 190 with format code "[$£-809]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID190 NumberFormat = 190
+	// NumberFormatID191 selects Excelize number-format ID 191 with format code "[$£-491]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID191 NumberFormat = 191
+	// NumberFormatID192 selects Excelize number-format ID 192 with format code "[$£-452]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID192 NumberFormat = 192
+	// NumberFormatID193 selects Excelize number-format ID 193 with format code "[$¥-804]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID193 NumberFormat = 193
+	// NumberFormatID194 selects Excelize number-format ID 194 with format code "[$¥-411]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID194 NumberFormat = 194
+	// NumberFormatID195 selects Excelize number-format ID 195 with format code "[$¥-478]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID195 NumberFormat = 195
+	// NumberFormatID196 selects Excelize number-format ID 196 with format code "[$¥-451]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID196 NumberFormat = 196
+	// NumberFormatID197 selects Excelize number-format ID 197 with format code "[$¥-480]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID197 NumberFormat = 197
+	// NumberFormatID198 selects Excelize number-format ID 198 with format code "#,##0.00\\ [$֏-42B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID198 NumberFormat = 198
+	// NumberFormatID199 selects Excelize number-format ID 199 with format code "[$؋-463]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID199 NumberFormat = 199
+	// NumberFormatID200 selects Excelize number-format ID 200 with format code "[$؋-48C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID200 NumberFormat = 200
+	// NumberFormatID201 selects Excelize number-format ID 201 with format code "[$৳-845]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID201 NumberFormat = 201
+	// NumberFormatID202 selects Excelize number-format ID 202 with format code "#,##0.00[$៛-453]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID202 NumberFormat = 202
+	// NumberFormatID203 selects Excelize number-format ID 203 with format code "[$₡-140A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID203 NumberFormat = 203
+	// NumberFormatID204 selects Excelize number-format ID 204 with format code "[$₦-468]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID204 NumberFormat = 204
+	// NumberFormatID205 selects Excelize number-format ID 205 with format code "[$₦-470]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID205 NumberFormat = 205
+	// NumberFormatID206 selects Excelize number-format ID 206 with format code "[$₩-412]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID206 NumberFormat = 206
+	// NumberFormatID207 selects Excelize number-format ID 207 with format code "[$₪-40D]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID207 NumberFormat = 207
+	// NumberFormatID208 selects Excelize number-format ID 208 with format code "#,##0.00\\ [$₫-42A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID208 NumberFormat = 208
+	// NumberFormatID209 selects Excelize number-format ID 209 with format code "#,##0.00\\ [$€-42D]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID209 NumberFormat = 209
+	// NumberFormatID210 selects Excelize number-format ID 210 with format code "#,##0.00\\ [$€-47E]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID210 NumberFormat = 210
+	// NumberFormatID211 selects Excelize number-format ID 211 with format code "#,##0.00\\ [$€-403]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID211 NumberFormat = 211
+	// NumberFormatID212 selects Excelize number-format ID 212 with format code "#,##0.00\\ [$€-483]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID212 NumberFormat = 212
+	// NumberFormatID213 selects Excelize number-format ID 213 with format code "[$€-813]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID213 NumberFormat = 213
+	// NumberFormatID214 selects Excelize number-format ID 214 with format code "[$€-413]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID214 NumberFormat = 214
+	// NumberFormatID215 selects Excelize number-format ID 215 with format code "[$€-1809]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID215 NumberFormat = 215
+	// NumberFormatID216 selects Excelize number-format ID 216 with format code "#,##0.00\\ [$€-425]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID216 NumberFormat = 216
+	// NumberFormatID217 selects Excelize number-format ID 217 with format code "[$€-2]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID217 NumberFormat = 217
+	// NumberFormatID218 selects Excelize number-format ID 218 with format code "#,##0.00\\ [$€-1]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID218 NumberFormat = 218
+	// NumberFormatID219 selects Excelize number-format ID 219 with format code "#,##0.00\\ [$€-40B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID219 NumberFormat = 219
+	// NumberFormatID220 selects Excelize number-format ID 220 with format code "#,##0.00\\ [$€-80C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID220 NumberFormat = 220
+	// NumberFormatID221 selects Excelize number-format ID 221 with format code "#,##0.00\\ [$€-40C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID221 NumberFormat = 221
+	// NumberFormatID222 selects Excelize number-format ID 222 with format code "#,##0.00\\ [$€-140C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID222 NumberFormat = 222
+	// NumberFormatID223 selects Excelize number-format ID 223 with format code "#,##0.00\\ [$€-180C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID223 NumberFormat = 223
+	// NumberFormatID224 selects Excelize number-format ID 224 with format code "[$€-200C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID224 NumberFormat = 224
+	// NumberFormatID225 selects Excelize number-format ID 225 with format code "#,##0.00\\ [$€-456]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID225 NumberFormat = 225
+	// NumberFormatID226 selects Excelize number-format ID 226 with format code "#,##0.00\\ [$€-C07]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID226 NumberFormat = 226
+	// NumberFormatID227 selects Excelize number-format ID 227 with format code "#,##0.00\\ [$€-407]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID227 NumberFormat = 227
+	// NumberFormatID228 selects Excelize number-format ID 228 with format code "#,##0.00\\ [$€-1007]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID228 NumberFormat = 228
+	// NumberFormatID229 selects Excelize number-format ID 229 with format code "#,##0.00\\ [$€-408]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID229 NumberFormat = 229
+	// NumberFormatID230 selects Excelize number-format ID 230 with format code "#,##0.00\\ [$€-243B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID230 NumberFormat = 230
+	// NumberFormatID231 selects Excelize number-format ID 231 with format code "[$€-83C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID231 NumberFormat = 231
+	// NumberFormatID232 selects Excelize number-format ID 232 with format code "[$€-410]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID232 NumberFormat = 232
+	// NumberFormatID233 selects Excelize number-format ID 233 with format code "[$€-476]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID233 NumberFormat = 233
+	// NumberFormatID234 selects Excelize number-format ID 234 with format code "#,##0.00\\ [$€-2C1A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID234 NumberFormat = 234
+	// NumberFormatID235 selects Excelize number-format ID 235 with format code "[$€-426]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID235 NumberFormat = 235
+	// NumberFormatID236 selects Excelize number-format ID 236 with format code "#,##0.00\\ [$€-427]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID236 NumberFormat = 236
+	// NumberFormatID237 selects Excelize number-format ID 237 with format code "#,##0.00\\ [$€-82E]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID237 NumberFormat = 237
+	// NumberFormatID238 selects Excelize number-format ID 238 with format code "#,##0.00\\ [$€-46E]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID238 NumberFormat = 238
+	// NumberFormatID239 selects Excelize number-format ID 239 with format code "[$€-43A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID239 NumberFormat = 239
+	// NumberFormatID240 selects Excelize number-format ID 240 with format code "#,##0.00\\ [$€-C3B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID240 NumberFormat = 240
+	// NumberFormatID241 selects Excelize number-format ID 241 with format code "#,##0.00\\ [$€-482]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID241 NumberFormat = 241
+	// NumberFormatID242 selects Excelize number-format ID 242 with format code "#,##0.00\\ [$€-816]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID242 NumberFormat = 242
+	// NumberFormatID243 selects Excelize number-format ID 243 with format code "#,##0.00\\ [$€-301A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID243 NumberFormat = 243
+	// NumberFormatID244 selects Excelize number-format ID 244 with format code "#,##0.00\\ [$€-203B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID244 NumberFormat = 244
+	// NumberFormatID245 selects Excelize number-format ID 245 with format code "#,##0.00\\ [$€-41B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID245 NumberFormat = 245
+	// NumberFormatID246 selects Excelize number-format ID 246 with format code "#,##0.00\\ [$€-424]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID246 NumberFormat = 246
+	// NumberFormatID247 selects Excelize number-format ID 247 with format code "#,##0.00\\ [$€-C0A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID247 NumberFormat = 247
+	// NumberFormatID248 selects Excelize number-format ID 248 with format code "#,##0.00\\ [$€-81D]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID248 NumberFormat = 248
+	// NumberFormatID249 selects Excelize number-format ID 249 with format code "#,##0.00\\ [$€-484]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID249 NumberFormat = 249
+	// NumberFormatID250 selects Excelize number-format ID 250 with format code "#,##0.00\\ [$€-42E]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID250 NumberFormat = 250
+	// NumberFormatID251 selects Excelize number-format ID 251 with format code "[$€-462]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID251 NumberFormat = 251
+	// NumberFormatID252 selects Excelize number-format ID 252 with format code "#,##0.00\\ [$₭-454]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID252 NumberFormat = 252
+	// NumberFormatID253 selects Excelize number-format ID 253 with format code "#,##0.00\\ [$₮-450]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID253 NumberFormat = 253
+	// NumberFormatID254 selects Excelize number-format ID 254 with format code "[$₮-C50]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID254 NumberFormat = 254
+	// NumberFormatID255 selects Excelize number-format ID 255 with format code "[$₱-3409]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID255 NumberFormat = 255
+	// NumberFormatID256 selects Excelize number-format ID 256 with format code "[$₱-464]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID256 NumberFormat = 256
+	// NumberFormatID257 selects Excelize number-format ID 257 with format code "#,##0.00[$₴-422]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID257 NumberFormat = 257
+	// NumberFormatID258 selects Excelize number-format ID 258 with format code "[$₸-43F]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID258 NumberFormat = 258
+	// NumberFormatID259 selects Excelize number-format ID 259 with format code "[$₹-460]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID259 NumberFormat = 259
+	// NumberFormatID260 selects Excelize number-format ID 260 with format code "[$₹-4009]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID260 NumberFormat = 260
+	// NumberFormatID261 selects Excelize number-format ID 261 with format code "[$₹-447]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID261 NumberFormat = 261
+	// NumberFormatID262 selects Excelize number-format ID 262 with format code "[$₹-439]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID262 NumberFormat = 262
+	// NumberFormatID263 selects Excelize number-format ID 263 with format code "[$₹-44B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID263 NumberFormat = 263
+	// NumberFormatID264 selects Excelize number-format ID 264 with format code "[$₹-860]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID264 NumberFormat = 264
+	// NumberFormatID265 selects Excelize number-format ID 265 with format code "[$₹-457]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID265 NumberFormat = 265
+	// NumberFormatID266 selects Excelize number-format ID 266 with format code "[$₹-458]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID266 NumberFormat = 266
+	// NumberFormatID267 selects Excelize number-format ID 267 with format code "[$₹-44E]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID267 NumberFormat = 267
+	// NumberFormatID268 selects Excelize number-format ID 268 with format code "[$₹-861]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID268 NumberFormat = 268
+	// NumberFormatID269 selects Excelize number-format ID 269 with format code "[$₹-448]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID269 NumberFormat = 269
+	// NumberFormatID270 selects Excelize number-format ID 270 with format code "[$₹-446]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID270 NumberFormat = 270
+	// NumberFormatID271 selects Excelize number-format ID 271 with format code "[$₹-44F]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID271 NumberFormat = 271
+	// NumberFormatID272 selects Excelize number-format ID 272 with format code "[$₹-459]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID272 NumberFormat = 272
+	// NumberFormatID273 selects Excelize number-format ID 273 with format code "[$₹-449]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID273 NumberFormat = 273
+	// NumberFormatID274 selects Excelize number-format ID 274 with format code "[$₹-820]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID274 NumberFormat = 274
+	// NumberFormatID275 selects Excelize number-format ID 275 with format code "#,##0.00\\ [$₺-41F]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID275 NumberFormat = 275
+	// NumberFormatID276 selects Excelize number-format ID 276 with format code "#,##0.00\\ [$₼-42C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID276 NumberFormat = 276
+	// NumberFormatID277 selects Excelize number-format ID 277 with format code "#,##0.00\\ [$₼-82C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID277 NumberFormat = 277
+	// NumberFormatID278 selects Excelize number-format ID 278 with format code "#,##0.00\\ [$₽-419]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID278 NumberFormat = 278
+	// NumberFormatID279 selects Excelize number-format ID 279 with format code "#,##0.00[$₽-485]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID279 NumberFormat = 279
+	// NumberFormatID280 selects Excelize number-format ID 280 with format code "#,##0.00\\ [$₾-437]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID280 NumberFormat = 280
+	// NumberFormatID281 selects Excelize number-format ID 281 with format code "[$B/.-180A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID281 NumberFormat = 281
+	// NumberFormatID282 selects Excelize number-format ID 282 with format code "[$Br-472]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID282 NumberFormat = 282
+	// NumberFormatID283 selects Excelize number-format ID 283 with format code "[$Br-477]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID283 NumberFormat = 283
+	// NumberFormatID284 selects Excelize number-format ID 284 with format code "#,##0.00[$Br-473]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID284 NumberFormat = 284
+	// NumberFormatID285 selects Excelize number-format ID 285 with format code "[$Bs-46B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID285 NumberFormat = 285
+	// NumberFormatID286 selects Excelize number-format ID 286 with format code "[$Bs-400A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID286 NumberFormat = 286
+	// NumberFormatID287 selects Excelize number-format ID 287 with format code "[$Bs.-200A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID287 NumberFormat = 287
+	// NumberFormatID288 selects Excelize number-format ID 288 with format code "[$BWP-832]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID288 NumberFormat = 288
+	// NumberFormatID289 selects Excelize number-format ID 289 with format code "[$C$-4C0A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID289 NumberFormat = 289
+	// NumberFormatID290 selects Excelize number-format ID 290 with format code "[$CA$-85D]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID290 NumberFormat = 290
+	// NumberFormatID291 selects Excelize number-format ID 291 with format code "[$CA$-47C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID291 NumberFormat = 291
+	// NumberFormatID292 selects Excelize number-format ID 292 with format code "[$CA$-45D]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID292 NumberFormat = 292
+	// NumberFormatID293 selects Excelize number-format ID 293 with format code "[$CFA-340C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID293 NumberFormat = 293
+	// NumberFormatID294 selects Excelize number-format ID 294 with format code "[$CFA-280C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID294 NumberFormat = 294
+	// NumberFormatID295 selects Excelize number-format ID 295 with format code "#,##0.00\\ [$CFA-867]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID295 NumberFormat = 295
+	// NumberFormatID296 selects Excelize number-format ID 296 with format code "#,##0.00\\ [$CFA-488]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID296 NumberFormat = 296
+	// NumberFormatID297 selects Excelize number-format ID 297 with format code "#,##0.00\\ [$CHF-100C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID297 NumberFormat = 297
+	// NumberFormatID298 selects Excelize number-format ID 298 with format code "[$CHF-1407]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID298 NumberFormat = 298
+	// NumberFormatID299 selects Excelize number-format ID 299 with format code "[$CHF-807]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID299 NumberFormat = 299
+	// NumberFormatID300 selects Excelize number-format ID 300 with format code "[$CHF-810]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID300 NumberFormat = 300
+	// NumberFormatID301 selects Excelize number-format ID 301 with format code "[$CHF-417]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID301 NumberFormat = 301
+	// NumberFormatID302 selects Excelize number-format ID 302 with format code "[$CLP-47A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID302 NumberFormat = 302
+	// NumberFormatID303 selects Excelize number-format ID 303 with format code "[$CN¥-850]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID303 NumberFormat = 303
+	// NumberFormatID304 selects Excelize number-format ID 304 with format code "#,##0.00\\ [$DZD-85F]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID304 NumberFormat = 304
+	// NumberFormatID305 selects Excelize number-format ID 305 with format code "[$FCFA-2C0C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID305 NumberFormat = 305
+	// NumberFormatID306 selects Excelize number-format ID 306 with format code "#,##0.00\\ [$Ft-40E]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID306 NumberFormat = 306
+	// NumberFormatID307 selects Excelize number-format ID 307 with format code "[$G-3C0C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID307 NumberFormat = 307
+	// NumberFormatID308 selects Excelize number-format ID 308 with format code "[$Gs.-3C0A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID308 NumberFormat = 308
+	// NumberFormatID309 selects Excelize number-format ID 309 with format code "[$GTQ-486]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID309 NumberFormat = 309
+	// NumberFormatID310 selects Excelize number-format ID 310 with format code "[$HK$-C04]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID310 NumberFormat = 310
+	// NumberFormatID311 selects Excelize number-format ID 311 with format code "[$HK$-3C09]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID311 NumberFormat = 311
+	// NumberFormatID312 selects Excelize number-format ID 312 with format code "#,##0.00\\ [$HRK-41A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID312 NumberFormat = 312
+	// NumberFormatID313 selects Excelize number-format ID 313 with format code "[$IDR-3809]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID313 NumberFormat = 313
+	// NumberFormatID314 selects Excelize number-format ID 314 with format code "[$IQD-492]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID314 NumberFormat = 314
+	// NumberFormatID315 selects Excelize number-format ID 315 with format code "#,##0.00\\ [$ISK-40F]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID315 NumberFormat = 315
+	// NumberFormatID316 selects Excelize number-format ID 316 with format code "[$K-455]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID316 NumberFormat = 316
+	// NumberFormatID317 selects Excelize number-format ID 317 with format code "#,##0.00\\ [$Kč-405]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID317 NumberFormat = 317
+	// NumberFormatID318 selects Excelize number-format ID 318 with format code "#,##0.00\\ [$KM-141A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID318 NumberFormat = 318
+	// NumberFormatID319 selects Excelize number-format ID 319 with format code "#,##0.00\\ [$KM-101A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID319 NumberFormat = 319
+	// NumberFormatID320 selects Excelize number-format ID 320 with format code "#,##0.00\\ [$KM-181A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID320 NumberFormat = 320
+	// NumberFormatID321 selects Excelize number-format ID 321 with format code "[$kr-438]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID321 NumberFormat = 321
+	// NumberFormatID322 selects Excelize number-format ID 322 with format code "[$kr-43B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID322 NumberFormat = 322
+	// NumberFormatID323 selects Excelize number-format ID 323 with format code "#,##0.00\\ [$kr-83B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID323 NumberFormat = 323
+	// NumberFormatID324 selects Excelize number-format ID 324 with format code "[$kr-414]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID324 NumberFormat = 324
+	// NumberFormatID325 selects Excelize number-format ID 325 with format code "[$kr-814]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID325 NumberFormat = 325
+	// NumberFormatID326 selects Excelize number-format ID 326 with format code "#,##0.00\\ [$kr-41D]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID326 NumberFormat = 326
+	// NumberFormatID327 selects Excelize number-format ID 327 with format code "[$kr.-406]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID327 NumberFormat = 327
+	// NumberFormatID328 selects Excelize number-format ID 328 with format code "[$kr.-46F]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID328 NumberFormat = 328
+	// NumberFormatID329 selects Excelize number-format ID 329 with format code "[$Ksh-441]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID329 NumberFormat = 329
+	// NumberFormatID330 selects Excelize number-format ID 330 with format code "[$L-818]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID330 NumberFormat = 330
+	// NumberFormatID331 selects Excelize number-format ID 331 with format code "[$L-819]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID331 NumberFormat = 331
+	// NumberFormatID332 selects Excelize number-format ID 332 with format code "[$L-480A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID332 NumberFormat = 332
+	// NumberFormatID333 selects Excelize number-format ID 333 with format code "#,##0.00\\ [$Lekë-41C]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID333 NumberFormat = 333
+	// NumberFormatID334 selects Excelize number-format ID 334 with format code "[$MAD-45F]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID334 NumberFormat = 334
+	// NumberFormatID335 selects Excelize number-format ID 335 with format code "[$MAD-380C]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID335 NumberFormat = 335
+	// NumberFormatID336 selects Excelize number-format ID 336 with format code "#,##0.00\\ [$MAD-105F]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID336 NumberFormat = 336
+	// NumberFormatID337 selects Excelize number-format ID 337 with format code "[$MOP$-1404]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID337 NumberFormat = 337
+	// NumberFormatID338 selects Excelize number-format ID 338 with format code "#,##0.00\\ [$MVR-465]_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID338 NumberFormat = 338
+	// NumberFormatID339 selects Excelize number-format ID 339 with format code "#,##0.00[$Nfk-873]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID339 NumberFormat = 339
+	// NumberFormatID340 selects Excelize number-format ID 340 with format code "[$NGN-466]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID340 NumberFormat = 340
+	// NumberFormatID341 selects Excelize number-format ID 341 with format code "[$NGN-467]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID341 NumberFormat = 341
+	// NumberFormatID342 selects Excelize number-format ID 342 with format code "[$NGN-469]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID342 NumberFormat = 342
+	// NumberFormatID343 selects Excelize number-format ID 343 with format code "[$NGN-471]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID343 NumberFormat = 343
+	// NumberFormatID344 selects Excelize number-format ID 344 with format code "[$NOK-103B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID344 NumberFormat = 344
+	// NumberFormatID345 selects Excelize number-format ID 345 with format code "[$NOK-183B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID345 NumberFormat = 345
+	// NumberFormatID346 selects Excelize number-format ID 346 with format code "[$NZ$-481]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID346 NumberFormat = 346
+	// NumberFormatID347 selects Excelize number-format ID 347 with format code "[$PKR-859]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID347 NumberFormat = 347
+	// NumberFormatID348 selects Excelize number-format ID 348 with format code "[$PYG-474]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID348 NumberFormat = 348
+	// NumberFormatID349 selects Excelize number-format ID 349 with format code "[$Q-100A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID349 NumberFormat = 349
+	// NumberFormatID350 selects Excelize number-format ID 350 with format code "[$R-436]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID350 NumberFormat = 350
+	// NumberFormatID351 selects Excelize number-format ID 351 with format code "[$R-1C09]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID351 NumberFormat = 351
+	// NumberFormatID352 selects Excelize number-format ID 352 with format code "[$R-435]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID352 NumberFormat = 352
+	// NumberFormatID353 selects Excelize number-format ID 353 with format code "[$R$-416]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID353 NumberFormat = 353
+	// NumberFormatID354 selects Excelize number-format ID 354 with format code "[$RD$-1C0A]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID354 NumberFormat = 354
+	// NumberFormatID355 selects Excelize number-format ID 355 with format code "#,##0.00\\ [$RF-487]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID355 NumberFormat = 355
+	// NumberFormatID356 selects Excelize number-format ID 356 with format code "[$RM-4409]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID356 NumberFormat = 356
+	// NumberFormatID357 selects Excelize number-format ID 357 with format code "[$RM-43E]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID357 NumberFormat = 357
+	// NumberFormatID358 selects Excelize number-format ID 358 with format code "#,##0.00\\ [$RON-418]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID358 NumberFormat = 358
+	// NumberFormatID359 selects Excelize number-format ID 359 with format code "[$Rp-421]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID359 NumberFormat = 359
+	// NumberFormatID360 selects Excelize number-format ID 360 with format code "[$Rs-420]#,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID360 NumberFormat = 360
+	// NumberFormatID361 selects Excelize number-format ID 361 with format code "[$Rs.-849]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID361 NumberFormat = 361
+	// NumberFormatID362 selects Excelize number-format ID 362 with format code "#,##0.00\\ [$RSD-81A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID362 NumberFormat = 362
+	// NumberFormatID363 selects Excelize number-format ID 363 with format code "#,##0.00\\ [$RSD-C1A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID363 NumberFormat = 363
+	// NumberFormatID364 selects Excelize number-format ID 364 with format code "#,##0.00\\ [$RUB-46D]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID364 NumberFormat = 364
+	// NumberFormatID365 selects Excelize number-format ID 365 with format code "#,##0.00\\ [$RUB-444]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID365 NumberFormat = 365
+	// NumberFormatID366 selects Excelize number-format ID 366 with format code "[$S/.-C6B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID366 NumberFormat = 366
+	// NumberFormatID367 selects Excelize number-format ID 367 with format code "[$S/.-280A]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID367 NumberFormat = 367
+	// NumberFormatID368 selects Excelize number-format ID 368 with format code "#,##0.00\\ [$SEK-143B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID368 NumberFormat = 368
+	// NumberFormatID369 selects Excelize number-format ID 369 with format code "#,##0.00\\ [$SEK-1C3B]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID369 NumberFormat = 369
+	// NumberFormatID370 selects Excelize number-format ID 370 with format code "#,##0.00\\ [$soʻm-443]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID370 NumberFormat = 370
+	// NumberFormatID371 selects Excelize number-format ID 371 with format code "#,##0.00\\ [$soʻm-843]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID371 NumberFormat = 371
+	// NumberFormatID372 selects Excelize number-format ID 372 with format code "#,##0.00\\ [$SYP-45A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID372 NumberFormat = 372
+	// NumberFormatID373 selects Excelize number-format ID 373 with format code "[$THB-41E]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID373 NumberFormat = 373
+	// NumberFormatID374 selects Excelize number-format ID 374 with format code "#,##0.00[$TMT-442]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID374 NumberFormat = 374
+	// NumberFormatID375 selects Excelize number-format ID 375 with format code "[$US$-3009]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID375 NumberFormat = 375
+	// NumberFormatID376 selects Excelize number-format ID 376 with format code "[$ZAR-46C]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID376 NumberFormat = 376
+	// NumberFormatID377 selects Excelize number-format ID 377 with format code "[$ZAR-430]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID377 NumberFormat = 377
+	// NumberFormatID378 selects Excelize number-format ID 378 with format code "[$ZAR-431]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID378 NumberFormat = 378
+	// NumberFormatID379 selects Excelize number-format ID 379 with format code "[$ZAR-432]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID379 NumberFormat = 379
+	// NumberFormatID380 selects Excelize number-format ID 380 with format code "[$ZAR-433]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID380 NumberFormat = 380
+	// NumberFormatID381 selects Excelize number-format ID 381 with format code "[$ZAR-434]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID381 NumberFormat = 381
+	// NumberFormatID382 selects Excelize number-format ID 382 with format code "#,##0.00\\ [$zł-415]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID382 NumberFormat = 382
+	// NumberFormatID383 selects Excelize number-format ID 383 with format code "#,##0.00\\ [$ден-42F]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID383 NumberFormat = 383
+	// NumberFormatID384 selects Excelize number-format ID 384 with format code "#,##0.00\\ [$КМ-201A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID384 NumberFormat = 384
+	// NumberFormatID385 selects Excelize number-format ID 385 with format code "#,##0.00\\ [$КМ-1C1A]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID385 NumberFormat = 385
+	// NumberFormatID386 selects Excelize number-format ID 386 with format code "#,##0.00\\ [$лв.-402]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID386 NumberFormat = 386
+	// NumberFormatID387 selects Excelize number-format ID 387 with format code "#,##0.00\\ [$р.-423]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID387 NumberFormat = 387
+	// NumberFormatID388 selects Excelize number-format ID 388 with format code "#,##0.00\\ [$сом-440]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID388 NumberFormat = 388
+	// NumberFormatID389 selects Excelize number-format ID 389 with format code "#,##0.00\\ [$сом-428]".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID389 NumberFormat = 389
+	// NumberFormatID390 selects Excelize number-format ID 390 with format code "[$ج.م.-C01]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID390 NumberFormat = 390
+	// NumberFormatID391 selects Excelize number-format ID 391 with format code "[$د.أ.-2C01]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID391 NumberFormat = 391
+	// NumberFormatID392 selects Excelize number-format ID 392 with format code "[$د.إ.-3801]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID392 NumberFormat = 392
+	// NumberFormatID393 selects Excelize number-format ID 393 with format code "[$د.ب.-3C01]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID393 NumberFormat = 393
+	// NumberFormatID394 selects Excelize number-format ID 394 with format code "[$د.ت.-1C01]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID394 NumberFormat = 394
+	// NumberFormatID395 selects Excelize number-format ID 395 with format code "[$د.ج.-1401]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID395 NumberFormat = 395
+	// NumberFormatID396 selects Excelize number-format ID 396 with format code "[$د.ع.-801]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID396 NumberFormat = 396
+	// NumberFormatID397 selects Excelize number-format ID 397 with format code "[$د.ك.-3401]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID397 NumberFormat = 397
+	// NumberFormatID398 selects Excelize number-format ID 398 with format code "[$د.ل.-1001]#,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID398 NumberFormat = 398
+	// NumberFormatID399 selects Excelize number-format ID 399 with format code "[$د.م.-1801]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID399 NumberFormat = 399
+	// NumberFormatID400 selects Excelize number-format ID 400 with format code "[$ر-846]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID400 NumberFormat = 400
+	// NumberFormatID401 selects Excelize number-format ID 401 with format code "[$ر.س.-401]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID401 NumberFormat = 401
+	// NumberFormatID402 selects Excelize number-format ID 402 with format code "[$ر.ع.-2001]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID402 NumberFormat = 402
+	// NumberFormatID403 selects Excelize number-format ID 403 with format code "[$ر.ق.-4001]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID403 NumberFormat = 403
+	// NumberFormatID404 selects Excelize number-format ID 404 with format code "[$ر.ي.-2401]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID404 NumberFormat = 404
+	// NumberFormatID405 selects Excelize number-format ID 405 with format code "[$ریال-429]#,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID405 NumberFormat = 405
+	// NumberFormatID406 selects Excelize number-format ID 406 with format code "[$ل.س.-2801]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID406 NumberFormat = 406
+	// NumberFormatID407 selects Excelize number-format ID 407 with format code "[$ل.ل.-3001]\\ #,##0.00_-".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID407 NumberFormat = 407
+	// NumberFormatID408 selects Excelize number-format ID 408 with format code "[$ብር-45E]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID408 NumberFormat = 408
+	// NumberFormatID409 selects Excelize number-format ID 409 with format code "[$रू-461]#,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID409 NumberFormat = 409
+	// NumberFormatID410 selects Excelize number-format ID 410 with format code "[$රු.-45B]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID410 NumberFormat = 410
+	// NumberFormatID411 selects Excelize number-format ID 411 with format code "[$ADP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID411 NumberFormat = 411
+	// NumberFormatID412 selects Excelize number-format ID 412 with format code "[$AED]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID412 NumberFormat = 412
+	// NumberFormatID413 selects Excelize number-format ID 413 with format code "[$AFA]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID413 NumberFormat = 413
+	// NumberFormatID414 selects Excelize number-format ID 414 with format code "[$AFN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID414 NumberFormat = 414
+	// NumberFormatID415 selects Excelize number-format ID 415 with format code "[$ALL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID415 NumberFormat = 415
+	// NumberFormatID416 selects Excelize number-format ID 416 with format code "[$AMD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID416 NumberFormat = 416
+	// NumberFormatID417 selects Excelize number-format ID 417 with format code "[$ANG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID417 NumberFormat = 417
+	// NumberFormatID418 selects Excelize number-format ID 418 with format code "[$AOA]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID418 NumberFormat = 418
+	// NumberFormatID419 selects Excelize number-format ID 419 with format code "[$ARS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID419 NumberFormat = 419
+	// NumberFormatID420 selects Excelize number-format ID 420 with format code "[$ATS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID420 NumberFormat = 420
+	// NumberFormatID421 selects Excelize number-format ID 421 with format code "[$AUD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID421 NumberFormat = 421
+	// NumberFormatID422 selects Excelize number-format ID 422 with format code "[$AWG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID422 NumberFormat = 422
+	// NumberFormatID423 selects Excelize number-format ID 423 with format code "[$AZM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID423 NumberFormat = 423
+	// NumberFormatID424 selects Excelize number-format ID 424 with format code "[$AZN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID424 NumberFormat = 424
+	// NumberFormatID425 selects Excelize number-format ID 425 with format code "[$BAM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID425 NumberFormat = 425
+	// NumberFormatID426 selects Excelize number-format ID 426 with format code "[$BBD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID426 NumberFormat = 426
+	// NumberFormatID427 selects Excelize number-format ID 427 with format code "[$BDT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID427 NumberFormat = 427
+	// NumberFormatID428 selects Excelize number-format ID 428 with format code "[$BEF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID428 NumberFormat = 428
+	// NumberFormatID429 selects Excelize number-format ID 429 with format code "[$BGL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID429 NumberFormat = 429
+	// NumberFormatID430 selects Excelize number-format ID 430 with format code "[$BGN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID430 NumberFormat = 430
+	// NumberFormatID431 selects Excelize number-format ID 431 with format code "[$BHD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID431 NumberFormat = 431
+	// NumberFormatID432 selects Excelize number-format ID 432 with format code "[$BIF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID432 NumberFormat = 432
+	// NumberFormatID433 selects Excelize number-format ID 433 with format code "[$BMD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID433 NumberFormat = 433
+	// NumberFormatID434 selects Excelize number-format ID 434 with format code "[$BND]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID434 NumberFormat = 434
+	// NumberFormatID435 selects Excelize number-format ID 435 with format code "[$BOB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID435 NumberFormat = 435
+	// NumberFormatID436 selects Excelize number-format ID 436 with format code "[$BOV]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID436 NumberFormat = 436
+	// NumberFormatID437 selects Excelize number-format ID 437 with format code "[$BRL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID437 NumberFormat = 437
+	// NumberFormatID438 selects Excelize number-format ID 438 with format code "[$BSD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID438 NumberFormat = 438
+	// NumberFormatID439 selects Excelize number-format ID 439 with format code "[$BTN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID439 NumberFormat = 439
+	// NumberFormatID440 selects Excelize number-format ID 440 with format code "[$BWP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID440 NumberFormat = 440
+	// NumberFormatID441 selects Excelize number-format ID 441 with format code "[$BYR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID441 NumberFormat = 441
+	// NumberFormatID442 selects Excelize number-format ID 442 with format code "[$BZD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID442 NumberFormat = 442
+	// NumberFormatID443 selects Excelize number-format ID 443 with format code "[$CAD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID443 NumberFormat = 443
+	// NumberFormatID444 selects Excelize number-format ID 444 with format code "[$CDF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID444 NumberFormat = 444
+	// NumberFormatID445 selects Excelize number-format ID 445 with format code "[$CHE]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID445 NumberFormat = 445
+	// NumberFormatID446 selects Excelize number-format ID 446 with format code "[$CHF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID446 NumberFormat = 446
+	// NumberFormatID447 selects Excelize number-format ID 447 with format code "[$CHW]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID447 NumberFormat = 447
+	// NumberFormatID448 selects Excelize number-format ID 448 with format code "[$CLF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID448 NumberFormat = 448
+	// NumberFormatID449 selects Excelize number-format ID 449 with format code "[$CLP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID449 NumberFormat = 449
+	// NumberFormatID450 selects Excelize number-format ID 450 with format code "[$CNY]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID450 NumberFormat = 450
+	// NumberFormatID451 selects Excelize number-format ID 451 with format code "[$COP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID451 NumberFormat = 451
+	// NumberFormatID452 selects Excelize number-format ID 452 with format code "[$COU]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID452 NumberFormat = 452
+	// NumberFormatID453 selects Excelize number-format ID 453 with format code "[$CRC]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID453 NumberFormat = 453
+	// NumberFormatID454 selects Excelize number-format ID 454 with format code "[$CSD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID454 NumberFormat = 454
+	// NumberFormatID455 selects Excelize number-format ID 455 with format code "[$CUC]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID455 NumberFormat = 455
+	// NumberFormatID456 selects Excelize number-format ID 456 with format code "[$CVE]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID456 NumberFormat = 456
+	// NumberFormatID457 selects Excelize number-format ID 457 with format code "[$CYP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID457 NumberFormat = 457
+	// NumberFormatID458 selects Excelize number-format ID 458 with format code "[$CZK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID458 NumberFormat = 458
+	// NumberFormatID459 selects Excelize number-format ID 459 with format code "[$DEM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID459 NumberFormat = 459
+	// NumberFormatID460 selects Excelize number-format ID 460 with format code "[$DJF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID460 NumberFormat = 460
+	// NumberFormatID461 selects Excelize number-format ID 461 with format code "[$DKK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID461 NumberFormat = 461
+	// NumberFormatID462 selects Excelize number-format ID 462 with format code "[$DOP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID462 NumberFormat = 462
+	// NumberFormatID463 selects Excelize number-format ID 463 with format code "[$DZD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID463 NumberFormat = 463
+	// NumberFormatID464 selects Excelize number-format ID 464 with format code "[$ECS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID464 NumberFormat = 464
+	// NumberFormatID465 selects Excelize number-format ID 465 with format code "[$ECV]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID465 NumberFormat = 465
+	// NumberFormatID466 selects Excelize number-format ID 466 with format code "[$EEK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID466 NumberFormat = 466
+	// NumberFormatID467 selects Excelize number-format ID 467 with format code "[$EGP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID467 NumberFormat = 467
+	// NumberFormatID468 selects Excelize number-format ID 468 with format code "[$ERN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID468 NumberFormat = 468
+	// NumberFormatID469 selects Excelize number-format ID 469 with format code "[$ESP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID469 NumberFormat = 469
+	// NumberFormatID470 selects Excelize number-format ID 470 with format code "[$ETB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID470 NumberFormat = 470
+	// NumberFormatID471 selects Excelize number-format ID 471 with format code "[$EUR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID471 NumberFormat = 471
+	// NumberFormatID472 selects Excelize number-format ID 472 with format code "[$FIM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID472 NumberFormat = 472
+	// NumberFormatID473 selects Excelize number-format ID 473 with format code "[$FJD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID473 NumberFormat = 473
+	// NumberFormatID474 selects Excelize number-format ID 474 with format code "[$FKP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID474 NumberFormat = 474
+	// NumberFormatID475 selects Excelize number-format ID 475 with format code "[$FRF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID475 NumberFormat = 475
+	// NumberFormatID476 selects Excelize number-format ID 476 with format code "[$GBP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID476 NumberFormat = 476
+	// NumberFormatID477 selects Excelize number-format ID 477 with format code "[$GEL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID477 NumberFormat = 477
+	// NumberFormatID478 selects Excelize number-format ID 478 with format code "[$GHC]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID478 NumberFormat = 478
+	// NumberFormatID479 selects Excelize number-format ID 479 with format code "[$GHS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID479 NumberFormat = 479
+	// NumberFormatID480 selects Excelize number-format ID 480 with format code "[$GIP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID480 NumberFormat = 480
+	// NumberFormatID481 selects Excelize number-format ID 481 with format code "[$GMD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID481 NumberFormat = 481
+	// NumberFormatID482 selects Excelize number-format ID 482 with format code "[$GNF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID482 NumberFormat = 482
+	// NumberFormatID483 selects Excelize number-format ID 483 with format code "[$GRD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID483 NumberFormat = 483
+	// NumberFormatID484 selects Excelize number-format ID 484 with format code "[$GTQ]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID484 NumberFormat = 484
+	// NumberFormatID485 selects Excelize number-format ID 485 with format code "[$GYD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID485 NumberFormat = 485
+	// NumberFormatID486 selects Excelize number-format ID 486 with format code "[$HKD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID486 NumberFormat = 486
+	// NumberFormatID487 selects Excelize number-format ID 487 with format code "[$HNL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID487 NumberFormat = 487
+	// NumberFormatID488 selects Excelize number-format ID 488 with format code "[$HRK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID488 NumberFormat = 488
+	// NumberFormatID489 selects Excelize number-format ID 489 with format code "[$HTG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID489 NumberFormat = 489
+	// NumberFormatID490 selects Excelize number-format ID 490 with format code "[$HUF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID490 NumberFormat = 490
+	// NumberFormatID491 selects Excelize number-format ID 491 with format code "[$IDR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID491 NumberFormat = 491
+	// NumberFormatID492 selects Excelize number-format ID 492 with format code "[$IEP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID492 NumberFormat = 492
+	// NumberFormatID493 selects Excelize number-format ID 493 with format code "[$ILS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID493 NumberFormat = 493
+	// NumberFormatID494 selects Excelize number-format ID 494 with format code "[$INR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID494 NumberFormat = 494
+	// NumberFormatID495 selects Excelize number-format ID 495 with format code "[$IQD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID495 NumberFormat = 495
+	// NumberFormatID496 selects Excelize number-format ID 496 with format code "[$IRR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID496 NumberFormat = 496
+	// NumberFormatID497 selects Excelize number-format ID 497 with format code "[$ISK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID497 NumberFormat = 497
+	// NumberFormatID498 selects Excelize number-format ID 498 with format code "[$ITL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID498 NumberFormat = 498
+	// NumberFormatID499 selects Excelize number-format ID 499 with format code "[$JMD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID499 NumberFormat = 499
+	// NumberFormatID500 selects Excelize number-format ID 500 with format code "[$JOD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID500 NumberFormat = 500
+	// NumberFormatID501 selects Excelize number-format ID 501 with format code "[$JPY]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID501 NumberFormat = 501
+	// NumberFormatID502 selects Excelize number-format ID 502 with format code "[$KAF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID502 NumberFormat = 502
+	// NumberFormatID503 selects Excelize number-format ID 503 with format code "[$KES]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID503 NumberFormat = 503
+	// NumberFormatID504 selects Excelize number-format ID 504 with format code "[$KGS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID504 NumberFormat = 504
+	// NumberFormatID505 selects Excelize number-format ID 505 with format code "[$KHR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID505 NumberFormat = 505
+	// NumberFormatID506 selects Excelize number-format ID 506 with format code "[$KMF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID506 NumberFormat = 506
+	// NumberFormatID507 selects Excelize number-format ID 507 with format code "[$KPW]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID507 NumberFormat = 507
+	// NumberFormatID508 selects Excelize number-format ID 508 with format code "[$KRW]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID508 NumberFormat = 508
+	// NumberFormatID509 selects Excelize number-format ID 509 with format code "[$KWD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID509 NumberFormat = 509
+	// NumberFormatID510 selects Excelize number-format ID 510 with format code "[$KYD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID510 NumberFormat = 510
+	// NumberFormatID511 selects Excelize number-format ID 511 with format code "[$KZT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID511 NumberFormat = 511
+	// NumberFormatID512 selects Excelize number-format ID 512 with format code "[$LAK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID512 NumberFormat = 512
+	// NumberFormatID513 selects Excelize number-format ID 513 with format code "[$LBP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID513 NumberFormat = 513
+	// NumberFormatID514 selects Excelize number-format ID 514 with format code "[$LKR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID514 NumberFormat = 514
+	// NumberFormatID515 selects Excelize number-format ID 515 with format code "[$LRD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID515 NumberFormat = 515
+	// NumberFormatID516 selects Excelize number-format ID 516 with format code "[$LSL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID516 NumberFormat = 516
+	// NumberFormatID517 selects Excelize number-format ID 517 with format code "[$LTL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID517 NumberFormat = 517
+	// NumberFormatID518 selects Excelize number-format ID 518 with format code "[$LUF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID518 NumberFormat = 518
+	// NumberFormatID519 selects Excelize number-format ID 519 with format code "[$LVL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID519 NumberFormat = 519
+	// NumberFormatID520 selects Excelize number-format ID 520 with format code "[$LYD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID520 NumberFormat = 520
+	// NumberFormatID521 selects Excelize number-format ID 521 with format code "[$MAD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID521 NumberFormat = 521
+	// NumberFormatID522 selects Excelize number-format ID 522 with format code "[$MDL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID522 NumberFormat = 522
+	// NumberFormatID523 selects Excelize number-format ID 523 with format code "[$MGA]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID523 NumberFormat = 523
+	// NumberFormatID524 selects Excelize number-format ID 524 with format code "[$MGF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID524 NumberFormat = 524
+	// NumberFormatID525 selects Excelize number-format ID 525 with format code "[$MKD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID525 NumberFormat = 525
+	// NumberFormatID526 selects Excelize number-format ID 526 with format code "[$MMK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID526 NumberFormat = 526
+	// NumberFormatID527 selects Excelize number-format ID 527 with format code "[$MNT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID527 NumberFormat = 527
+	// NumberFormatID528 selects Excelize number-format ID 528 with format code "[$MOP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID528 NumberFormat = 528
+	// NumberFormatID529 selects Excelize number-format ID 529 with format code "[$MRO]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID529 NumberFormat = 529
+	// NumberFormatID530 selects Excelize number-format ID 530 with format code "[$MTL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID530 NumberFormat = 530
+	// NumberFormatID531 selects Excelize number-format ID 531 with format code "[$MUR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID531 NumberFormat = 531
+	// NumberFormatID532 selects Excelize number-format ID 532 with format code "[$MVR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID532 NumberFormat = 532
+	// NumberFormatID533 selects Excelize number-format ID 533 with format code "[$MWK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID533 NumberFormat = 533
+	// NumberFormatID534 selects Excelize number-format ID 534 with format code "[$MXN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID534 NumberFormat = 534
+	// NumberFormatID535 selects Excelize number-format ID 535 with format code "[$MXV]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID535 NumberFormat = 535
+	// NumberFormatID536 selects Excelize number-format ID 536 with format code "[$MYR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID536 NumberFormat = 536
+	// NumberFormatID537 selects Excelize number-format ID 537 with format code "[$MZM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID537 NumberFormat = 537
+	// NumberFormatID538 selects Excelize number-format ID 538 with format code "[$MZN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID538 NumberFormat = 538
+	// NumberFormatID539 selects Excelize number-format ID 539 with format code "[$NAD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID539 NumberFormat = 539
+	// NumberFormatID540 selects Excelize number-format ID 540 with format code "[$NGN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID540 NumberFormat = 540
+	// NumberFormatID541 selects Excelize number-format ID 541 with format code "[$NIO]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID541 NumberFormat = 541
+	// NumberFormatID542 selects Excelize number-format ID 542 with format code "[$NLG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID542 NumberFormat = 542
+	// NumberFormatID543 selects Excelize number-format ID 543 with format code "[$NOK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID543 NumberFormat = 543
+	// NumberFormatID544 selects Excelize number-format ID 544 with format code "[$NPR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID544 NumberFormat = 544
+	// NumberFormatID545 selects Excelize number-format ID 545 with format code "[$NTD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID545 NumberFormat = 545
+	// NumberFormatID546 selects Excelize number-format ID 546 with format code "[$NZD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID546 NumberFormat = 546
+	// NumberFormatID547 selects Excelize number-format ID 547 with format code "[$OMR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID547 NumberFormat = 547
+	// NumberFormatID548 selects Excelize number-format ID 548 with format code "[$PAB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID548 NumberFormat = 548
+	// NumberFormatID549 selects Excelize number-format ID 549 with format code "[$PEN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID549 NumberFormat = 549
+	// NumberFormatID550 selects Excelize number-format ID 550 with format code "[$PGK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID550 NumberFormat = 550
+	// NumberFormatID551 selects Excelize number-format ID 551 with format code "[$PHP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID551 NumberFormat = 551
+	// NumberFormatID552 selects Excelize number-format ID 552 with format code "[$PKR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID552 NumberFormat = 552
+	// NumberFormatID553 selects Excelize number-format ID 553 with format code "[$PLN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID553 NumberFormat = 553
+	// NumberFormatID554 selects Excelize number-format ID 554 with format code "[$PTE]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID554 NumberFormat = 554
+	// NumberFormatID555 selects Excelize number-format ID 555 with format code "[$PYG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID555 NumberFormat = 555
+	// NumberFormatID556 selects Excelize number-format ID 556 with format code "[$QAR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID556 NumberFormat = 556
+	// NumberFormatID557 selects Excelize number-format ID 557 with format code "[$ROL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID557 NumberFormat = 557
+	// NumberFormatID558 selects Excelize number-format ID 558 with format code "[$RON]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID558 NumberFormat = 558
+	// NumberFormatID559 selects Excelize number-format ID 559 with format code "[$RSD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID559 NumberFormat = 559
+	// NumberFormatID560 selects Excelize number-format ID 560 with format code "[$RUB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID560 NumberFormat = 560
+	// NumberFormatID561 selects Excelize number-format ID 561 with format code "[$RUR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID561 NumberFormat = 561
+	// NumberFormatID562 selects Excelize number-format ID 562 with format code "[$RWF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID562 NumberFormat = 562
+	// NumberFormatID563 selects Excelize number-format ID 563 with format code "[$SAR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID563 NumberFormat = 563
+	// NumberFormatID564 selects Excelize number-format ID 564 with format code "[$SBD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID564 NumberFormat = 564
+	// NumberFormatID565 selects Excelize number-format ID 565 with format code "[$SCR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID565 NumberFormat = 565
+	// NumberFormatID566 selects Excelize number-format ID 566 with format code "[$SDD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID566 NumberFormat = 566
+	// NumberFormatID567 selects Excelize number-format ID 567 with format code "[$SDG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID567 NumberFormat = 567
+	// NumberFormatID568 selects Excelize number-format ID 568 with format code "[$SDP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID568 NumberFormat = 568
+	// NumberFormatID569 selects Excelize number-format ID 569 with format code "[$SEK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID569 NumberFormat = 569
+	// NumberFormatID570 selects Excelize number-format ID 570 with format code "[$SGD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID570 NumberFormat = 570
+	// NumberFormatID571 selects Excelize number-format ID 571 with format code "[$SHP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID571 NumberFormat = 571
+	// NumberFormatID572 selects Excelize number-format ID 572 with format code "[$SIT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID572 NumberFormat = 572
+	// NumberFormatID573 selects Excelize number-format ID 573 with format code "[$SKK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID573 NumberFormat = 573
+	// NumberFormatID574 selects Excelize number-format ID 574 with format code "[$SLL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID574 NumberFormat = 574
+	// NumberFormatID575 selects Excelize number-format ID 575 with format code "[$SOS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID575 NumberFormat = 575
+	// NumberFormatID576 selects Excelize number-format ID 576 with format code "[$SPL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID576 NumberFormat = 576
+	// NumberFormatID577 selects Excelize number-format ID 577 with format code "[$SRD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID577 NumberFormat = 577
+	// NumberFormatID578 selects Excelize number-format ID 578 with format code "[$SRG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID578 NumberFormat = 578
+	// NumberFormatID579 selects Excelize number-format ID 579 with format code "[$STD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID579 NumberFormat = 579
+	// NumberFormatID580 selects Excelize number-format ID 580 with format code "[$SVC]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID580 NumberFormat = 580
+	// NumberFormatID581 selects Excelize number-format ID 581 with format code "[$SYP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID581 NumberFormat = 581
+	// NumberFormatID582 selects Excelize number-format ID 582 with format code "[$SZL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID582 NumberFormat = 582
+	// NumberFormatID583 selects Excelize number-format ID 583 with format code "[$THB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID583 NumberFormat = 583
+	// NumberFormatID584 selects Excelize number-format ID 584 with format code "[$TJR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID584 NumberFormat = 584
+	// NumberFormatID585 selects Excelize number-format ID 585 with format code "[$TJS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID585 NumberFormat = 585
+	// NumberFormatID586 selects Excelize number-format ID 586 with format code "[$TMM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID586 NumberFormat = 586
+	// NumberFormatID587 selects Excelize number-format ID 587 with format code "[$TMT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID587 NumberFormat = 587
+	// NumberFormatID588 selects Excelize number-format ID 588 with format code "[$TND]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID588 NumberFormat = 588
+	// NumberFormatID589 selects Excelize number-format ID 589 with format code "[$TOP]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID589 NumberFormat = 589
+	// NumberFormatID590 selects Excelize number-format ID 590 with format code "[$TRL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID590 NumberFormat = 590
+	// NumberFormatID591 selects Excelize number-format ID 591 with format code "[$TRY]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID591 NumberFormat = 591
+	// NumberFormatID592 selects Excelize number-format ID 592 with format code "[$TTD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID592 NumberFormat = 592
+	// NumberFormatID593 selects Excelize number-format ID 593 with format code "[$TWD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID593 NumberFormat = 593
+	// NumberFormatID594 selects Excelize number-format ID 594 with format code "[$TZS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID594 NumberFormat = 594
+	// NumberFormatID595 selects Excelize number-format ID 595 with format code "[$UAH]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID595 NumberFormat = 595
+	// NumberFormatID596 selects Excelize number-format ID 596 with format code "[$UGX]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID596 NumberFormat = 596
+	// NumberFormatID597 selects Excelize number-format ID 597 with format code "[$USD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID597 NumberFormat = 597
+	// NumberFormatID598 selects Excelize number-format ID 598 with format code "[$USN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID598 NumberFormat = 598
+	// NumberFormatID599 selects Excelize number-format ID 599 with format code "[$USS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID599 NumberFormat = 599
+	// NumberFormatID600 selects Excelize number-format ID 600 with format code "[$UYI]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID600 NumberFormat = 600
+	// NumberFormatID601 selects Excelize number-format ID 601 with format code "[$UYU]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID601 NumberFormat = 601
+	// NumberFormatID602 selects Excelize number-format ID 602 with format code "[$UZS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID602 NumberFormat = 602
+	// NumberFormatID603 selects Excelize number-format ID 603 with format code "[$VEB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID603 NumberFormat = 603
+	// NumberFormatID604 selects Excelize number-format ID 604 with format code "[$VEF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID604 NumberFormat = 604
+	// NumberFormatID605 selects Excelize number-format ID 605 with format code "[$VND]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID605 NumberFormat = 605
+	// NumberFormatID606 selects Excelize number-format ID 606 with format code "[$VUV]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID606 NumberFormat = 606
+	// NumberFormatID607 selects Excelize number-format ID 607 with format code "[$WST]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID607 NumberFormat = 607
+	// NumberFormatID608 selects Excelize number-format ID 608 with format code "[$XAF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID608 NumberFormat = 608
+	// NumberFormatID609 selects Excelize number-format ID 609 with format code "[$XAG]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID609 NumberFormat = 609
+	// NumberFormatID610 selects Excelize number-format ID 610 with format code "[$XAU]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID610 NumberFormat = 610
+	// NumberFormatID611 selects Excelize number-format ID 611 with format code "[$XB5]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID611 NumberFormat = 611
+	// NumberFormatID612 selects Excelize number-format ID 612 with format code "[$XBA]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID612 NumberFormat = 612
+	// NumberFormatID613 selects Excelize number-format ID 613 with format code "[$XBB]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID613 NumberFormat = 613
+	// NumberFormatID614 selects Excelize number-format ID 614 with format code "[$XBC]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID614 NumberFormat = 614
+	// NumberFormatID615 selects Excelize number-format ID 615 with format code "[$XBD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID615 NumberFormat = 615
+	// NumberFormatID616 selects Excelize number-format ID 616 with format code "[$XCD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID616 NumberFormat = 616
+	// NumberFormatID617 selects Excelize number-format ID 617 with format code "[$XDR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID617 NumberFormat = 617
+	// NumberFormatID618 selects Excelize number-format ID 618 with format code "[$XFO]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID618 NumberFormat = 618
+	// NumberFormatID619 selects Excelize number-format ID 619 with format code "[$XFU]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID619 NumberFormat = 619
+	// NumberFormatID620 selects Excelize number-format ID 620 with format code "[$XOF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID620 NumberFormat = 620
+	// NumberFormatID621 selects Excelize number-format ID 621 with format code "[$XPD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID621 NumberFormat = 621
+	// NumberFormatID622 selects Excelize number-format ID 622 with format code "[$XPF]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID622 NumberFormat = 622
+	// NumberFormatID623 selects Excelize number-format ID 623 with format code "[$XPT]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID623 NumberFormat = 623
+	// NumberFormatID624 selects Excelize number-format ID 624 with format code "[$XTS]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID624 NumberFormat = 624
+	// NumberFormatID625 selects Excelize number-format ID 625 with format code "[$XXX]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID625 NumberFormat = 625
+	// NumberFormatID626 selects Excelize number-format ID 626 with format code "[$YER]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID626 NumberFormat = 626
+	// NumberFormatID627 selects Excelize number-format ID 627 with format code "[$YUM]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID627 NumberFormat = 627
+	// NumberFormatID628 selects Excelize number-format ID 628 with format code "[$ZAR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID628 NumberFormat = 628
+	// NumberFormatID629 selects Excelize number-format ID 629 with format code "[$ZMK]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID629 NumberFormat = 629
+	// NumberFormatID630 selects Excelize number-format ID 630 with format code "[$ZMW]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID630 NumberFormat = 630
+	// NumberFormatID631 selects Excelize number-format ID 631 with format code "[$ZWD]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID631 NumberFormat = 631
+	// NumberFormatID632 selects Excelize number-format ID 632 with format code "[$ZWL]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID632 NumberFormat = 632
+	// NumberFormatID633 selects Excelize number-format ID 633 with format code "[$ZWN]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID633 NumberFormat = 633
+	// NumberFormatID634 selects Excelize number-format ID 634 with format code "[$ZWR]\\ #,##0.00".
+	//
+	// See https://xuri.me/excelize/en/style.html
 	NumberFormatID634 NumberFormat = 634
 )
 
@@ -1856,13 +3709,31 @@ func (value NumberFormat) Code() (string, bool) {
 	}
 }
 
+// StyleLanguage identifies a language tag in Excelize's localized number-format tables; newer Style APIs use the resolved format code.
+//
+// See https://xuri.me/excelize/en/style.html
 type StyleLanguage string
 
 const (
+	// StyleLanguageJa_jp identifies language tag "ja-jp" for localized number-format lookup.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleLanguageJa_jp StyleLanguage = "ja-jp"
+	// StyleLanguageKo_kr identifies language tag "ko-kr" for localized number-format lookup.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleLanguageKo_kr StyleLanguage = "ko-kr"
+	// StyleLanguageTh_th identifies language tag "th-th" for localized number-format lookup.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleLanguageTh_th StyleLanguage = "th-th"
+	// StyleLanguageZh_cn identifies language tag "zh-cn" for localized number-format lookup.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleLanguageZh_cn StyleLanguage = "zh-cn"
+	// StyleLanguageZh_tw identifies language tag "zh-tw" for localized number-format lookup.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleLanguageZh_tw StyleLanguage = "zh-tw"
 )
 
@@ -2081,62 +3952,161 @@ func (value NumberFormat) CodeForLanguage(language StyleLanguage) (string, bool)
 	return value.Code()
 }
 
+// AlignmentField identifies a public field of excelize.Alignment; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type AlignmentField string
 
 const (
-	AlignmentFieldHorizontal      AlignmentField = "Horizontal"
-	AlignmentFieldIndent          AlignmentField = "Indent"
+	// AlignmentFieldHorizontal identifies excelize.Alignment.Horizontal.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldHorizontal AlignmentField = "Horizontal"
+	// AlignmentFieldIndent identifies excelize.Alignment.Indent.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldIndent AlignmentField = "Indent"
+	// AlignmentFieldJustifyLastLine identifies excelize.Alignment.JustifyLastLine.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	AlignmentFieldJustifyLastLine AlignmentField = "JustifyLastLine"
-	AlignmentFieldReadingOrder    AlignmentField = "ReadingOrder"
-	AlignmentFieldRelativeIndent  AlignmentField = "RelativeIndent"
-	AlignmentFieldShrinkToFit     AlignmentField = "ShrinkToFit"
-	AlignmentFieldTextRotation    AlignmentField = "TextRotation"
-	AlignmentFieldVertical        AlignmentField = "Vertical"
-	AlignmentFieldWrapText        AlignmentField = "WrapText"
+	// AlignmentFieldReadingOrder identifies excelize.Alignment.ReadingOrder.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldReadingOrder AlignmentField = "ReadingOrder"
+	// AlignmentFieldRelativeIndent identifies excelize.Alignment.RelativeIndent.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldRelativeIndent AlignmentField = "RelativeIndent"
+	// AlignmentFieldShrinkToFit identifies excelize.Alignment.ShrinkToFit.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldShrinkToFit AlignmentField = "ShrinkToFit"
+	// AlignmentFieldTextRotation identifies excelize.Alignment.TextRotation.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldTextRotation AlignmentField = "TextRotation"
+	// AlignmentFieldVertical identifies excelize.Alignment.Vertical.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldVertical AlignmentField = "Vertical"
+	// AlignmentFieldWrapText identifies excelize.Alignment.WrapText.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	AlignmentFieldWrapText AlignmentField = "WrapText"
 )
 
 func AlignmentFieldValues() []AlignmentField {
 	return []AlignmentField{"Horizontal", "Indent", "JustifyLastLine", "ReadingOrder", "RelativeIndent", "ShrinkToFit", "TextRotation", "Vertical", "WrapText"}
 }
 
+// BorderField identifies a public field of excelize.Border; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type BorderField string
 
 const (
-	BorderFieldType  BorderField = "Type"
+	// BorderFieldType identifies excelize.Border.Type.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	BorderFieldType BorderField = "Type"
+	// BorderFieldColor identifies excelize.Border.Color.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderFieldColor BorderField = "Color"
+	// BorderFieldStyle identifies excelize.Border.Style.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	BorderFieldStyle BorderField = "Style"
 )
 
 func BorderFieldValues() []BorderField { return []BorderField{"Type", "Color", "Style"} }
 
+// FontField identifies a public field of excelize.Font; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type FontField string
 
 const (
-	FontFieldBold         FontField = "Bold"
-	FontFieldItalic       FontField = "Italic"
-	FontFieldUnderline    FontField = "Underline"
-	FontFieldFamily       FontField = "Family"
-	FontFieldSize         FontField = "Size"
-	FontFieldStrike       FontField = "Strike"
-	FontFieldColor        FontField = "Color"
+	// FontFieldBold identifies excelize.Font.Bold.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldBold FontField = "Bold"
+	// FontFieldItalic identifies excelize.Font.Italic.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldItalic FontField = "Italic"
+	// FontFieldUnderline identifies excelize.Font.Underline.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldUnderline FontField = "Underline"
+	// FontFieldFamily identifies excelize.Font.Family.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldFamily FontField = "Family"
+	// FontFieldSize identifies excelize.Font.Size.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldSize FontField = "Size"
+	// FontFieldStrike identifies excelize.Font.Strike.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldStrike FontField = "Strike"
+	// FontFieldColor identifies excelize.Font.Color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldColor FontField = "Color"
+	// FontFieldColorIndexed identifies excelize.Font.ColorIndexed.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontFieldColorIndexed FontField = "ColorIndexed"
-	FontFieldColorTheme   FontField = "ColorTheme"
-	FontFieldColorTint    FontField = "ColorTint"
-	FontFieldVertAlign    FontField = "VertAlign"
-	FontFieldCharset      FontField = "Charset"
+	// FontFieldColorTheme identifies excelize.Font.ColorTheme.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldColorTheme FontField = "ColorTheme"
+	// FontFieldColorTint identifies excelize.Font.ColorTint.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldColorTint FontField = "ColorTint"
+	// FontFieldVertAlign identifies excelize.Font.VertAlign.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldVertAlign FontField = "VertAlign"
+	// FontFieldCharset identifies excelize.Font.Charset.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontFieldCharset FontField = "Charset"
 )
 
 func FontFieldValues() []FontField {
 	return []FontField{"Bold", "Italic", "Underline", "Family", "Size", "Strike", "Color", "ColorIndexed", "ColorTheme", "ColorTint", "VertAlign", "Charset"}
 }
 
+// FillField identifies a public field of excelize.Fill; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type FillField string
 
 const (
-	FillFieldType         FillField = "Type"
-	FillFieldPattern      FillField = "Pattern"
-	FillFieldColor        FillField = "Color"
-	FillFieldShading      FillField = "Shading"
+	// FillFieldType identifies excelize.Fill.Type.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillFieldType FillField = "Type"
+	// FillFieldPattern identifies excelize.Fill.Pattern.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillFieldPattern FillField = "Pattern"
+	// FillFieldColor identifies excelize.Fill.Color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillFieldColor FillField = "Color"
+	// FillFieldShading identifies excelize.Fill.Shading.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FillFieldShading FillField = "Shading"
+	// FillFieldTransparency identifies excelize.Fill.Transparency.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FillFieldTransparency FillField = "Transparency"
 )
 
@@ -2144,146 +4114,494 @@ func FillFieldValues() []FillField {
 	return []FillField{"Type", "Pattern", "Color", "Shading", "Transparency"}
 }
 
+// ProtectionField identifies a public field of excelize.Protection; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type ProtectionField string
 
 const (
+	// ProtectionFieldHidden identifies excelize.Protection.Hidden.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	ProtectionFieldHidden ProtectionField = "Hidden"
+	// ProtectionFieldLocked identifies excelize.Protection.Locked.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	ProtectionFieldLocked ProtectionField = "Locked"
 )
 
 func ProtectionFieldValues() []ProtectionField { return []ProtectionField{"Hidden", "Locked"} }
 
+// StyleField identifies a public field of excelize.Style; these values are field names rather than formatting values.
+//
+// See https://xuri.me/excelize/en/style.html
 type StyleField string
 
 const (
-	StyleFieldBorder        StyleField = "Border"
-	StyleFieldFill          StyleField = "Fill"
-	StyleFieldFont          StyleField = "Font"
-	StyleFieldAlignment     StyleField = "Alignment"
-	StyleFieldProtection    StyleField = "Protection"
-	StyleFieldNumFmt        StyleField = "NumFmt"
+	// StyleFieldBorder identifies excelize.Style.Border.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldBorder StyleField = "Border"
+	// StyleFieldFill identifies excelize.Style.Fill.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldFill StyleField = "Fill"
+	// StyleFieldFont identifies excelize.Style.Font.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldFont StyleField = "Font"
+	// StyleFieldAlignment identifies excelize.Style.Alignment.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldAlignment StyleField = "Alignment"
+	// StyleFieldProtection identifies excelize.Style.Protection.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldProtection StyleField = "Protection"
+	// StyleFieldNumFmt identifies excelize.Style.NumFmt.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldNumFmt StyleField = "NumFmt"
+	// StyleFieldDecimalPlaces identifies excelize.Style.DecimalPlaces.
+	//
+	// See https://xuri.me/excelize/en/style.html
 	StyleFieldDecimalPlaces StyleField = "DecimalPlaces"
-	StyleFieldCustomNumFmt  StyleField = "CustomNumFmt"
-	StyleFieldNegRed        StyleField = "NegRed"
+	// StyleFieldCustomNumFmt identifies excelize.Style.CustomNumFmt.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldCustomNumFmt StyleField = "CustomNumFmt"
+	// StyleFieldNegRed identifies excelize.Style.NegRed.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	StyleFieldNegRed StyleField = "NegRed"
 )
 
 func StyleFieldValues() []StyleField {
 	return []StyleField{"Border", "Fill", "Font", "Alignment", "Protection", "NumFmt", "DecimalPlaces", "CustomNumFmt", "NegRed"}
 }
 
+// IndexedColor selects an indexed palette entry or system color for excelize.Font.ColorIndexed; workbook palettes can override the displayed RGB.
+//
+// See https://xuri.me/excelize/en/style.html
 type IndexedColor int
 
 const (
-	IndexedColorUnset            IndexedColor = -1
-	IndexedColorIndex0           IndexedColor = 0
-	IndexedColorIndex1           IndexedColor = 1
-	IndexedColorIndex2           IndexedColor = 2
-	IndexedColorIndex3           IndexedColor = 3
-	IndexedColorIndex4           IndexedColor = 4
-	IndexedColorIndex5           IndexedColor = 5
-	IndexedColorIndex6           IndexedColor = 6
-	IndexedColorIndex7           IndexedColor = 7
-	IndexedColorIndex8           IndexedColor = 8
-	IndexedColorIndex9           IndexedColor = 9
-	IndexedColorIndex10          IndexedColor = 10
-	IndexedColorIndex11          IndexedColor = 11
-	IndexedColorIndex12          IndexedColor = 12
-	IndexedColorIndex13          IndexedColor = 13
-	IndexedColorIndex14          IndexedColor = 14
-	IndexedColorIndex15          IndexedColor = 15
-	IndexedColorIndex16          IndexedColor = 16
-	IndexedColorIndex17          IndexedColor = 17
-	IndexedColorIndex18          IndexedColor = 18
-	IndexedColorIndex19          IndexedColor = 19
-	IndexedColorIndex20          IndexedColor = 20
-	IndexedColorIndex21          IndexedColor = 21
-	IndexedColorIndex22          IndexedColor = 22
-	IndexedColorIndex23          IndexedColor = 23
-	IndexedColorIndex24          IndexedColor = 24
-	IndexedColorIndex25          IndexedColor = 25
-	IndexedColorIndex26          IndexedColor = 26
-	IndexedColorIndex27          IndexedColor = 27
-	IndexedColorIndex28          IndexedColor = 28
-	IndexedColorIndex29          IndexedColor = 29
-	IndexedColorIndex30          IndexedColor = 30
-	IndexedColorIndex31          IndexedColor = 31
-	IndexedColorIndex32          IndexedColor = 32
-	IndexedColorIndex33          IndexedColor = 33
-	IndexedColorIndex34          IndexedColor = 34
-	IndexedColorIndex35          IndexedColor = 35
-	IndexedColorIndex36          IndexedColor = 36
-	IndexedColorIndex37          IndexedColor = 37
-	IndexedColorIndex38          IndexedColor = 38
-	IndexedColorIndex39          IndexedColor = 39
-	IndexedColorIndex40          IndexedColor = 40
-	IndexedColorIndex41          IndexedColor = 41
-	IndexedColorIndex42          IndexedColor = 42
-	IndexedColorIndex43          IndexedColor = 43
-	IndexedColorIndex44          IndexedColor = 44
-	IndexedColorIndex45          IndexedColor = 45
-	IndexedColorIndex46          IndexedColor = 46
-	IndexedColorIndex47          IndexedColor = 47
-	IndexedColorIndex48          IndexedColor = 48
-	IndexedColorIndex49          IndexedColor = 49
-	IndexedColorIndex50          IndexedColor = 50
-	IndexedColorIndex51          IndexedColor = 51
-	IndexedColorIndex52          IndexedColor = 52
-	IndexedColorIndex53          IndexedColor = 53
-	IndexedColorIndex54          IndexedColor = 54
-	IndexedColorIndex55          IndexedColor = 55
-	IndexedColorIndex56          IndexedColor = 56
-	IndexedColorIndex57          IndexedColor = 57
-	IndexedColorIndex58          IndexedColor = 58
-	IndexedColorIndex59          IndexedColor = 59
-	IndexedColorIndex60          IndexedColor = 60
-	IndexedColorIndex61          IndexedColor = 61
-	IndexedColorIndex62          IndexedColor = 62
-	IndexedColorIndex63          IndexedColor = 63
-	IndexedColorIndex64          IndexedColor = 64
-	IndexedColorIndex65          IndexedColor = 65
+	// IndexedColorUnset leaves the indexed font color selector unspecified (ID -1).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorUnset IndexedColor = -1
+	// IndexedColorIndex0 selects palette index 0; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex0 IndexedColor = 0
+	// IndexedColorIndex1 selects palette index 1; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex1 IndexedColor = 1
+	// IndexedColorIndex2 selects palette index 2; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex2 IndexedColor = 2
+	// IndexedColorIndex3 selects palette index 3; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex3 IndexedColor = 3
+	// IndexedColorIndex4 selects palette index 4; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex4 IndexedColor = 4
+	// IndexedColorIndex5 selects palette index 5; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex5 IndexedColor = 5
+	// IndexedColorIndex6 selects palette index 6; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex6 IndexedColor = 6
+	// IndexedColorIndex7 selects palette index 7; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex7 IndexedColor = 7
+	// IndexedColorIndex8 selects palette index 8; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex8 IndexedColor = 8
+	// IndexedColorIndex9 selects palette index 9; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex9 IndexedColor = 9
+	// IndexedColorIndex10 selects palette index 10; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex10 IndexedColor = 10
+	// IndexedColorIndex11 selects palette index 11; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex11 IndexedColor = 11
+	// IndexedColorIndex12 selects palette index 12; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex12 IndexedColor = 12
+	// IndexedColorIndex13 selects palette index 13; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex13 IndexedColor = 13
+	// IndexedColorIndex14 selects palette index 14; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex14 IndexedColor = 14
+	// IndexedColorIndex15 selects palette index 15; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex15 IndexedColor = 15
+	// IndexedColorIndex16 selects palette index 16; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex16 IndexedColor = 16
+	// IndexedColorIndex17 selects palette index 17; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex17 IndexedColor = 17
+	// IndexedColorIndex18 selects palette index 18; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex18 IndexedColor = 18
+	// IndexedColorIndex19 selects palette index 19; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex19 IndexedColor = 19
+	// IndexedColorIndex20 selects palette index 20; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex20 IndexedColor = 20
+	// IndexedColorIndex21 selects palette index 21; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex21 IndexedColor = 21
+	// IndexedColorIndex22 selects palette index 22; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex22 IndexedColor = 22
+	// IndexedColorIndex23 selects palette index 23; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex23 IndexedColor = 23
+	// IndexedColorIndex24 selects palette index 24; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex24 IndexedColor = 24
+	// IndexedColorIndex25 selects palette index 25; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex25 IndexedColor = 25
+	// IndexedColorIndex26 selects palette index 26; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex26 IndexedColor = 26
+	// IndexedColorIndex27 selects palette index 27; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex27 IndexedColor = 27
+	// IndexedColorIndex28 selects palette index 28; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex28 IndexedColor = 28
+	// IndexedColorIndex29 selects palette index 29; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex29 IndexedColor = 29
+	// IndexedColorIndex30 selects palette index 30; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex30 IndexedColor = 30
+	// IndexedColorIndex31 selects palette index 31; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex31 IndexedColor = 31
+	// IndexedColorIndex32 selects palette index 32; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex32 IndexedColor = 32
+	// IndexedColorIndex33 selects palette index 33; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex33 IndexedColor = 33
+	// IndexedColorIndex34 selects palette index 34; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex34 IndexedColor = 34
+	// IndexedColorIndex35 selects palette index 35; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex35 IndexedColor = 35
+	// IndexedColorIndex36 selects palette index 36; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex36 IndexedColor = 36
+	// IndexedColorIndex37 selects palette index 37; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex37 IndexedColor = 37
+	// IndexedColorIndex38 selects palette index 38; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex38 IndexedColor = 38
+	// IndexedColorIndex39 selects palette index 39; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex39 IndexedColor = 39
+	// IndexedColorIndex40 selects palette index 40; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex40 IndexedColor = 40
+	// IndexedColorIndex41 selects palette index 41; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex41 IndexedColor = 41
+	// IndexedColorIndex42 selects palette index 42; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex42 IndexedColor = 42
+	// IndexedColorIndex43 selects palette index 43; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex43 IndexedColor = 43
+	// IndexedColorIndex44 selects palette index 44; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex44 IndexedColor = 44
+	// IndexedColorIndex45 selects palette index 45; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex45 IndexedColor = 45
+	// IndexedColorIndex46 selects palette index 46; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex46 IndexedColor = 46
+	// IndexedColorIndex47 selects palette index 47; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex47 IndexedColor = 47
+	// IndexedColorIndex48 selects palette index 48; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex48 IndexedColor = 48
+	// IndexedColorIndex49 selects palette index 49; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex49 IndexedColor = 49
+	// IndexedColorIndex50 selects palette index 50; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex50 IndexedColor = 50
+	// IndexedColorIndex51 selects palette index 51; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex51 IndexedColor = 51
+	// IndexedColorIndex52 selects palette index 52; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex52 IndexedColor = 52
+	// IndexedColorIndex53 selects palette index 53; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex53 IndexedColor = 53
+	// IndexedColorIndex54 selects palette index 54; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex54 IndexedColor = 54
+	// IndexedColorIndex55 selects palette index 55; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex55 IndexedColor = 55
+	// IndexedColorIndex56 selects palette index 56; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex56 IndexedColor = 56
+	// IndexedColorIndex57 selects palette index 57; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex57 IndexedColor = 57
+	// IndexedColorIndex58 selects palette index 58; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex58 IndexedColor = 58
+	// IndexedColorIndex59 selects palette index 59; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex59 IndexedColor = 59
+	// IndexedColorIndex60 selects palette index 60; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex60 IndexedColor = 60
+	// IndexedColorIndex61 selects palette index 61; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex61 IndexedColor = 61
+	// IndexedColorIndex62 selects palette index 62; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex62 IndexedColor = 62
+	// IndexedColorIndex63 selects palette index 63; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex63 IndexedColor = 63
+	// IndexedColorIndex64 selects palette index 64; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex64 IndexedColor = 64
+	// IndexedColorIndex65 selects palette index 65; the workbook palette determines its RGB color.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	IndexedColorIndex65 IndexedColor = 65
+	// IndexedColorSystemForeground selects the system foreground color (index 64).
+	//
+	// See https://xuri.me/excelize/en/style.html
 	IndexedColorSystemForeground IndexedColor = 64
+	// IndexedColorSystemBackground selects the system background color (index 65).
+	//
+	// See https://xuri.me/excelize/en/style.html
 	IndexedColorSystemBackground IndexedColor = 65
 )
 
+// ThemeColor selects a workbook theme slot for excelize.Font.ColorTheme; its displayed color depends on the workbook theme.
+//
+// See https://xuri.me/excelize/en/style.html
 type ThemeColor int
 
 const (
-	ThemeColorLight1            ThemeColor = 0
-	ThemeColorDark1             ThemeColor = 1
-	ThemeColorLight2            ThemeColor = 2
-	ThemeColorDark2             ThemeColor = 3
-	ThemeColorAccent1           ThemeColor = 4
-	ThemeColorAccent2           ThemeColor = 5
-	ThemeColorAccent3           ThemeColor = 6
-	ThemeColorAccent4           ThemeColor = 7
-	ThemeColorAccent5           ThemeColor = 8
-	ThemeColorAccent6           ThemeColor = 9
-	ThemeColorHyperlink         ThemeColor = 10
+	// ThemeColorLight1 selects the workbook theme's Light1 color slot (ID 0).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorLight1 ThemeColor = 0
+	// ThemeColorDark1 selects the workbook theme's Dark1 color slot (ID 1).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorDark1 ThemeColor = 1
+	// ThemeColorLight2 selects the workbook theme's Light2 color slot (ID 2).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorLight2 ThemeColor = 2
+	// ThemeColorDark2 selects the workbook theme's Dark2 color slot (ID 3).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorDark2 ThemeColor = 3
+	// ThemeColorAccent1 selects the workbook theme's Accent1 color slot (ID 4).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent1 ThemeColor = 4
+	// ThemeColorAccent2 selects the workbook theme's Accent2 color slot (ID 5).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent2 ThemeColor = 5
+	// ThemeColorAccent3 selects the workbook theme's Accent3 color slot (ID 6).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent3 ThemeColor = 6
+	// ThemeColorAccent4 selects the workbook theme's Accent4 color slot (ID 7).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent4 ThemeColor = 7
+	// ThemeColorAccent5 selects the workbook theme's Accent5 color slot (ID 8).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent5 ThemeColor = 8
+	// ThemeColorAccent6 selects the workbook theme's Accent6 color slot (ID 9).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorAccent6 ThemeColor = 9
+	// ThemeColorHyperlink selects the workbook theme's Hyperlink color slot (ID 10).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	ThemeColorHyperlink ThemeColor = 10
+	// ThemeColorFollowedHyperlink selects the workbook theme's FollowedHyperlink color slot (ID 11).
+	//
+	// See https://xuri.me/excelize/en/style.html
 	ThemeColorFollowedHyperlink ThemeColor = 11
 )
 
+// FontCharset identifies an OOXML font character set for excelize.Font.Charset; these numeric selectors are not RGB colors or text encodings to apply to cell values.
+//
+// See https://xuri.me/excelize/en/style.html
 type FontCharset int
 
 const (
-	FontCharsetANSI       FontCharset = 0
-	FontCharsetDefault    FontCharset = 1
-	FontCharsetSymbol     FontCharset = 2
-	FontCharsetMac        FontCharset = 77
-	FontCharsetShiftJIS   FontCharset = 128
-	FontCharsetHangul     FontCharset = 129
-	FontCharsetJohab      FontCharset = 130
-	FontCharsetGB2312     FontCharset = 134
-	FontCharsetBig5       FontCharset = 136
-	FontCharsetGreek      FontCharset = 161
-	FontCharsetTurkish    FontCharset = 162
+	// FontCharsetANSI selects the ANSI font character set (ID 0).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetANSI FontCharset = 0
+	// FontCharsetDefault selects the Default font character set (ID 1).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetDefault FontCharset = 1
+	// FontCharsetSymbol selects the Symbol font character set (ID 2).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetSymbol FontCharset = 2
+	// FontCharsetMac selects the Mac font character set (ID 77).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetMac FontCharset = 77
+	// FontCharsetShiftJIS selects the ShiftJIS font character set (ID 128).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetShiftJIS FontCharset = 128
+	// FontCharsetHangul selects the Hangul font character set (ID 129).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetHangul FontCharset = 129
+	// FontCharsetJohab selects the Johab font character set (ID 130).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetJohab FontCharset = 130
+	// FontCharsetGB2312 selects the GB2312 font character set (ID 134).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetGB2312 FontCharset = 134
+	// FontCharsetBig5 selects the Big5 font character set (ID 136).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetBig5 FontCharset = 136
+	// FontCharsetGreek selects the Greek font character set (ID 161).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetGreek FontCharset = 161
+	// FontCharsetTurkish selects the Turkish font character set (ID 162).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetTurkish FontCharset = 162
+	// FontCharsetVietnamese selects the Vietnamese font character set (ID 163).
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontCharsetVietnamese FontCharset = 163
-	FontCharsetHebrew     FontCharset = 177
-	FontCharsetArabic     FontCharset = 178
-	FontCharsetBaltic     FontCharset = 186
-	FontCharsetRussian    FontCharset = 204
-	FontCharsetThai       FontCharset = 222
+	// FontCharsetHebrew selects the Hebrew font character set (ID 177).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetHebrew FontCharset = 177
+	// FontCharsetArabic selects the Arabic font character set (ID 178).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetArabic FontCharset = 178
+	// FontCharsetBaltic selects the Baltic font character set (ID 186).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetBaltic FontCharset = 186
+	// FontCharsetRussian selects the Russian font character set (ID 204).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetRussian FontCharset = 204
+	// FontCharsetThai selects the Thai font character set (ID 222).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetThai FontCharset = 222
+	// FontCharsetEastEurope selects the EastEurope font character set (ID 238).
+	//
+	// See https://xuri.me/excelize/en/style.html
 	FontCharsetEastEurope FontCharset = 238
-	FontCharsetOEM        FontCharset = 255
+	// FontCharsetOEM selects the OEM font character set (ID 255).
+	//
+	// See https://xuri.me/excelize/en/style.html
+	FontCharsetOEM FontCharset = 255
 )
 
 // AlignmentDefinition preserves all public excelize.Alignment fields with typed categorical values.
@@ -2524,25 +4842,82 @@ func StyleDefinitionFromExcelize(in excelize.Style) StyleDefinition {
 	return out
 }
 
+// GradientShading selects a gradient preset in the selected Excelize dependency; preset numbering may change between versions.
+//
+// See https://xuri.me/excelize/en/style.html
 type GradientShading int
 
 const (
-	GradientShadingPreset0  GradientShading = 0
-	GradientShadingPreset1  GradientShading = 1
-	GradientShadingPreset2  GradientShading = 2
-	GradientShadingPreset3  GradientShading = 3
-	GradientShadingPreset4  GradientShading = 4
-	GradientShadingPreset5  GradientShading = 5
-	GradientShadingPreset6  GradientShading = 6
-	GradientShadingPreset7  GradientShading = 7
-	GradientShadingPreset8  GradientShading = 8
-	GradientShadingPreset9  GradientShading = 9
+	// GradientShadingPreset0 selects preset 0: linear gradient, degree 90, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset0 GradientShading = 0
+	// GradientShadingPreset1 selects preset 1: linear gradient, degree 270, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset1 GradientShading = 1
+	// GradientShadingPreset2 selects preset 2: linear gradient, degree 90, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,0.5,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset2 GradientShading = 2
+	// GradientShadingPreset3 selects preset 3: linear gradient, degree 0, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset3 GradientShading = 3
+	// GradientShadingPreset4 selects preset 4: linear gradient, degree 180, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset4 GradientShading = 4
+	// GradientShadingPreset5 selects preset 5: linear gradient, degree 0, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,0.5,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset5 GradientShading = 5
+	// GradientShadingPreset6 selects preset 6: linear gradient, degree 45, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset6 GradientShading = 6
+	// GradientShadingPreset7 selects preset 7: linear gradient, degree 255, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset7 GradientShading = 7
+	// GradientShadingPreset8 selects preset 8: linear gradient, degree 45, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,0.5,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset8 GradientShading = 8
+	// GradientShadingPreset9 selects preset 9: linear gradient, degree 135, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingPreset9 GradientShading = 9
+	// GradientShadingPreset10 selects preset 10: linear gradient, degree 315, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset10 GradientShading = 10
+	// GradientShadingPreset11 selects preset 11: linear gradient, degree 135, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,0.5,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset11 GradientShading = 11
+	// GradientShadingPreset12 selects preset 12: path gradient, degree 0, path bounds (left 0, right 0, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset12 GradientShading = 12
+	// GradientShadingPreset13 selects preset 13: path gradient, degree 0, path bounds (left 1, right 1, top 0, bottom 0), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset13 GradientShading = 13
+	// GradientShadingPreset14 selects preset 14: path gradient, degree 0, path bounds (left 0, right 0, top 1, bottom 1), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset14 GradientShading = 14
+	// GradientShadingPreset15 selects preset 15: path gradient, degree 0, path bounds (left 1, right 1, top 1, bottom 1), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset15 GradientShading = 15
+	// GradientShadingPreset16 selects preset 16: path gradient, degree 0, path bounds (left 0.5, right 0.5, top 0.5, bottom 0.5), and stop positions [0,1].
+	//
+	// See https://xuri.me/excelize/en/style.html
 	GradientShadingPreset16 GradientShading = 16
-	GradientShadingCount    GradientShading = 17
+	// GradientShadingCount is the number of generated choices; it is not a valid formatting value.
+	//
+	// See https://xuri.me/excelize/en/style.html
+	GradientShadingCount GradientShading = 17
 )

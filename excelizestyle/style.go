@@ -6,24 +6,55 @@ import (
 
 // Preserve the existing border style names as aliases of the generated enums.
 const (
+	// BorderStyleContinuous0 is the compatibility alias for BorderStyleHair.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleContinuous0 = BorderStyleHair
+	// BorderStyleContinuous1 is the compatibility alias for BorderStyleThin.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleContinuous1 = BorderStyleThin
+	// BorderStyleContinuous2 is the compatibility alias for BorderStyleMedium.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleContinuous2 = BorderStyleMedium
+	// BorderStyleContinuous3 is the compatibility alias for BorderStyleThick.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleContinuous3 = BorderStyleThick
-	BorderStyleDash1       = BorderStyleDashed
-	BorderStyleDash2       = BorderStyleMediumDashed
-	BorderStyleDot         = BorderStyleDotted
-	BorderStyleDashDot1    = BorderStyleDashDot
-	BorderStyleDashDot2    = BorderStyleMediumDashDot
+	// BorderStyleDash1       is the compatibility alias for BorderStyleDashed.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleDash1 = BorderStyleDashed
+	// BorderStyleDash2       is the compatibility alias for BorderStyleMediumDashed.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleDash2 = BorderStyleMediumDashed
+	// BorderStyleDot         is the compatibility alias for BorderStyleDotted.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleDot = BorderStyleDotted
+	// BorderStyleDashDot1    is the compatibility alias for BorderStyleDashDot.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleDashDot1 = BorderStyleDashDot
+	// BorderStyleDashDot2    is the compatibility alias for BorderStyleMediumDashDot.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleDashDot2 = BorderStyleMediumDashDot
+	// BorderStyleDashDotDot1 is the compatibility alias for BorderStyleDashDotDot.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleDashDotDot1 = BorderStyleDashDotDot
+	// BorderStyleDashDotDot2 is the compatibility alias for BorderStyleMediumDashDotDot.
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderStyleDashDotDot2 = BorderStyleMediumDashDotDot
-	BorderStyleSlantDash   = BorderStyleSlantDashDot
+	// BorderStyleSlantDash   is the compatibility alias for BorderStyleSlantDashDot.
+	// See https://xuri.me/excelize/en/style.html#border
+	BorderStyleSlantDash = BorderStyleSlantDashDot
 )
 
+// BorderColor specifies an RGB border color, including custom hexadecimal values.
+//
+// See https://xuri.me/excelize/en/style.html#border
 type BorderColor string
 
 const (
+	// BorderColorBlack selects the RGB color black (#000000).
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderColorBlack BorderColor = "#000000"
+	// BorderColorWhite selects the RGB color white (#FFFFFF).
+	// See https://xuri.me/excelize/en/style.html#border
 	BorderColorWhite BorderColor = "#FFFFFF"
 )
 
