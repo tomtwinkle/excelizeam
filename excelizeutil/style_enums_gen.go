@@ -2,207 +2,38 @@
 
 package excelizeutil
 
-type fillPattern int
+import "github.com/tomtwinkle/excelizeam/excelizestyle"
 
-const (
-	fillPatternNone fillPattern = iota
-	fillPatternSolid
-	fillPatternMediumGray
-	fillPatternDarkGray
-	fillPatternLightGray
-	fillPatternDarkHorizontal
-	fillPatternDarkVertical
-	fillPatternDarkDown
-	fillPatternDarkUp
-	fillPatternDarkGrid
-	fillPatternDarkTrellis
-	fillPatternLightHorizontal
-	fillPatternLightVertical
-	fillPatternLightDown
-	fillPatternLightUp
-	fillPatternLightGrid
-	fillPatternLightTrellis
-	fillPatternGray125
-	fillPatternGray0625
-	fillPatternCount
-)
+type fillPattern = excelizestyle.FillPattern
 
-func (value fillPattern) String() string {
-	switch value {
-	case fillPatternNone:
-		return "none"
-	case fillPatternSolid:
-		return "solid"
-	case fillPatternMediumGray:
-		return "mediumGray"
-	case fillPatternDarkGray:
-		return "darkGray"
-	case fillPatternLightGray:
-		return "lightGray"
-	case fillPatternDarkHorizontal:
-		return "darkHorizontal"
-	case fillPatternDarkVertical:
-		return "darkVertical"
-	case fillPatternDarkDown:
-		return "darkDown"
-	case fillPatternDarkUp:
-		return "darkUp"
-	case fillPatternDarkGrid:
-		return "darkGrid"
-	case fillPatternDarkTrellis:
-		return "darkTrellis"
-	case fillPatternLightHorizontal:
-		return "lightHorizontal"
-	case fillPatternLightVertical:
-		return "lightVertical"
-	case fillPatternLightDown:
-		return "lightDown"
-	case fillPatternLightUp:
-		return "lightUp"
-	case fillPatternLightGrid:
-		return "lightGrid"
-	case fillPatternLightTrellis:
-		return "lightTrellis"
-	case fillPatternGray125:
-		return "gray125"
-	case fillPatternGray0625:
-		return "gray0625"
-	default:
-		return ""
-	}
-}
+const fillPatternNone = excelizestyle.FillPatternNone
 
-func parseFillPattern(value string) (fillPattern, bool) {
-	switch value {
-	case "none":
-		return fillPatternNone, true
-	case "solid":
-		return fillPatternSolid, true
-	case "mediumGray":
-		return fillPatternMediumGray, true
-	case "darkGray":
-		return fillPatternDarkGray, true
-	case "lightGray":
-		return fillPatternLightGray, true
-	case "darkHorizontal":
-		return fillPatternDarkHorizontal, true
-	case "darkVertical":
-		return fillPatternDarkVertical, true
-	case "darkDown":
-		return fillPatternDarkDown, true
-	case "darkUp":
-		return fillPatternDarkUp, true
-	case "darkGrid":
-		return fillPatternDarkGrid, true
-	case "darkTrellis":
-		return fillPatternDarkTrellis, true
-	case "lightHorizontal":
-		return fillPatternLightHorizontal, true
-	case "lightVertical":
-		return fillPatternLightVertical, true
-	case "lightDown":
-		return fillPatternLightDown, true
-	case "lightUp":
-		return fillPatternLightUp, true
-	case "lightGrid":
-		return fillPatternLightGrid, true
-	case "lightTrellis":
-		return fillPatternLightTrellis, true
-	case "gray125":
-		return fillPatternGray125, true
-	case "gray0625":
-		return fillPatternGray0625, true
-	default:
-		return 0, false
-	}
-}
+func parseFillPattern(value string) (fillPattern, bool) { return excelizestyle.ParseFillPattern(value) }
 
-type borderStyle int
+type borderStyle = excelizestyle.BorderStyle
 
-const (
-	borderStyleNone borderStyle = iota
-	borderStyleThin
-	borderStyleMedium
-	borderStyleDashed
-	borderStyleDotted
-	borderStyleThick
-	borderStyleDouble
-	borderStyleHair
-	borderStyleMediumDashed
-	borderStyleDashDot
-	borderStyleMediumDashDot
-	borderStyleDashDotDot
-	borderStyleMediumDashDotDot
-	borderStyleSlantDashDot
-	borderStyleCount
-)
+const borderStyleNone = excelizestyle.BorderStyleNone
 
-func (value borderStyle) String() string {
-	switch value {
-	case borderStyleNone:
-		return "none"
-	case borderStyleThin:
-		return "thin"
-	case borderStyleMedium:
-		return "medium"
-	case borderStyleDashed:
-		return "dashed"
-	case borderStyleDotted:
-		return "dotted"
-	case borderStyleThick:
-		return "thick"
-	case borderStyleDouble:
-		return "double"
-	case borderStyleHair:
-		return "hair"
-	case borderStyleMediumDashed:
-		return "mediumDashed"
-	case borderStyleDashDot:
-		return "dashDot"
-	case borderStyleMediumDashDot:
-		return "mediumDashDot"
-	case borderStyleDashDotDot:
-		return "dashDotDot"
-	case borderStyleMediumDashDotDot:
-		return "mediumDashDotDot"
-	case borderStyleSlantDashDot:
-		return "slantDashDot"
-	default:
-		return ""
-	}
-}
+func parseBorderStyle(value string) (borderStyle, bool) { return excelizestyle.ParseBorderStyle(value) }
 
-func parseBorderStyle(value string) (borderStyle, bool) {
-	switch value {
-	case "none":
-		return borderStyleNone, true
-	case "thin":
-		return borderStyleThin, true
-	case "medium":
-		return borderStyleMedium, true
-	case "dashed":
-		return borderStyleDashed, true
-	case "dotted":
-		return borderStyleDotted, true
-	case "thick":
-		return borderStyleThick, true
-	case "double":
-		return borderStyleDouble, true
-	case "hair":
-		return borderStyleHair, true
-	case "mediumDashed":
-		return borderStyleMediumDashed, true
-	case "dashDot":
-		return borderStyleDashDot, true
-	case "mediumDashDot":
-		return borderStyleMediumDashDot, true
-	case "dashDotDot":
-		return borderStyleDashDotDot, true
-	case "mediumDashDotDot":
-		return borderStyleMediumDashDotDot, true
-	case "slantDashDot":
-		return borderStyleSlantDashDot, true
-	default:
-		return 0, false
+func gradientGeometries() []gradientGeometry {
+	return []gradientGeometry{
+		{typeName: "", degree: 90, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 270, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 90, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 0.5, 1}},
+		{typeName: "", degree: 0, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 180, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 0, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 0.5, 1}},
+		{typeName: "", degree: 45, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 255, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 45, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 0.5, 1}},
+		{typeName: "", degree: 135, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 315, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "", degree: 135, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 0.5, 1}},
+		{typeName: "path", degree: 0, left: 0, right: 0, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "path", degree: 0, left: 1, right: 1, top: 0, bottom: 0, positions: []float64{0, 1}},
+		{typeName: "path", degree: 0, left: 0, right: 0, top: 1, bottom: 1, positions: []float64{0, 1}},
+		{typeName: "path", degree: 0, left: 1, right: 1, top: 1, bottom: 1, positions: []float64{0, 1}},
+		{typeName: "path", degree: 0, left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, positions: []float64{0, 1}},
 	}
 }

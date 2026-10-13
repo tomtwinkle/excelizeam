@@ -14,6 +14,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomtwinkle/excelizeam/excelizestyle"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -34,11 +35,7 @@ func TestExcelizeV2101StyleFieldInventory(t *testing.T) {
 }
 
 func TestGetStyleRoundTripsAllGradientPresets(t *testing.T) {
-	maxShading := 16
-	if !hasPublicField(reflect.TypeOf(excelize.Fill{}), "Transparency") {
-		maxShading = 5
-	}
-	for shading := 0; shading <= maxShading; shading++ {
+	for shading := 0; shading < int(excelizestyle.GradientShadingCount); shading++ {
 		t.Run(fmt.Sprintf("shading-%d", shading), func(t *testing.T) {
 			style := &excelize.Style{Fill: excelize.Fill{Type: "gradient", Shading: shading, Color: []string{"#123456", "#ABCDEF"}}}
 			original := workbookWithStyle(t, style)
@@ -326,7 +323,7 @@ func TestGetStyleUsesForegroundColorWhenPatternHasBothColors(t *testing.T) {
 }
 
 func TestGetStyleRoundTripsEveryPatternIDAndBorderStyle(t *testing.T) {
-	for pattern := 0; pattern <= 18; pattern++ {
+	for pattern := 0; pattern < int(excelizestyle.FillPatternCount); pattern++ {
 		t.Run(fmt.Sprintf("pattern-%d", pattern), func(t *testing.T) {
 			style := &excelize.Style{Fill: excelize.Fill{Type: "pattern", Pattern: pattern, Color: []string{"#315D3C"}}}
 			got := mustGetStyle(t, workbookWithStyle(t, style), "Sheet1", 1, 1)
@@ -337,7 +334,7 @@ func TestGetStyleRoundTripsEveryPatternIDAndBorderStyle(t *testing.T) {
 			assert.Equal(t, got.Fill, mustGetStyle(t, reapplied, "Sheet1", 1, 1).Fill)
 		})
 	}
-	for borderStyle := 0; borderStyle <= 13; borderStyle++ {
+	for borderStyle := 0; borderStyle < int(excelizestyle.BorderStyleCount); borderStyle++ {
 		t.Run(fmt.Sprintf("border-style-%d", borderStyle), func(t *testing.T) {
 			style := &excelize.Style{Border: []excelize.Border{{Type: "top", Style: borderStyle, Color: "#112233"}}}
 			got := mustGetStyle(t, workbookWithStyle(t, style), "Sheet1", 1, 1)
@@ -657,4 +654,18 @@ func publicFieldValue(target any, name string) any {
 		field = field.Elem()
 	}
 	return field.Interface()
+}
+
+func TestGetStyleDefinitionUsesTypedFields(t *testing.T) {
+	buffer := workbookWithStyle(t, &excelize.Style{Fill: excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"#123456"}}, Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "bottom"}})
+	definition, err := GetStyleDefinition(buffer, "Sheet1", 1, 1)
+	require.NoError(t, err)
+	assert.Equal(t, excelizestyle.FillPatternSolid, definition.Fill.Pattern)
+	require.NotNil(t, definition.Alignment)
+	assert.Equal(t, excelizestyle.AlignmentVerticalBottom, definition.Alignment.Vertical)
+	expected, err := GetStyle(buffer, "Sheet1", 1, 1)
+	require.NoError(t, err)
+	assert.Equal(t, expected, definition.ToExcelize())
+	_, err = GetStyleDefinition(bytes.Buffer{}, "Sheet1", 1, 1)
+	require.Error(t, err)
 }

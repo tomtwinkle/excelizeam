@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/tomtwinkle/excelizeam/excelizestyle"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -55,6 +56,15 @@ func GetStyle(excelBuffer bytes.Buffer, sheetName string, corIdx, rowIdx int) (e
 	}
 	applyNativeNumberFormatMetadata(&style, f, styleID, format, customNumFmt)
 	return style, nil
+}
+
+// GetStyleDefinition returns the effective cell style with typed categorical fields.
+func GetStyleDefinition(excelBuffer bytes.Buffer, sheetName string, column, row int) (excelizestyle.StyleDefinition, error) {
+	style, err := GetStyle(excelBuffer, sheetName, column, row)
+	if err != nil {
+		return excelizestyle.StyleDefinition{}, err
+	}
+	return excelizestyle.StyleDefinitionFromExcelize(style), nil
 }
 
 type resolvedCellFormat struct {
@@ -448,38 +458,6 @@ func readGradient(value any) (gradientGeometry, []struct {
 		geometry.positions[index] = stop.position
 	}
 	return geometry, colors, true
-}
-
-func gradientGeometries() []gradientGeometry {
-	if !hasExcelizeField(reflect.TypeOf(excelize.Fill{}), "Transparency") {
-		return []gradientGeometry{
-			{degree: 90, positions: []float64{0, 1}},
-			{positions: []float64{0, 1}},
-			{degree: 45, positions: []float64{0, 1}},
-			{degree: 135, positions: []float64{0, 1}},
-			{typeName: "path", positions: []float64{0, 1}},
-			{typeName: "path", left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, positions: []float64{0, 1}},
-		}
-	}
-	return []gradientGeometry{
-		{degree: 90, positions: []float64{0, 1}},
-		{degree: 270, positions: []float64{0, 1}},
-		{degree: 90, positions: []float64{0, 0.5, 1}},
-		{positions: []float64{0, 1}},
-		{degree: 180, positions: []float64{0, 1}},
-		{positions: []float64{0, 0.5, 1}},
-		{degree: 45, positions: []float64{0, 1}},
-		{degree: 255, positions: []float64{0, 1}},
-		{degree: 45, positions: []float64{0, 0.5, 1}},
-		{degree: 135, positions: []float64{0, 1}},
-		{degree: 315, positions: []float64{0, 1}},
-		{degree: 135, positions: []float64{0, 0.5, 1}},
-		{typeName: "path", positions: []float64{0, 1}},
-		{typeName: "path", left: 1, right: 1, positions: []float64{0, 1}},
-		{typeName: "path", bottom: 1, top: 1, positions: []float64{0, 1}},
-		{typeName: "path", left: 1, right: 1, top: 1, bottom: 1, positions: []float64{0, 1}},
-		{typeName: "path", left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, positions: []float64{0, 1}},
-	}
 }
 
 func hasExcelizeField(typ reflect.Type, fieldName string) bool {

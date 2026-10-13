@@ -4,33 +4,20 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-type BorderPosition string
-
+// Preserve the existing border style names as aliases of the generated enums.
 const (
-	BorderPositionTop    BorderPosition = "top"
-	BorderPositionLeft   BorderPosition = "left"
-	BorderPositionRight  BorderPosition = "right"
-	BorderPositionBottom BorderPosition = "bottom"
-)
-
-// BorderStyle https://xuri.me/excelize/ja/style.html#border
-type BorderStyle int
-
-const (
-	BorderStyleNone        BorderStyle = 0  // Weight: 0, Style:
-	BorderStyleContinuous0 BorderStyle = 7  // Weight: 0, Style: -----------
-	BorderStyleContinuous1 BorderStyle = 1  // Weight: 1, Style: -----------
-	BorderStyleContinuous2 BorderStyle = 2  // Weight: 2, Style: -----------
-	BorderStyleContinuous3 BorderStyle = 5  // Weight: 3, Style: -----------
-	BorderStyleDash1       BorderStyle = 3  // Weight: 1, Style: - - - - - -
-	BorderStyleDash2       BorderStyle = 8  // Weight: 2, Style: - - - - - -
-	BorderStyleDot         BorderStyle = 4  // Weight: 1, Style: . . . . . .
-	BorderStyleDouble      BorderStyle = 6  // Weight: 3, Style: ===========
-	BorderStyleDashDot1    BorderStyle = 9  // Weight: 1, Style: - . - . - .
-	BorderStyleDashDot2    BorderStyle = 10 // Weight: 2, Style: - . - . - .
-	BorderStyleDashDotDot1 BorderStyle = 11 // Weight: 1, Style: - . . - . .
-	BorderStyleDashDotDot2 BorderStyle = 12 // Weight: 2, Style: - . . - . .
-	BorderStyleSlantDash   BorderStyle = 13 // Weight: 2, Style: / - . / - .
+	BorderStyleContinuous0 = BorderStyleHair
+	BorderStyleContinuous1 = BorderStyleThin
+	BorderStyleContinuous2 = BorderStyleMedium
+	BorderStyleContinuous3 = BorderStyleThick
+	BorderStyleDash1       = BorderStyleDashed
+	BorderStyleDash2       = BorderStyleMediumDashed
+	BorderStyleDot         = BorderStyleDotted
+	BorderStyleDashDot1    = BorderStyleDashDot
+	BorderStyleDashDot2    = BorderStyleMediumDashDot
+	BorderStyleDashDotDot1 = BorderStyleDashDotDot
+	BorderStyleDashDotDot2 = BorderStyleMediumDashDotDot
+	BorderStyleSlantDash   = BorderStyleSlantDashDot
 )
 
 type BorderColor string
@@ -91,29 +78,6 @@ func ExistsBorder(borders []excelize.Border, position BorderPosition) bool {
 	return false
 }
 
-// AlignmentHorizontal https://xuri.me/excelize/ja/style.html#align
-type AlignmentHorizontal string
-
-const (
-	AlignmentHorizontalLeft             AlignmentHorizontal = "left"             // Left (indented)
-	AlignmentHorizontalCenter           AlignmentHorizontal = "center"           // Centered
-	AlignmentHorizontalRight            AlignmentHorizontal = "right"            // Right (indented)
-	AlignmentHorizontalFill             AlignmentHorizontal = "fill"             // Filling
-	AlignmentHorizontalJustify          AlignmentHorizontal = "justify"          // Justified
-	AlignmentHorizontalCenterContinuous AlignmentHorizontal = "centerContinuous" // Cross-column centered
-	AlignmentHorizontalDistributed      AlignmentHorizontal = "distributed"      // Decentralized alignment (indented)
-)
-
-// AlignmentVertical https://xuri.me/excelize/ja/style.html#align
-type AlignmentVertical string
-
-const (
-	AlignmentVerticalTop         AlignmentVertical = "top"         // Top alignment
-	AlignmentVerticalCenter      AlignmentVertical = "center"      // Centered
-	AlignmentVerticalJustify     AlignmentVertical = "justify"     // Justified
-	AlignmentVerticalDistributed AlignmentVertical = "distributed" // Decentralized alignment
-)
-
 func Alignment(horizontal AlignmentHorizontal, vertical AlignmentVertical, wrapText bool) *excelize.Alignment {
 	return &excelize.Alignment{
 		Horizontal: string(horizontal),
@@ -122,34 +86,9 @@ func Alignment(horizontal AlignmentHorizontal, vertical AlignmentVertical, wrapT
 	}
 }
 
-// FillPattern https://xuri.me/excelize/ja/style.html#pattern
-type FillPattern int
-
-const (
-	FillPatternNone            FillPattern = 0
-	FillPatternSolid           FillPattern = 1
-	FillPatternMediumGray      FillPattern = 2
-	FillPatternDarkGray        FillPattern = 3
-	FillPatternLightGray       FillPattern = 4
-	FillPatternDarkHorizontal  FillPattern = 5
-	FillPatternDarkVertical    FillPattern = 6
-	FillPatternDarkDown        FillPattern = 7
-	FillPatternDarkUp          FillPattern = 8
-	FillPatternDarkGrid        FillPattern = 9
-	FillPatternDarkTrellis     FillPattern = 10
-	FillPatternLightHorizontal FillPattern = 11
-	FillPatternLightVertical   FillPattern = 12
-	FillPatternLightDown       FillPattern = 13
-	FillPatternLightUp         FillPattern = 14
-	FillPatternLightGrid       FillPattern = 15
-	FillPatternLightTrellis    FillPattern = 16
-	FillPatternGray125         FillPattern = 17
-	FillPatternGray0625        FillPattern = 18
-)
-
 func Fill(pattern FillPattern, color string) excelize.Fill {
 	return excelize.Fill{
-		Type:    "pattern",
+		Type:    string(FillTypePattern),
 		Pattern: int(pattern),
 		Color:   []string{color},
 	}

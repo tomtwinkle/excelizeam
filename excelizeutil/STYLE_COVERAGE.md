@@ -4,7 +4,7 @@
 
 この表は、PR の統合ツリーで使われる Excelize **v2.10.1** の `excelize.Style` を基準にしています。対応する公開型の全40フィールドを棚卸しし、セルの実効書式を取得して `NewStyle` で再適用できる範囲を定義します。元の `NewStyle` 入力を復元することや、任意の OOXML を無損失で複製することは契約に含めません。
 
-PR ブランチ自身の `go.mod` は v2.6.0 です。v2.6.0 には `Style.Lang` があり、`DecimalPlaces` は `int`、`Fill.Transparency` や Font の色参照フィールドはありません。v2.10.1 では `Style.Lang` がなく、`DecimalPlaces` は `*int` です。v2.6.0 固有の `Lang` 指定は取得・再適用対象外です。実装は両方でビルドできるよう、バージョン固有フィールドを実行時に扱います。gradient の shading 番号もバージョン間で異なるため、v2.10.1 の17 preset と v2.6.0 の6 preset を別の表で解釈します。
+PR ブランチは main の依存更新を取り込み、Excelize v2.10.1 を使用します。生成器は v2.6.0 の旧定義形式にも対応しますが、依存バージョンを変更した場合は `go generate ./excelizeutil` で型付き定義を再生成する必要があります。v2.6.0 には `Style.Lang` があり、`DecimalPlaces` は `int`、`Fill.Transparency` と Font の色参照フィールドはありません。v2.10.1 には `Style.Lang` がなく、`DecimalPlaces` は `*int` です。旧版の `Lang` 入力は workbook から一意に復元できず、選択された完全な書式コードを保持します。gradient は依存中の AST から生成し、v2.10.1 の17 preset と v2.6.0 の6 preset をそれぞれ扱います。
 
 フィールド定義の根拠は Excelize の固定タグにある [`xmlStyles.go`](https://github.com/qax-os/excelize/blob/v2.10.1/xmlStyles.go)、[`styles.go`](https://github.com/qax-os/excelize/blob/v2.10.1/styles.go)、[`numfmt.go`](https://github.com/qax-os/excelize/blob/v2.10.1/numfmt.go) です。
 
@@ -44,6 +44,10 @@ PR ブランチ自身の `go.mod` は v2.6.0 です。v2.6.0 には `Style.Lang`
 
 `style_roundtrip_test.go` のテストは v2.10.1 の40フィールド棚卸し、Font fieldごとの再適用、全 gradient preset、pattern 0〜18、border style 0〜13、theme/indexed identity と RGB、組み込み decimal 数、明示適用・継承および省略 ID による Font ID 0、空 boolean 属性、疎な border、pattern の2色制約、Alignment 全9属性、Protection の既定値・解除・継承を確認します。gradient、色参照、Alignment、Protection などの焦点項目は、独自 extractor の戻り値だけでなく、保存後の `xl/styles.xml` を XML として読み直して比較します。
 
-## Excelize の書式名 enum の更新
+## 全フィールドの型付き定義と enum の更新
 
-fill pattern と border style は Excelize の公開 enum ではありません。`go generate ./excelizeutil` は、依存中の Excelize `styles.go` を Go AST で解析し、順序付きの型付き定数と XML 名の変換関数を `style_enums_gen.go` に生成します。Excelize v2.6.0 の関数内 slice と v2.9 以降の package-level slice の両方を読み取ります。Excelize を更新した場合はこのコマンドを再実行してください。上流で定義の構造や場所が変わった場合は、生成器がエラーにして見落としを防ぎます。
+`excelizestyle.StyleDefinition` と入れ子の定義は、依存中の Excelize の公開 Style 関連フィールドを全て保持します。罫線・塗り・配置・下線・色セレクタ・charset・数値書式・言語などの選択値には型付き enum を使い、任意の色・サイズ・文字列・数値と bool は元の型で保持します。`ToExcelize` と `StyleDefinitionFromExcelize` は全フィールドの相互変換を提供します。`GetStyleDefinition` はセルの取得結果をこの型付き定義で返します。元の Style 入力と workbook から復元できる値は異なり、上記の再適用制約は引き続き適用されます。
+
+`go generate ./excelizeutil` は、依存中の Excelize のソースを Go AST で解析し、公開 enum、全フィールド名 enum、型付き定義、相互変換、gradient geometry を生成します。罫線・pattern・gradient・数値書式などの定義追加は再生成で反映されます。配置の選択値は AST のドキュメントコメントを解析し、旧版の文書に欠けている OOXML の `general` と `bottom` を補います。Excelize が enum として定義していない reading order、theme slot、charset は OOXML の定義を明示します。任意値の領域を AST だけから推測して enum 化することはしません。
+
+依存更新後は生成を実行し、`(cd excelizeutil && go run ./cmd/gen-style-enums -check)` で生成物の更新漏れを確認してください。上流の構造変更・未知の gradient geometry は生成エラーになります。新規フィールドの定義と相互変換は自動で追加されますが、workbook 取得処理の対応可否は別途確認が必要です。使い方と生成範囲は [`excelizestyle/README.md`](../excelizestyle/README.md) に記載しています。
