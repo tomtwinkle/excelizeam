@@ -43,3 +43,7 @@ PR ブランチ自身の `go.mod` は v2.6.0 です。v2.6.0 には `Style.Lang`
 ## 検証
 
 `style_roundtrip_test.go` のテストは v2.10.1 の40フィールド棚卸し、Font fieldごとの再適用、全 gradient preset、pattern 0〜18、border style 0〜13、theme/indexed identity と RGB、組み込み decimal 数、明示適用・継承および省略 ID による Font ID 0、空 boolean 属性、疎な border、pattern の2色制約、Alignment 全9属性、Protection の既定値・解除・継承を確認します。gradient、色参照、Alignment、Protection などの焦点項目は、独自 extractor の戻り値だけでなく、保存後の `xl/styles.xml` を XML として読み直して比較します。
+
+## Excelize の書式名 enum の更新
+
+fill pattern と border style は Excelize の公開 enum ではありません。`go generate ./excelizeutil` は、依存中の Excelize `styles.go` を Go AST で解析し、順序付きの型付き定数と XML 名の変換関数を `style_enums_gen.go` に生成します。Excelize v2.6.0 の関数内 slice と v2.9 以降の package-level slice の両方を読み取ります。Excelize を更新した場合はこのコマンドを再実行してください。上流で定義の構造や場所が変わった場合は、生成器がエラーにして見落としを防ぎます。

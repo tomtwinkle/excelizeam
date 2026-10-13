@@ -1,3 +1,5 @@
+//go:generate go run ./cmd/gen-style-enums
+
 package excelizeutil
 
 import (
@@ -12,45 +14,6 @@ import (
 
 	"github.com/xuri/excelize/v2"
 )
-
-var fillPatterns = []string{
-	"none",
-	"solid",
-	"mediumGray",
-	"darkGray",
-	"lightGray",
-	"darkHorizontal",
-	"darkVertical",
-	"darkDown",
-	"darkUp",
-	"darkGrid",
-	"darkTrellis",
-	"lightHorizontal",
-	"lightVertical",
-	"lightDown",
-	"lightUp",
-	"lightGrid",
-	"lightTrellis",
-	"gray125",
-	"gray0625",
-}
-
-var borderStyles = []string{
-	"none",
-	"thin",
-	"medium",
-	"dashed",
-	"dotted",
-	"thick",
-	"double",
-	"hair",
-	"mediumDashed",
-	"dashDot",
-	"mediumDashDot",
-	"dashDotDot",
-	"mediumDashDotDot",
-	"slantDashDot",
-}
 
 var errInvalidStyleReference = errors.New("invalid style reference")
 
@@ -334,12 +297,10 @@ func borderLine(line any) (string, *xlsxColor) {
 }
 
 func borderStyleID(style string) int {
-	for i, candidate := range borderStyles {
-		if candidate == style {
-			return i
-		}
+	if value, ok := parseBorderStyle(style); ok {
+		return int(value)
 	}
-	return 0
+	return int(borderStyleNone)
 }
 
 func getCellFill(f *excelize.File, fillID int, themeColors []string, indexedColors map[int]string) excelize.Fill {
@@ -355,12 +316,9 @@ func getCellFill(f *excelize.File, fillID int, themeColors []string, indexedColo
 	}
 	patternFill := definition.PatternFill
 
-	pattern := 0
-	for i, name := range fillPatterns {
-		if name == patternFill.PatternType {
-			pattern = i
-			break
-		}
+	pattern := int(fillPatternNone)
+	if value, ok := parseFillPattern(patternFill.PatternType); ok {
+		pattern = int(value)
 	}
 
 	color := patternFill.FgColor
